@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Lock, ExternalLink, AlertTriangle, ShieldCheck, Loader2, Sparkles } from 'lucide-react';
+import { X, Lock, ExternalLink, AlertTriangle, ShieldCheck, Loader2, Copy, Check, Settings, Globe } from 'lucide-react';
 import { useAuth, ADMIN_EMAIL } from '../firebase/AuthContext';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -16,7 +16,22 @@ export const GoogleLoginModal: React.FC = () => {
   } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedDomain, setCopiedDomain] = useState(false);
   const gsiContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isUnauthorizedDomain =
+    authError?.includes('auth/unauthorized-domain') ||
+    authError?.includes('승인되지 않은 도메인');
+
+  const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
+
+  const handleCopyDomain = () => {
+    if (!currentHost) return;
+    navigator.clipboard.writeText(currentHost);
+    setCopiedDomain(true);
+    setTimeout(() => setCopiedDomain(false), 2500);
+  };
 
   // Initialize Google Identity Services (GSI) button if available
   useEffect(() => {
@@ -86,7 +101,7 @@ export const GoogleLoginModal: React.FC = () => {
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in"
     >
       <div
-        className="relative w-full max-w-md bg-[#081224] border border-cyan-500/40 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.25)] overflow-hidden"
+        className="relative w-full max-w-lg bg-[#081224] border border-cyan-500/40 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.25)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -97,14 +112,14 @@ export const GoogleLoginModal: React.FC = () => {
           </div>
           <button
             onClick={closeLoginModal}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
           {/* Target Email Info */}
           <div className="p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-xs font-mono">
             <div className="text-slate-400 mb-1">지정된 관리자 계정:</div>
@@ -137,6 +152,75 @@ export const GoogleLoginModal: React.FC = () => {
           {authError && (
             <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-200 text-xs font-mono whitespace-pre-line leading-relaxed">
               {authError}
+            </div>
+          )}
+
+          {/* Unauthorized Domain Guide Box (Shows up when domain error occurs) */}
+          {isUnauthorizedDomain && (
+            <div className="p-4 rounded-xl bg-[#061328] border border-cyan-500/40 space-y-3 animate-in fade-in">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-cyan-300">
+                <Globe className="w-4 h-4 text-cyan-400" />
+                <span>도메인 승인 해결 방법 (1회 설정)</span>
+              </div>
+
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Firebase 보안 정책상 현재 호스트 도메인을 Firebase Console의 <strong>'승인된 도메인(Authorized domains)'</strong>에 등록해야 Google 로그인이 정상 작동합니다.
+              </p>
+
+              {/* Current Hostname Display + Copy Button */}
+              <div className="space-y-1.5">
+                <div className="text-[11px] font-mono text-slate-400">현재 웹앱 도메인 (복사해서 붙여넣기):</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 px-3 py-2 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-300 text-xs font-mono truncate select-all">
+                    {currentHost}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyDomain}
+                    className="px-3 py-2 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-300 text-xs font-mono flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+                  >
+                    {copiedDomain ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400 font-bold">복사됨!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>도메인 복사</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step by Step instructions */}
+              <div className="space-y-1.5 pt-1 text-[11px] font-mono text-slate-300">
+                <div className="flex items-start gap-1.5">
+                  <span className="text-cyan-400 font-bold">1.</span>
+                  <span>아래 버튼을 눌러 Firebase Console 설정 페이지로 이동합니다.</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-cyan-400 font-bold">2.</span>
+                  <span><strong>'승인된 도메인'</strong> 섹션에서 <strong>[도메인 추가]</strong>를 누르고 위 복사한 도메인을 붙여넣습니다.</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-cyan-400 font-bold">3.</span>
+                  <span>추가 완료 후 다시 아래 <strong>'Google 계정으로 로그인'</strong> 버튼을 클릭합니다.</span>
+                </div>
+              </div>
+
+              {/* Direct Link to Firebase Console */}
+              <a
+                href={firebaseConsoleUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="w-full py-2.5 px-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_#00f0ff] transition-all cursor-pointer"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Firebase Console 승인 설정 열기 (새 탭)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           )}
 

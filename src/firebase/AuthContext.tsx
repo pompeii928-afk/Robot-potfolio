@@ -74,8 +74,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       console.error('Google Sign-In popup error:', err);
       let msg = err.message || 'Google 로그인 중 오류가 발생했습니다.';
-      if (err?.code === 'auth/popup-blocked') {
-        msg = '브라우저 팝업이 차단되었습니다. 팝업을 허용하거나 아래의 구글 원클릭 버튼을 이용해 주세요.';
+      if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('auth/unauthorized-domain'))) {
+        msg = `[승인되지 않은 도메인 오류 (auth/unauthorized-domain)]\n현재 웹앱 도메인이 Firebase Authentication 승인된 도메인에 등록되어 있지 않습니다.\n아래 안내에 따라 Firebase Console에서 현재 도메인을 승인 목록에 추가해 주세요.`;
+      } else if (err?.code === 'auth/popup-blocked') {
+        msg = '브라우저 팝업이 차단되었습니다. 브라우저 팝업을 허용하거나 아래 버튼을 이용해 주세요.';
       } else if (err?.code === 'auth/popup-closed-by-user') {
         msg = '로그인 팝업 창이 닫혔습니다. 다시 시도해 주세요.';
       } else if (err?.code === 'auth/cancelled-popup-request') {

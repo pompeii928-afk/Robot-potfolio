@@ -1,0 +1,6 @@
+{
+  "name": "K.F.C. Code Chaser - Robot Portfolio",
+  "description": "배지훈의 WRO 로봇 공학 및 소프트웨어 포트폴리오 (K.F.C. Code Chaser Robot Engineering Portfolio)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

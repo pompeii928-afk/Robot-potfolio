@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #050811;
+    color: #cbd5e1;
+    overflow-x: hidden;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .font-display {
+    font-family: 'Orbitron', 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+/* Cybernetic Blueprint Grid */
+.bg-blueprint-grid {
+  background-color: #060a15;
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(0, 240, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.015) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+  background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+}
+
+.bg-blueprint-dense {
+  background-image: 
+    linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Glowing text & border accents */
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.6), 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.6), 0 0 25px rgba(168, 85, 247, 0.3);
+}
+
+.box-glow-cyan {
+  box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.25), 0 0 6px -2px rgba(6, 182, 212, 0.4);
+}
+
+.box-glow-cyan-lg {
+  box-shadow: 0 0 25px -2px rgba(6, 182, 212, 0.35), 0 0 10px 0px rgba(6, 182, 212, 0.5);
+}
+
+.box-glow-purple {
+  box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.3);
+}
+
+/* Glassmorphic card styling with cyber borders */
+.cyber-card {
+  background: rgba(10, 18, 36, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 20px -5px rgba(6, 182, 212, 0.2);
+}
+
+/* Custom cyber scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060a15;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #16243e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
+

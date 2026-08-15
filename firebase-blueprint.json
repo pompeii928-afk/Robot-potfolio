@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "AboutConfig": {
+      "title": "AboutConfig",
+      "description": "Hero section content, bio, goal, and system image",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "subtitle": { "type": "string", "maxLength": 100 },
+        "quote": { "type": "string", "maxLength": 500 },
+        "bio": { "type": "string", "maxLength": 1000 },
+        "subBio": { "type": "string", "maxLength": 1000 },
+        "goal": { "type": "string", "maxLength": 300 },
+        "heroImage": { "type": "string", "maxLength": 2000000 },
+        "currentFocus": { "type": "string", "maxLength": 100 },
+        "coreDomain": { "type": "string", "maxLength": 100 },
+        "teamRole": { "type": "string", "maxLength": 100 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "quote", "bio", "goal"]
+    },
+    "Journey": {
+      "title": "Journey",
+      "description": "Competition journey and milestones",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "season": { "type": "string", "maxLength": 100 },
+        "title": { "type": "string", "maxLength": 200 },
+        "team": { "type": "string", "maxLength": 100 },
+        "period": { "type": "string", "maxLength": 100 },
+        "roles": { "type": "array" },
+        "strengths": { "type": "string", "maxLength": 1000 },
+        "improvements": { "type": "string", "maxLength": 1000 },
+        "quote": { "type": "string", "maxLength": 500 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "detailedPoints": { "type": "array" },
+        "metrics": { "type": "array" },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["season", "title", "team", "strengths", "improvements"]
+    },
+    "Award": {
+      "title": "Award",
+      "description": "Competition awards and honors",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "competition": { "type": "string", "maxLength": 200 },
+        "date": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "highlight": { "type": "boolean" },
+        "rank": { "type": "string", "maxLength": 100 },
+        "score": { "type": "string", "maxLength": 50 },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "competition", "date", "description"]
+    },
+    "Skill": {
+      "title": "Skill",
+      "description": "Technical and domain competencies",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "enum": ["HARDWARE", "ACTUATION", "PERCEPTION", "FRAMEWORK", "ALGORITHM", "AI/VISION", "SOFT_SKILL"] },
+        "proficiency": { "type": "number" },
+        "iconName": { "type": "string", "maxLength": 50 },
+        "highlighted": { "type": "boolean" },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "description", "category", "iconName"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Robot engineering projects, CAD schematics, and autonomous vehicles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "projectId": { "type": "string", "maxLength": 50 },
+        "title": { "type": "string", "maxLength": 200 },
+        "summary": { "type": "string", "maxLength": 1000 },
+        "detailedDescription": { "type": "string", "maxLength": 3000 },
+        "image": { "type": "string", "maxLength": 2000000 },
+        "tags": { "type": "array" },
+        "status": { "type": "string", "enum": ["COMPLETED", "IN_PROGRESS", "AWAITING"] },
+        "specs": { "type": "object" },
+        "highlights": { "type": "array" },
+        "blueprintAnnotations": { "type": "array" },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["projectId", "title", "summary", "status"]
+    }
+  },
+  "firestore": {
+    "/about/main": {
+      "schema": "AboutConfig",
+      "description": "Global portfolio about & hero configurations"
+    },
+    "/journeys/{journeyId}": {
+      "schema": "Journey",
+      "description": "Competition journey timeline entries"
+    },
+    "/awards/{awardId}": {
+      "schema": "Award",
+      "description": "Honors and competition award records"
+    },
+    "/skills/{skillId}": {
+      "schema": "Skill",
+      "description": "Core competencies and robotic domain skills"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Robotics projects, specifications, and CAD blueprints"
+    }
+  }
+}

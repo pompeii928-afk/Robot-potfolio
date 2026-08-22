@@ -204,7 +204,15 @@ function PortfolioApp() {
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.getBoundingClientRect().height : 70;
+      const elementTop = el.getBoundingClientRect().top + window.pageYOffset;
+      const targetY = Math.max(0, elementTop - headerHeight - 12);
+
+      window.scrollTo({
+        top: targetY,
+        behavior: 'smooth',
+      });
     }
   };
 

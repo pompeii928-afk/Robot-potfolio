@@ -16,7 +16,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onExploreProjects,
 }) => {
   return (
-    <section id="about" className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 overflow-hidden">
+    <section id="about" className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       {/* Background ambient lighting effects */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />

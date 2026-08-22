@@ -59,7 +59,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
   };
 
   return (
-    <section id="awards" className="relative py-16 sm:py-24 border-t border-cyan-500/10">
+    <section id="awards" className="relative py-16 sm:py-24 border-t border-cyan-500/10 scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-12">

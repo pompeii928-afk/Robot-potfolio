@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RobotLogo } from './RobotLogo';
-import { Menu, X, Mail, Sparkles, Terminal } from 'lucide-react';
+import { Menu, X, Mail } from 'lucide-react';
 
 interface NavbarProps {
   activeSection: string;
@@ -11,7 +11,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   activeSection,
   onNavigate,
-  onOpenTerminal,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -33,8 +32,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   const handleLinkClick = (id: string) => {
-    onNavigate(id);
-    setMobileMenuOpen(false);
+    // If mobile menu is open, close it first and smoothly scroll after drawer collapse
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+      setTimeout(() => {
+        onNavigate(id);
+      }, 100);
+    } else {
+      onNavigate(id);
+    }
   };
 
   return (
@@ -127,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleLinkClick(item.id)}
-                  className={`w-full text-left px-4 py-2.5 rounded-lg text-base font-medium flex items-center justify-between cursor-pointer ${
+                  className={`w-full text-left px-4 py-3 rounded-lg text-base font-medium flex items-center justify-between cursor-pointer ${
                     isActive
                       ? 'text-cyan-300 bg-cyan-950/60 border border-cyan-500/40 text-glow-cyan'
                       : 'text-slate-300 hover:bg-slate-800/60 hover:text-cyan-300'

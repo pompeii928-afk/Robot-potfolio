@@ -1,4 +1,4 @@
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem } from '../types';
 
 export const DEFAULT_ABOUT_CONFIG: AboutConfig = {
   title: 'MY ROBOT',
@@ -312,3 +312,62 @@ export const PROJECTS_DATA: ProjectItem[] = [
     status: 'AWAITING',
   },
 ];
+
+export const DEFAULT_CHANNEL_INFO = {
+  channelName: 'WRO COSPACE / K.F.C.Code Chaser',
+  handle: '@Wrocospace',
+  channelUrl: 'http://www.youtube.com/@Wrocospace',
+  customUrl: 'https://www.youtube.com/@Wrocospace',
+  tagline: 'WRO 로봇 공학, 자율주행 알고리즘 및 로봇 시스템 개발 기록 채널',
+  description: 'World Robot Olympiad (WRO) 및 CoSpace 로보틱스, 자율주행 주행 테스트, PID 제어 튜닝, 하드웨어 빌드 메이킹 영상을 공유하는 공식 채널입니다.',
+  topics: ['WRO Competition Match', 'Line Tracking PID', 'Autonomous Navigation', 'Robotics CAD & Build', 'Field Tests'],
+};
+
+export const DEFAULT_YOUTUBE_VIDEOS: YouTubeVideoItem[] = [
+  {
+    id: 'yt-1',
+    title: 'WRO RoboMission Autonomous Full Mission Run',
+    titleKo: 'WRO 로보미션 자율주행 전체 미션 완주 주행 테스트',
+    description: '고속 듀얼 컬러 센서와 자이로센서 융합 기반의 WRO 정규 미션 고속 완주 주행 영상입니다.',
+    youtubeUrl: 'http://www.youtube.com/@Wrocospace',
+    videoId: 'wro_full_mission',
+    thumbnail: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
+    duration: '02:45',
+    tags: ['WRO 2026', '자율주행', '고속주행', 'PID 제어'],
+    category: 'Competition',
+    views: '1.2K',
+    isFeatured: true,
+    order: 1,
+  },
+  {
+    id: 'yt-2',
+    title: 'Precision Dual Sensor Line Tracking & PID Tuning',
+    titleKo: '정밀 듀얼 센서 라인트레이싱 및 PID 제어 파라미터 튜닝',
+    description: '90도 및 직각 코너링에서 오버슈트 없이 매끄러운 궤적을 유지하는 PID 튜닝 과정과 분석입니다.',
+    youtubeUrl: 'http://www.youtube.com/@Wrocospace',
+    videoId: 'pid_tuning_demo',
+    thumbnail: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
+    duration: '04:12',
+    tags: ['PID Tuning', 'Color Sensor', 'Algorithm'],
+    category: 'Algorithm',
+    views: '850',
+    isFeatured: false,
+    order: 2,
+  },
+  {
+    id: 'yt-3',
+    title: 'Robotics 3D CAD Design & Chassis Assembly Timelapse',
+    titleKo: '경량 차체 3D CAD 설계 및 섀시 조립 타임랩스',
+    description: '무게중심 최적화와 모듈형 센서 마운트를 적용한 로봇 기구부 설계 및 제작 과정입니다.',
+    youtubeUrl: 'http://www.youtube.com/@Wrocospace',
+    videoId: 'cad_build_timelapse',
+    thumbnail: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=800&q=80',
+    duration: '03:30',
+    tags: ['CAD', 'Hardware', 'Timelapse', 'Robotics'],
+    category: 'Hardware',
+    views: '1.5K',
+    isFeatured: false,
+    order: 3,
+  },
+];
+

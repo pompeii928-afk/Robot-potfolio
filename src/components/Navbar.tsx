@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RobotLogo } from './RobotLogo';
-import { Menu, X, Mail, Sun, Moon, Globe, LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2 } from 'lucide-react';
+import { Menu, X, Mail, Sun, Moon, Globe, LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme, useLanguage } from '../context/ThemeContext';
 
@@ -34,7 +34,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'awards', label: t('nav.awards'), icon: Trophy },
     { id: 'skills', label: t('nav.skills'), icon: Cpu },
     { id: 'experience', label: t('nav.experience'), icon: FolderGit2 },
+    { id: 'youtube', label: t('nav.youtube', 'YouTube'), icon: Youtube },
   ];
+
 
   const handleLinkClick = (id: string) => {
     if (mobileMenuOpen) {

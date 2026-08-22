@@ -11,6 +11,7 @@ import { JourneySection } from './components/JourneySection';
 import { AwardsSection } from './components/AwardsSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
+import { YouTubeSection } from './components/YouTubeSection';
 import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
@@ -37,6 +38,9 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  subscribeYouTubeVideos,
+  saveYouTubeVideo,
+  deleteYouTubeVideo,
 } from './firebase/firestoreService';
 import {
   DEFAULT_ABOUT_CONFIG,
@@ -44,14 +48,16 @@ import {
   AWARDS_DATA,
   SKILLS_DATA,
   PROJECTS_DATA,
+  DEFAULT_YOUTUBE_VIDEOS,
 } from './data/portfolioData';
 import { CACHE_KEYS, getCachedData } from './utils/localCache';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem } from './types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem } from './types';
 import { EditAboutModal } from './components/modals/EditAboutModal';
 import { EditJourneyModal } from './components/modals/EditJourneyModal';
 import { EditAwardModal } from './components/modals/EditAwardModal';
 import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
+import { EditYouTubeModal } from './components/modals/EditYouTubeModal';
 
 function PortfolioApp() {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -122,6 +128,9 @@ function PortfolioApp() {
   const [projects, setProjects] = useState<ProjectItem[]>(() =>
     getCachedData(CACHE_KEYS.PROJECTS, PROJECTS_DATA)
   );
+  const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideoItem[]>(() =>
+    getCachedData('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS)
+  );
 
   // Modal States
   const [isEditAboutOpen, setIsEditAboutOpen] = useState(false);
@@ -144,6 +153,11 @@ function PortfolioApp() {
   const [projectModalData, setProjectModalData] = useState<{
     isOpen: boolean;
     item: ProjectItem | null;
+  }>({ isOpen: false, item: null });
+
+  const [youtubeModalData, setYoutubeModalData] = useState<{
+    isOpen: boolean;
+    item: YouTubeVideoItem | null;
   }>({ isOpen: false, item: null });
 
   // Real-time Firestore Subscriptions
@@ -173,12 +187,15 @@ function PortfolioApp() {
       (err) => console.log('Projects stream:', err)
     );
 
+    const unsubYouTube = subscribeYouTubeVideos((items) => setYoutubeVideos(items));
+
     return () => {
       unsubAbout();
       unsubJourneys();
       unsubAwards();
       unsubSkills();
       unsubProjects();
+      unsubYouTube();
     };
   }, []);
 
@@ -259,16 +276,16 @@ function PortfolioApp() {
       if (exists) {
         await updateAward(data.id, data);
         showToast(
-          lang === 'en' ? 'Award entry updated.' : '수상 내역이 수정되었습니다.',
+          lang === 'en' ? 'Award updated.' : '수상 내역이 수정되었습니다.',
           'success',
           lang === 'en' ? 'Updated' : '수정 완료'
         );
       } else {
         await createAward(data);
         showToast(
-          lang === 'en' ? 'New award registered.' : '새 수상 내역이 등록되었습니다.',
+          lang === 'en' ? 'New award added.' : '새 수상 내역이 추가되었습니다.',
           'success',
-          lang === 'en' ? 'Added' : '등록 완료'
+          lang === 'en' ? 'Added' : '추가 완료'
         );
       }
     } catch (err) {
@@ -282,7 +299,7 @@ function PortfolioApp() {
     try {
       await deleteAward(id);
       showToast(
-        lang === 'en' ? 'Award entry deleted.' : '수상 내역이 삭제되었습니다.',
+        lang === 'en' ? 'Award deleted.' : '수상 내역이 삭제되었습니다.',
         'info',
         lang === 'en' ? 'Deleted' : '삭제 완료'
       );
@@ -299,21 +316,21 @@ function PortfolioApp() {
       if (exists) {
         await updateSkill(data.id, data);
         showToast(
-          lang === 'en' ? 'Skill updated.' : '역량 항목이 수정되었습니다.',
+          lang === 'en' ? 'Skill competency updated.' : '핵심 역량이 수정되었습니다.',
           'success',
           lang === 'en' ? 'Updated' : '수정 완료'
         );
       } else {
         await createSkill(data);
         showToast(
-          lang === 'en' ? 'New skill added.' : '새 역량 항목이 추가되었습니다.',
+          lang === 'en' ? 'New skill added.' : '새 핵심 역량이 추가되었습니다.',
           'success',
           lang === 'en' ? 'Added' : '추가 완료'
         );
       }
     } catch (err) {
       console.error(err);
-      showToast('역량 항목 저장에 실패했습니다.', 'error', '오류 발생');
+      showToast('기술 역량 저장에 실패했습니다.', 'error', '오류 발생');
       throw err;
     }
   };
@@ -322,13 +339,13 @@ function PortfolioApp() {
     try {
       await deleteSkill(id);
       showToast(
-        lang === 'en' ? 'Skill deleted.' : '역량 항목이 삭제되었습니다.',
+        lang === 'en' ? 'Skill deleted.' : '핵심 역량이 삭제되었습니다.',
         'info',
         lang === 'en' ? 'Deleted' : '삭제 완료'
       );
     } catch (err) {
       console.error(err);
-      showToast('역량 항목 삭제에 실패했습니다.', 'error', '삭제 실패');
+      showToast('기술 역량 삭제에 실패했습니다.', 'error', '삭제 실패');
       throw err;
     }
   };
@@ -339,16 +356,16 @@ function PortfolioApp() {
       if (exists) {
         await updateProject(data.id, data);
         showToast(
-          lang === 'en' ? 'Project updated.' : '프로젝트가 수정되었습니다.',
+          lang === 'en' ? 'Project system updated.' : '로봇 프로젝트가 수정되었습니다.',
           'success',
           lang === 'en' ? 'Updated' : '수정 완료'
         );
       } else {
         await createProject(data);
         showToast(
-          lang === 'en' ? 'New project registered.' : '새 프로젝트가 등록되었습니다.',
+          lang === 'en' ? 'New project added.' : '새 로봇 프로젝트가 추가되었습니다.',
           'success',
-          lang === 'en' ? 'Added' : '등록 완료'
+          lang === 'en' ? 'Added' : '추가 완료'
         );
       }
     } catch (err) {
@@ -362,7 +379,7 @@ function PortfolioApp() {
     try {
       await deleteProject(id);
       showToast(
-        lang === 'en' ? 'Project deleted.' : '프로젝트가 삭제되었습니다.',
+        lang === 'en' ? 'Project deleted.' : '로봇 프로젝트가 삭제되었습니다.',
         'info',
         lang === 'en' ? 'Deleted' : '삭제 완료'
       );
@@ -373,10 +390,38 @@ function PortfolioApp() {
     }
   };
 
-  // If user requested /admin route:
-  // If not authenticated -> Show AdminLoginView
-  // If authenticated -> Show Admin Portfolio with AdminBar & Edit controls
-  if (currentPath === '/admin' && !isAdmin && !authLoading) {
+  const handleSaveYouTubeVideo = async (data: YouTubeVideoItem) => {
+    try {
+      await saveYouTubeVideo(data);
+      showToast(
+        lang === 'en' ? 'YouTube video entry saved.' : '유튜브 영상 항목이 저장되었습니다.',
+        'success',
+        lang === 'en' ? 'Saved' : '저장 완료'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('유튜브 영상 저장에 실패했습니다.', 'error', '오류 발생');
+      throw err;
+    }
+  };
+
+  const handleDeleteYouTubeVideo = async (id: string) => {
+    try {
+      await deleteYouTubeVideo(id);
+      showToast(
+        lang === 'en' ? 'YouTube video entry deleted.' : '유튜브 영상 항목이 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('유튜브 영상 삭제에 실패했습니다.', 'error', '삭제 실패');
+      throw err;
+    }
+  };
+
+  // If user navigates to `/admin` and is not logged in, render the sleek login screen
+  if (currentPath === '/admin' && !authLoading && !isAdmin) {
     return <AdminLoginView onBackToPublic={() => navigateTo('/')} />;
   }
 
@@ -417,6 +462,7 @@ function PortfolioApp() {
           awards: awards.length,
           skills: skills.length,
           projects: projects.length,
+          videos: youtubeVideos.length,
         }}
       />
 
@@ -480,6 +526,16 @@ function PortfolioApp() {
                 onDeleteProject={handleDeleteProject}
               />
             )}
+
+            {(activeSection === 'all' || activeSection === 'youtube') && (
+              <YouTubeSection
+                videos={youtubeVideos}
+                isAdmin={isEditingEnabled}
+                onAddVideo={() => setYoutubeModalData({ isOpen: true, item: null })}
+                onEditVideo={(video) => setYoutubeModalData({ isOpen: true, item: video })}
+                onDeleteVideo={handleDeleteYouTubeVideo}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -527,6 +583,14 @@ function PortfolioApp() {
             onClose={() => setProjectModalData({ isOpen: false, item: null })}
             onSave={handleSaveProject}
             onDelete={handleDeleteProject}
+          />
+
+          <EditYouTubeModal
+            isOpen={youtubeModalData.isOpen}
+            initialData={youtubeModalData.item}
+            onClose={() => setYoutubeModalData({ isOpen: false, item: null })}
+            onSave={handleSaveYouTubeVideo}
+            onDelete={handleDeleteYouTubeVideo}
           />
         </>
       )}

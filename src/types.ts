@@ -91,3 +91,21 @@ export interface ProjectItem {
   order?: number;
   updatedAt?: string;
 }
+
+export interface YouTubeVideoItem {
+  id: string;
+  title: string;
+  titleKo?: string;
+  description: string;
+  youtubeUrl: string;
+  videoId?: string;
+  thumbnail?: string;
+  duration?: string;
+  tags?: string[];
+  category?: string;
+  views?: string;
+  isFeatured?: boolean;
+  order?: number;
+  updatedAt?: string;
+}
+

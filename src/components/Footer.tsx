@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Check, Copy } from 'lucide-react';
+import { Mail, Check, Copy, Youtube, ExternalLink } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
 
 export const Footer: React.FC = () => {
   const { theme } = useTheme();
@@ -44,7 +45,23 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Right Links & Email */}
-          <div className="flex flex-col items-center md:items-end space-y-3">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+            {/* YouTube Channel Button */}
+            <a
+              href={DEFAULT_CHANNEL_INFO.channelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer group ${
+                theme === 'light'
+                  ? 'bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 shadow-sm'
+                  : 'bg-red-950/40 border border-red-500/30 text-red-400 hover:bg-red-900/60 hover:border-red-400'
+              }`}
+            >
+              <Youtube className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+              <span>YouTube @Wrocospace</span>
+              <ExternalLink className="w-3 h-3 opacity-70" />
+            </a>
+
             {/* Email pill */}
             <button
               onClick={copyEmail}

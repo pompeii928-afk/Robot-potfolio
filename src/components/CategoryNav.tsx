@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2 } from 'lucide-react';
+import { LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme, useLanguage } from '../context/ThemeContext';
 
@@ -8,6 +8,7 @@ interface CategoryCounts {
   awards?: number;
   skills?: number;
   projects?: number;
+  videos?: number;
 }
 
 interface CategoryNavProps {
@@ -81,6 +82,15 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
       descEn: 'Autonomous platforms & CAD specs',
       descKo: '자율주행 플랫폼 및 엔지니어링',
     },
+    {
+      id: 'youtube',
+      labelEn: 'YouTube Channel',
+      labelKo: '유튜브 채널',
+      icon: Youtube,
+      badge: '@Wrocospace',
+      descEn: 'Official YouTube Channel & Match Videos',
+      descKo: '공식 유튜브 채널 및 실전 주행 영상',
+    },
   ];
 
   return (
@@ -97,6 +107,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
             const isActive = activeCategory === cat.id;
             const Icon = cat.icon;
             const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+            const isYouTube = cat.id === 'youtube';
 
             return (
               <button
@@ -119,9 +130,11 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                     layoutId="activeCategoryPill"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                     className={`absolute inset-0 rounded-xl border ${
-                      theme === 'light'
-                        ? 'bg-gradient-to-r from-sky-100/90 to-blue-50/90 border-sky-300 shadow-sm'
-                        : 'bg-gradient-to-r from-cyan-950/90 to-[#0c1f3d]/90 border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
+                      isYouTube
+                        ? 'bg-gradient-to-r from-red-600/20 to-rose-600/20 border-red-500/60 shadow-[0_0_18px_rgba(220,38,38,0.35)]'
+                        : theme === 'light'
+                          ? 'bg-gradient-to-r from-sky-100/90 to-blue-50/90 border-sky-300 shadow-sm'
+                          : 'bg-gradient-to-r from-cyan-950/90 to-[#0c1f3d]/90 border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
                     }`}
                   />
                 )}
@@ -129,13 +142,15 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                 <span className="relative z-10 flex items-center gap-2">
                   <Icon
                     className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${
-                      isActive
-                        ? theme === 'light'
-                          ? 'text-sky-600'
-                          : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]'
-                        : theme === 'light'
-                          ? 'text-slate-500 group-hover:text-sky-600'
-                          : 'text-slate-500 group-hover:text-cyan-300'
+                      isYouTube
+                        ? 'text-red-600 dark:text-red-400'
+                        : isActive
+                          ? theme === 'light'
+                            ? 'text-sky-600'
+                            : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]'
+                          : theme === 'light'
+                            ? 'text-slate-500 group-hover:text-sky-600'
+                            : 'text-slate-500 group-hover:text-cyan-300'
                     }`}
                   />
                   <span>{label}</span>
@@ -143,13 +158,15 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                   {cat.badge && (
                     <span
                       className={`hidden md:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono tracking-tight transition-colors ${
-                        isActive
-                          ? theme === 'light'
-                            ? 'bg-sky-200/80 text-sky-900 font-bold'
-                            : 'bg-cyan-900/80 text-cyan-200 border border-cyan-400/40'
-                          : theme === 'light'
-                            ? 'bg-slate-100 text-slate-500'
-                            : 'bg-slate-900/80 text-slate-400'
+                        isYouTube
+                          ? 'bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/40 font-bold'
+                          : isActive
+                            ? theme === 'light'
+                              ? 'bg-sky-200/80 text-sky-900 font-bold'
+                              : 'bg-cyan-900/80 text-cyan-200 border border-cyan-400/40'
+                            : theme === 'light'
+                              ? 'bg-slate-100 text-slate-500'
+                              : 'bg-slate-900/80 text-slate-400'
                       }`}
                     >
                       {cat.badge}

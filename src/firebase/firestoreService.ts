@@ -10,22 +10,25 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { handleFirestoreError, OperationType } from './errorHandling';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem } from '../types';
 import {
   DEFAULT_ABOUT_CONFIG,
   JOURNEY_DATA,
   AWARDS_DATA,
   SKILLS_DATA,
   PROJECTS_DATA,
+  DEFAULT_YOUTUBE_VIDEOS,
 } from '../data/portfolioData';
-import { CACHE_KEYS, setCachedData } from '../utils/localCache';
+import { CACHE_KEYS, setCachedData, getCachedData } from '../utils/localCache';
 
 const ABOUT_DOC_PATH = 'about/main';
 const JOURNEYS_COLLECTION = 'journeys';
 const AWARDS_COLLECTION = 'awards';
 const SKILLS_COLLECTION = 'skills';
 const PROJECTS_COLLECTION = 'projects';
+const YOUTUBE_COLLECTION = 'youtube_videos';
 const SYSTEM_COLLECTION = 'system';
+
 
 // Helper to mark a collection as initialized in Firestore & local cache
 async function markInitialized(collectionName: string) {
@@ -621,8 +624,97 @@ export async function deleteProject(id: string): Promise<void> {
 }
 
 // ========================
+// YOUTUBE VIDEOS CRUD
+// ========================
+
+export function subscribeYouTubeVideos(callback: (videos: YouTubeVideoItem[]) => void): () => void {
+  const colRef = collection(db, YOUTUBE_COLLECTION);
+
+  // Instant local cache callback
+  const cached = getCachedData<YouTubeVideoItem[]>('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS);
+  callback(cached);
+
+  const unsubscribe = onSnapshot(
+    colRef,
+    async (snapshot) => {
+      if (snapshot.empty) {
+        const initialized = await isCollectionInitialized(YOUTUBE_COLLECTION);
+        if (!initialized) {
+          try {
+            console.log('[Firestore] Initializing YouTube videos with default dataset...');
+            const batch = writeBatch(db);
+            DEFAULT_YOUTUBE_VIDEOS.forEach((item, index) => {
+              const docRef = doc(db, YOUTUBE_COLLECTION, item.id);
+              batch.set(docRef, { ...item, order: index, updatedAt: new Date().toISOString() });
+            });
+            await batch.commit();
+            await markInitialized(YOUTUBE_COLLECTION);
+            setCachedData('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS);
+            callback(DEFAULT_YOUTUBE_VIDEOS);
+            return;
+          } catch (initErr) {
+            console.warn('[Firestore] YouTube seed error:', initErr);
+          }
+        }
+        callback([]);
+        setCachedData('cached_youtube_videos', []);
+        return;
+      }
+
+      const items: YouTubeVideoItem[] = [];
+      snapshot.forEach((docSnap) => {
+        items.push({ id: docSnap.id, ...docSnap.data() } as YouTubeVideoItem);
+      });
+
+      items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+      setCachedData('cached_youtube_videos', items);
+      callback(items);
+    },
+    (error) => {
+      console.warn('[Firestore] YouTube videos listener warning:', error.message);
+      const fallback = getCachedData<YouTubeVideoItem[]>('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS);
+      callback(fallback);
+    }
+  );
+
+  return unsubscribe;
+}
+
+export async function saveYouTubeVideo(video: YouTubeVideoItem): Promise<void> {
+  const path = `${YOUTUBE_COLLECTION}/${video.id}`;
+  try {
+    const docRef = doc(db, YOUTUBE_COLLECTION, video.id);
+    await setDoc(
+      docRef,
+      {
+        ...video,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+    await markInitialized(YOUTUBE_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+    throw error;
+  }
+}
+
+export async function deleteYouTubeVideo(id: string): Promise<void> {
+  const path = `${YOUTUBE_COLLECTION}/${id}`;
+  try {
+    const docRef = doc(db, YOUTUBE_COLLECTION, id);
+    await deleteDoc(docRef);
+    await markInitialized(YOUTUBE_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
+// ========================
 // SEED & RESET DATA
 // ========================
+
 
 export async function seedAllPortfolioData(): Promise<void> {
   try {

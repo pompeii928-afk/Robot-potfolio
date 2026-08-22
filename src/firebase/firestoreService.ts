@@ -4,7 +4,6 @@ import {
   getDoc,
   getDocs,
   setDoc,
-  updateDoc,
   deleteDoc,
   onSnapshot,
   writeBatch,
@@ -19,6 +18,7 @@ import {
   SKILLS_DATA,
   PROJECTS_DATA,
 } from '../data/portfolioData';
+import { CACHE_KEYS, setCachedData } from '../utils/localCache';
 
 const ABOUT_DOC_PATH = 'about/main';
 const JOURNEYS_COLLECTION = 'journeys';
@@ -68,7 +68,9 @@ export function subscribeAboutConfig(
     docRef,
     (snapshot) => {
       if (snapshot.exists()) {
-        onUpdate(snapshot.data() as AboutConfig);
+        const data = snapshot.data() as AboutConfig;
+        setCachedData(CACHE_KEYS.ABOUT, data);
+        onUpdate(data);
       } else {
         onUpdate(DEFAULT_ABOUT_CONFIG);
       }
@@ -89,9 +91,11 @@ export async function saveAboutConfig(data: AboutConfig): Promise<void> {
       ...data,
       updatedAt: new Date().toISOString(),
     });
+    setCachedData(CACHE_KEYS.ABOUT, data);
     await markInitialized('about');
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
+    throw error;
   }
 }
 
@@ -110,8 +114,10 @@ export function subscribeJourneys(
       if (snapshot.empty) {
         const initialized = await isCollectionInitialized(JOURNEYS_COLLECTION);
         if (initialized) {
+          setCachedData(CACHE_KEYS.JOURNEYS, []);
           onUpdate([]);
         } else {
+          setCachedData(CACHE_KEYS.JOURNEYS, JOURNEY_DATA);
           onUpdate(JOURNEY_DATA);
         }
       } else {
@@ -120,6 +126,7 @@ export function subscribeJourneys(
           id: docSnap.id,
         })) as JourneyItem[];
         items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.JOURNEYS, items);
         onUpdate(items);
         if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${JOURNEYS_COLLECTION}`, 'true');
       }
@@ -149,7 +156,8 @@ export async function createJourney(journey: Omit<JourneyItem, 'id'> & { id?: st
           batch.set(jRef, { ...j, order: idx, updatedAt: new Date().toISOString() });
         });
         const newRef = doc(db, JOURNEYS_COLLECTION, id);
-        batch.set(newRef, { ...journey, id, order: JOURNEY_DATA.length, updatedAt: new Date().toISOString() });
+        const itemWithOrder = { ...journey, id, order: JOURNEY_DATA.length, updatedAt: new Date().toISOString() };
+        batch.set(newRef, itemWithOrder);
         await batch.commit();
         await markInitialized(JOURNEYS_COLLECTION);
         return id;
@@ -239,8 +247,10 @@ export function subscribeAwards(
       if (snapshot.empty) {
         const initialized = await isCollectionInitialized(AWARDS_COLLECTION);
         if (initialized) {
+          setCachedData(CACHE_KEYS.AWARDS, []);
           onUpdate([]);
         } else {
+          setCachedData(CACHE_KEYS.AWARDS, AWARDS_DATA);
           onUpdate(AWARDS_DATA);
         }
       } else {
@@ -249,6 +259,7 @@ export function subscribeAwards(
           id: docSnap.id,
         })) as AwardItem[];
         items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.AWARDS, items);
         onUpdate(items);
         if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${AWARDS_COLLECTION}`, 'true');
       }
@@ -366,8 +377,10 @@ export function subscribeSkills(
       if (snapshot.empty) {
         const initialized = await isCollectionInitialized(SKILLS_COLLECTION);
         if (initialized) {
+          setCachedData(CACHE_KEYS.SKILLS, []);
           onUpdate([]);
         } else {
+          setCachedData(CACHE_KEYS.SKILLS, SKILLS_DATA);
           onUpdate(SKILLS_DATA);
         }
       } else {
@@ -376,6 +389,7 @@ export function subscribeSkills(
           id: docSnap.id,
         })) as SkillItem[];
         items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.SKILLS, items);
         onUpdate(items);
         if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${SKILLS_COLLECTION}`, 'true');
       }
@@ -492,8 +506,10 @@ export function subscribeProjects(
       if (snapshot.empty) {
         const initialized = await isCollectionInitialized(PROJECTS_COLLECTION);
         if (initialized) {
+          setCachedData(CACHE_KEYS.PROJECTS, []);
           onUpdate([]);
         } else {
+          setCachedData(CACHE_KEYS.PROJECTS, PROJECTS_DATA);
           onUpdate(PROJECTS_DATA);
         }
       } else {
@@ -502,6 +518,7 @@ export function subscribeProjects(
           id: docSnap.id,
         })) as ProjectItem[];
         items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.PROJECTS, items);
         onUpdate(items);
         if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${PROJECTS_COLLECTION}`, 'true');
       }
@@ -617,30 +634,35 @@ export async function seedAllPortfolioData(): Promise<void> {
       ...DEFAULT_ABOUT_CONFIG,
       updatedAt: new Date().toISOString(),
     });
+    setCachedData(CACHE_KEYS.ABOUT, DEFAULT_ABOUT_CONFIG);
 
     // Journeys
     JOURNEY_DATA.forEach((j, index) => {
       const ref = doc(db, JOURNEYS_COLLECTION, j.id);
       batch.set(ref, { ...j, order: index, updatedAt: new Date().toISOString() });
     });
+    setCachedData(CACHE_KEYS.JOURNEYS, JOURNEY_DATA);
 
     // Awards
     AWARDS_DATA.forEach((a, index) => {
       const ref = doc(db, AWARDS_COLLECTION, a.id);
       batch.set(ref, { ...a, order: index, updatedAt: new Date().toISOString() });
     });
+    setCachedData(CACHE_KEYS.AWARDS, AWARDS_DATA);
 
     // Skills
     SKILLS_DATA.forEach((s, index) => {
       const ref = doc(db, SKILLS_COLLECTION, s.id);
       batch.set(ref, { ...s, order: index, updatedAt: new Date().toISOString() });
     });
+    setCachedData(CACHE_KEYS.SKILLS, SKILLS_DATA);
 
     // Projects
     PROJECTS_DATA.forEach((p, index) => {
       const ref = doc(db, PROJECTS_COLLECTION, p.id);
       batch.set(ref, { ...p, order: index, updatedAt: new Date().toISOString() });
     });
+    setCachedData(CACHE_KEYS.PROJECTS, PROJECTS_DATA);
 
     // Initialize all markers
     const markers = [JOURNEYS_COLLECTION, AWARDS_COLLECTION, SKILLS_COLLECTION, PROJECTS_COLLECTION, 'about'];

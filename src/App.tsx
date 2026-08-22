@@ -42,6 +42,7 @@ import {
   SKILLS_DATA,
   PROJECTS_DATA,
 } from './data/portfolioData';
+import { CACHE_KEYS, getCachedData } from './utils/localCache';
 import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem } from './types';
 import { EditAboutModal } from './components/modals/EditAboutModal';
 import { EditJourneyModal } from './components/modals/EditJourneyModal';
@@ -100,12 +101,22 @@ function PortfolioApp() {
     };
   }, []);
 
-  // Firestore Real-time States
-  const [aboutData, setAboutData] = useState<AboutConfig>(DEFAULT_ABOUT_CONFIG);
-  const [journeys, setJourneys] = useState<JourneyItem[]>(JOURNEY_DATA);
-  const [awards, setAwards] = useState<AwardItem[]>(AWARDS_DATA);
-  const [skills, setSkills] = useState<SkillItem[]>(SKILLS_DATA);
-  const [projects, setProjects] = useState<ProjectItem[]>(PROJECTS_DATA);
+  // Firestore Real-time States (Synchronous local cache initialization prevents flash of old content)
+  const [aboutData, setAboutData] = useState<AboutConfig>(() =>
+    getCachedData(CACHE_KEYS.ABOUT, DEFAULT_ABOUT_CONFIG)
+  );
+  const [journeys, setJourneys] = useState<JourneyItem[]>(() =>
+    getCachedData(CACHE_KEYS.JOURNEYS, JOURNEY_DATA)
+  );
+  const [awards, setAwards] = useState<AwardItem[]>(() =>
+    getCachedData(CACHE_KEYS.AWARDS, AWARDS_DATA)
+  );
+  const [skills, setSkills] = useState<SkillItem[]>(() =>
+    getCachedData(CACHE_KEYS.SKILLS, SKILLS_DATA)
+  );
+  const [projects, setProjects] = useState<ProjectItem[]>(() =>
+    getCachedData(CACHE_KEYS.PROJECTS, PROJECTS_DATA)
+  );
 
   // Modal States
   const [isEditAboutOpen, setIsEditAboutOpen] = useState(false);

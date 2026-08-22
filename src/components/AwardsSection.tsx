@@ -129,85 +129,91 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
           <>
             {/* Central Achievement Showcase Card */}
             {mainAward && (
-              <div className="max-w-2xl mx-auto relative group">
-                    {/* Admin Quick Edit Bar for Main Award */}
-                    {isAdmin && rawMainAward && (
-                      <div
-                        className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 p-1 rounded-lg border ${
+              <div className="max-w-3xl mx-auto relative group">
+                {/* Admin Quick Edit Bar for Main Award */}
+                {isAdmin && rawMainAward && (
+                  <div
+                    className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 p-1 rounded-lg border backdrop-blur-md ${
+                      theme === 'light'
+                        ? 'bg-white/90 border-slate-300 shadow-sm'
+                        : 'bg-[#060c18]/90 border-cyan-500/40'
+                    }`}
+                  >
+                    {onEditAward && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditAward(rawMainAward);
+                        }}
+                        className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
                           theme === 'light'
-                            ? 'bg-white/90 border-slate-300 shadow-sm'
-                            : 'bg-[#060c18]/90 border-cyan-500/40'
+                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
                         }`}
                       >
-                        {onEditAward && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEditAward(rawMainAward);
-                            }}
-                            className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                              theme === 'light'
-                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                                : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
-                            }`}
-                          >
-                            <Edit3 className="w-3 h-3" /> {t('journey.edit')}
-                          </button>
-                        )}
-                        {onDeleteAward && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAwardToDelete(rawMainAward);
-                            }}
-                            className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                              theme === 'light'
-                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-600'
-                                : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
-                            }`}
-                          >
-                            <Trash2 className="w-3 h-3" /> {t('journey.delete')}
-                          </button>
-                        )}
-                      </div>
+                        <Edit3 className="w-3.5 h-3.5" /> {t('journey.edit')}
+                      </button>
                     )}
+                    {onDeleteAward && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAwardToDelete(rawMainAward);
+                        }}
+                        className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
+                          theme === 'light'
+                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                            : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
+                        }`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> {t('journey.delete')}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 <div
                   onClick={(e) => handleTriggerCelebration(e, mainAward)}
                   className={`relative cursor-pointer p-8 sm:p-12 rounded-3xl backdrop-blur-xl border text-center transition-all duration-300 overflow-hidden ${
                     theme === 'light'
-                      ? 'bg-white border-slate-200 shadow-[0_15px_45px_rgba(15,23,42,0.08)] hover:border-sky-400 hover:shadow-[0_20px_50px_rgba(2,132,199,0.15)]'
-                      : 'bg-[#0a152d]/85 border-cyan-500/30 hover:border-cyan-400/80 hover:shadow-[0_0_50px_rgba(6,182,212,0.3)]'
+                      ? 'bg-white border-amber-300/80 shadow-[0_15px_45px_rgba(245,158,11,0.12)] hover:border-amber-400 hover:shadow-[0_20px_50px_rgba(245,158,11,0.2)]'
+                      : 'bg-[#0a152d]/90 border-amber-500/40 hover:border-amber-400/90 shadow-[0_0_50px_rgba(245,158,11,0.25)]'
                   }`}
                 >
+                  {/* Corner Accent Brackets */}
+                  <div className={`absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
+                  <div className={`absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
+                  <div className={`absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
+                  <div className={`absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
+
                   {/* Ambient Radial Background Glow */}
                   <div
-                    className={`absolute inset-0 opacity-70 pointer-events-none ${
+                    className={`absolute inset-0 opacity-75 pointer-events-none ${
                       theme === 'light'
-                        ? 'bg-gradient-to-b from-sky-400/10 via-transparent to-indigo-500/5'
-                        : 'bg-gradient-to-b from-cyan-500/10 via-transparent to-purple-600/10'
+                        ? 'bg-gradient-to-b from-amber-400/10 via-transparent to-sky-500/5'
+                        : 'bg-gradient-to-b from-amber-500/15 via-transparent to-purple-600/10'
                     }`}
                   />
 
-                  {/* Glowing Medal Icon */}
+                  {/* Glowing Trophy / Medal Icon */}
                   <div className="relative inline-flex items-center justify-center mb-6">
                     <div
                       className={`absolute inset-0 rounded-full blur-xl animate-pulse ${
-                        theme === 'light' ? 'bg-sky-400/30' : 'bg-cyan-400/20'
+                        theme === 'light' ? 'bg-amber-400/40' : 'bg-amber-400/30'
                       }`}
                     />
                     <div
                       className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 flex items-center justify-center group-hover:scale-110 transition-transform ${
                         theme === 'light'
-                          ? 'bg-gradient-to-br from-sky-100 to-indigo-50 border-sky-500 shadow-[0_6px_25px_rgba(2,132,199,0.3)]'
-                          : 'bg-gradient-to-br from-[#0c234a] to-[#081329] border-cyan-400/80 shadow-[0_0_25px_rgba(6,182,212,0.5)]'
+                          ? 'bg-gradient-to-br from-amber-100 to-yellow-50 border-amber-400 shadow-[0_6px_25px_rgba(245,158,11,0.3)]'
+                          : 'bg-gradient-to-br from-[#2a1e06] to-[#081329] border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.5)]'
                       }`}
                     >
                       <Medal
                         className={`w-10 h-10 sm:w-12 sm:h-12 ${
                           theme === 'light'
-                            ? 'text-sky-600'
-                            : 'text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]'
+                            ? 'text-amber-600'
+                            : 'text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]'
                         }`}
                       />
                     </div>
@@ -215,18 +221,18 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
 
                   {/* Subtitle */}
                   <div
-                    className={`text-xs sm:text-sm font-mono tracking-[0.25em] uppercase font-semibold mb-2 flex items-center justify-center gap-1.5 ${
-                      theme === 'light' ? 'text-sky-700' : 'text-cyan-400/90'
+                    className={`text-xs sm:text-sm font-mono tracking-[0.25em] uppercase font-bold mb-2 flex items-center justify-center gap-2 ${
+                      theme === 'light' ? 'text-amber-700' : 'text-amber-400'
                     }`}
                   >
-                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-300'}`} />
+                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-amber-600' : 'text-amber-300'}`} />
                     <span>{t('awards.unlocked')}</span>
-                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-300'}`} />
+                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-amber-600' : 'text-amber-300'}`} />
                   </div>
 
                   {/* Main Award Title */}
                   <h3
-                    className={`font-display text-2xl sm:text-4xl font-extrabold tracking-wide mb-5 ${
+                    className={`font-display text-2xl sm:text-4xl font-extrabold tracking-wide mb-4 leading-tight ${
                       theme === 'light' ? 'text-slate-900' : 'text-white'
                     }`}
                   >
@@ -235,18 +241,19 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
 
                   {/* Pill Badge */}
                   <div
-                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-semibold text-sm sm:text-base border transition-all ${
+                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm sm:text-base border transition-all ${
                       theme === 'light'
-                        ? 'bg-sky-50 border-sky-300 text-sky-800 shadow-sm group-hover:bg-sky-100'
-                        : 'bg-cyan-950/80 border border-cyan-400/70 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:bg-cyan-900/90'
+                        ? 'bg-amber-50 border-amber-300 text-amber-900 shadow-sm group-hover:bg-amber-100'
+                        : 'bg-amber-950/80 border border-amber-400/70 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] group-hover:bg-amber-900/90'
                     }`}
                   >
+                    <Trophy className="w-4 h-4 text-amber-500" />
                     <span>{mainAward.title}</span>
                   </div>
 
                   {/* Description & Rank */}
                   <p
-                    className={`mt-6 text-sm max-w-lg mx-auto leading-relaxed whitespace-pre-line ${
+                    className={`mt-6 text-sm sm:text-base max-w-xl mx-auto leading-relaxed whitespace-pre-line ${
                       theme === 'light' ? 'text-slate-700' : 'text-slate-300'
                     }`}
                   >
@@ -254,26 +261,30 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                   </p>
 
                   <div
-                    className={`mt-6 inline-flex items-center gap-4 text-xs font-mono ${
-                      theme === 'light' ? 'text-slate-500' : 'text-cyan-400/80'
+                    className={`mt-6 inline-flex flex-wrap items-center justify-center gap-3 text-xs font-mono ${
+                      theme === 'light' ? 'text-slate-600' : 'text-cyan-300/90'
                     }`}
                   >
-                    <span>Date: {mainAward.date}</span>
+                    <span className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      Date: {mainAward.date}
+                    </span>
                     {mainAward.rank && (
-                      <>
-                        <span>•</span>
-                        <span className={theme === 'light' ? 'text-indigo-600 font-semibold' : 'text-purple-300 font-semibold'}>
-                          Rank: {mainAward.rank}
-                        </span>
-                      </>
+                      <span className={`px-2.5 py-1 rounded font-bold border ${
+                        theme === 'light'
+                          ? 'bg-amber-50 border-amber-300 text-amber-800'
+                          : 'bg-amber-950/80 border-amber-500/50 text-amber-300'
+                      }`}>
+                        Rank: {mainAward.rank}
+                      </span>
                     )}
                     {mainAward.score && (
-                      <>
-                        <span>•</span>
-                        <span className={theme === 'light' ? 'text-emerald-700 font-semibold' : 'text-emerald-300 font-semibold'}>
-                          Score: {mainAward.score}
-                        </span>
-                      </>
+                      <span className={`px-2.5 py-1 rounded font-bold border ${
+                        theme === 'light'
+                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                          : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
+                      }`}>
+                        Score: {mainAward.score}
+                      </span>
                     )}
                   </div>
                 </div>

@@ -137,27 +137,27 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   return (
                     <div
                       key={item.id}
-                      className={`relative group flex items-center gap-3 px-5 py-3 rounded-xl border text-left transition-all duration-300 ${
+                      className={`relative group flex items-center gap-3 px-4 sm:px-5 py-3 rounded-2xl border text-left transition-all duration-300 ${
                         isSelected
                           ? theme === 'light'
-                            ? 'bg-sky-50 border-sky-400 text-sky-950 shadow-md ring-1 ring-sky-300'
-                            : 'bg-cyan-950/80 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] text-white'
+                            ? 'bg-sky-50/90 border-sky-400 text-sky-950 shadow-md ring-2 ring-sky-300/40'
+                            : 'bg-cyan-950/90 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.35)] text-white'
                           : theme === 'light'
                             ? 'bg-white border-slate-200 text-slate-600 hover:border-sky-300 hover:text-slate-900 shadow-sm'
-                            : 'bg-[#081224]/60 border-slate-800/80 text-slate-400 hover:border-cyan-500/40 hover:text-slate-200'
+                            : 'bg-[#081224]/70 border-slate-800/80 text-slate-400 hover:border-cyan-500/40 hover:text-slate-200'
                       }`}
                     >
                       <button
                         type="button"
                         onClick={() => setSelectedJourneyId(item.id)}
-                        className="flex items-center gap-3 cursor-pointer text-left focus:outline-none"
+                        className="flex items-center gap-3.5 cursor-pointer text-left focus:outline-none"
                       >
                         <div
-                          className={`w-7 h-7 rounded-lg font-mono text-xs font-bold flex items-center justify-center border ${
+                          className={`w-8 h-8 rounded-xl font-mono text-xs font-extrabold flex items-center justify-center border transition-all ${
                             isSelected
                               ? theme === 'light'
-                                ? 'bg-sky-600 text-white border-sky-500 font-bold'
-                                : 'bg-cyan-400 text-black border-cyan-300 font-bold'
+                                ? 'bg-sky-600 text-white border-sky-500 shadow-sm'
+                                : 'bg-cyan-400 text-black border-cyan-300 shadow-[0_0_10px_#00f0ff]'
                               : theme === 'light'
                                 ? 'bg-slate-100 text-slate-600 border-slate-300'
                                 : 'bg-slate-900 text-slate-400 border-slate-700'
@@ -167,13 +167,15 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         </div>
                         <div>
                           <div
-                            className={`text-xs font-mono font-semibold ${
-                              theme === 'light' ? 'text-sky-600' : 'text-cyan-400'
+                            className={`text-xs font-mono font-bold tracking-tight ${
+                              isSelected
+                                ? theme === 'light' ? 'text-sky-700' : 'text-cyan-300'
+                                : theme === 'light' ? 'text-slate-500' : 'text-slate-400'
                             }`}
                           >
                             {itemYear}
                           </div>
-                          <div className="text-sm font-bold truncate max-w-[170px]">{itemTitle}</div>
+                          <div className="text-sm font-bold truncate max-w-[180px]">{itemTitle}</div>
                         </div>
                       </button>
 
@@ -204,37 +206,52 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             {/* Selected Journey Detailed View */}
             {selectedItem && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Left Column: Competition Summary */}
+                {/* Left Column: Competition Summary & Metrics */}
                 <div className="lg:col-span-5 space-y-6">
                   <div
                     className={`p-6 sm:p-8 rounded-2xl backdrop-blur-xl border relative overflow-hidden transition-all ${
                       theme === 'light'
-                        ? 'bg-white border-slate-200 shadow-[0_8px_30px_rgba(15,23,42,0.06)]'
-                        : 'bg-[#081224]/80 border-cyan-500/30'
+                        ? 'bg-white border-slate-200/90 shadow-[0_8px_30px_rgba(15,23,42,0.06)]'
+                        : 'bg-[#081224]/85 border-cyan-500/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
                     }`}
                   >
-                    <div
-                      className={`text-xs font-mono uppercase tracking-wider mb-1 ${
-                        theme === 'light' ? 'text-sky-600' : 'text-cyan-400'
-                      }`}
-                    >
-                      {selectedItem.year || selectedItem.season || ''} • STEP {selectedItem.step || 1}
+                    {/* Top Step & Year Tag */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span
+                        className={`text-xs font-mono font-bold uppercase tracking-wider ${
+                          theme === 'light' ? 'text-sky-600' : 'text-cyan-400'
+                        }`}
+                      >
+                        {selectedItem.year || selectedItem.season || ''}
+                      </span>
+                      <span
+                        className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold ${
+                          theme === 'light'
+                            ? 'bg-sky-100 text-sky-800'
+                            : 'bg-cyan-950 text-cyan-300 border border-cyan-500/30'
+                        }`}
+                      >
+                        STEP {selectedItem.step || 1}
+                      </span>
                     </div>
+
                     <h3
-                      className={`font-display text-2xl sm:text-3xl font-extrabold mb-3 ${
+                      className={`font-display text-2xl sm:text-3xl font-extrabold mb-3 leading-tight ${
                         theme === 'light' ? 'text-slate-900' : 'text-white'
                       }`}
                     >
                       {selectedItem.competition || selectedItem.title || ''}
                     </h3>
+
+                    {/* Award / Milestone status badge */}
                     <div
-                      className={`inline-block px-3 py-1 rounded-md text-xs font-mono font-semibold mb-6 border ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold mb-5 border ${
                         theme === 'light'
-                          ? 'bg-sky-50 border-sky-300 text-sky-800'
-                          : 'bg-cyan-950/80 border-cyan-400/50 text-cyan-300'
+                          ? 'bg-amber-50 border-amber-300 text-amber-900'
+                          : 'bg-amber-950/40 border-amber-400/50 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
                       }`}
                     >
-                      {selectedItem.award || (lang === 'en' ? 'Participant / In Progress' : '대회 참가 / 진행')}
+                      <span>🏆 {selectedItem.award || (lang === 'en' ? 'Participant / In Progress' : '대회 참가 / 진행')}</span>
                     </div>
 
                     <p
@@ -245,17 +262,41 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       {selectedItem.summary || selectedItem.description || ''}
                     </p>
 
-                    {/* Team Info Pill */}
+                    {/* Team Info Box */}
                     <div
                       className={`flex items-center gap-3 p-3.5 rounded-xl border text-xs font-mono ${
                         theme === 'light'
                           ? 'bg-slate-50 border-slate-200 text-slate-700'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-300'
+                          : 'bg-slate-950/70 border-slate-800 text-slate-300'
                       }`}
                     >
                       <Users className={`w-4 h-4 shrink-0 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-400'}`} />
-                      <span>{selectedItem.teamName || selectedItem.team || 'Team K.F.C.Code Chaser'}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold">Team & Organization</span>
+                        <span className="font-bold">{selectedItem.teamName || selectedItem.team || 'Team K.F.C.Code Chaser'}</span>
+                      </div>
                     </div>
+
+                    {/* Performance Metrics Ticker if Available */}
+                    {selectedItem.metrics && selectedItem.metrics.length > 0 && (
+                      <div className="mt-5 pt-5 border-t border-dashed border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {selectedItem.metrics.map((metric, mIdx) => (
+                          <div
+                            key={mIdx}
+                            className={`p-2.5 rounded-xl border flex flex-col ${
+                              theme === 'light'
+                                ? 'bg-sky-50/50 border-sky-100 text-slate-800'
+                                : 'bg-[#060c18] border-cyan-500/20 text-slate-200'
+                            }`}
+                          >
+                            <span className="text-[10px] font-mono text-slate-400 truncate">{metric.label}</span>
+                            <span className={`text-xs sm:text-sm font-mono font-bold mt-0.5 ${theme === 'light' ? 'text-sky-700' : 'text-cyan-300'}`}>
+                              {metric.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Team Members List */}
@@ -267,12 +308,12 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           : 'bg-[#081224]/60 border-slate-800/80'
                       }`}
                     >
-                      <div className="text-xs font-mono text-slate-400 uppercase mb-3">Team Lineup:</div>
+                      <div className="text-xs font-mono text-slate-400 uppercase mb-3 font-semibold">Team Lineup:</div>
                       <div className="flex flex-wrap gap-2">
                         {selectedItem.members.map((member, idx) => (
                           <span
                             key={idx}
-                            className={`px-2.5 py-1 rounded border text-xs font-mono ${
+                            className={`px-3 py-1 rounded-lg border text-xs font-mono font-medium ${
                               theme === 'light'
                                 ? 'bg-slate-100 border-slate-200 text-slate-800'
                                 : 'bg-slate-900 border-slate-700 text-slate-300'
@@ -286,7 +327,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   )}
                 </div>
 
-                {/* Right Column: Detailed Card */}
+                {/* Right Column: Detailed 3-Pillar Breakdown */}
                 <div className="lg:col-span-7">
                   <div
                     className={`p-6 sm:p-8 rounded-2xl backdrop-blur-xl border relative overflow-hidden transition-all ${
@@ -358,7 +399,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         {selectedItem.roles?.map((role, idx) => (
                           <span
                             key={idx}
-                            className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                            className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold border ${
                               theme === 'light'
                                 ? 'bg-sky-50 border-sky-200 text-sky-800'
                                 : 'bg-cyan-950/70 border-cyan-500/40 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.15)]'
@@ -374,13 +415,13 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     <div
                       className={`mb-5 p-4 rounded-xl border ${
                         theme === 'light'
-                          ? 'bg-emerald-50/60 border-emerald-200'
+                          ? 'bg-emerald-50/70 border-emerald-200'
                           : 'bg-[#061022]/70 border-cyan-500/20'
                       }`}
                     >
                       <div
-                        className={`flex items-center gap-2 text-sm font-semibold mb-1.5 ${
-                          theme === 'light' ? 'text-emerald-800' : 'text-cyan-300'
+                        className={`flex items-center gap-2 text-sm font-bold mb-1.5 ${
+                          theme === 'light' ? 'text-emerald-900' : 'text-cyan-300'
                         }`}
                       >
                         <CheckCircle2
@@ -403,13 +444,13 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     <div
                       className={`mb-6 p-4 rounded-xl border ${
                         theme === 'light'
-                          ? 'bg-amber-50/60 border-amber-200'
+                          ? 'bg-amber-50/70 border-amber-200'
                           : 'bg-[#061022]/70 border-rose-500/20'
                       }`}
                     >
                       <div
-                        className={`flex items-center gap-2 text-sm font-semibold mb-1.5 ${
-                          theme === 'light' ? 'text-amber-800' : 'text-rose-400'
+                        className={`flex items-center gap-2 text-sm font-bold mb-1.5 ${
+                          theme === 'light' ? 'text-amber-900' : 'text-rose-400'
                         }`}
                       >
                         <AlertTriangle
@@ -448,18 +489,18 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           theme === 'light' ? 'border-slate-200' : 'border-cyan-500/20'
                         }`}
                       >
-                        <div className="text-xs font-mono text-slate-400 uppercase mb-2">
+                        <div className="text-xs font-mono text-slate-400 uppercase mb-2.5 font-bold">
                           {t('journey.keyPoints')}:
                         </div>
                         <ul
-                          className={`space-y-1.5 text-xs ${
-                            theme === 'light' ? 'text-slate-600' : 'text-slate-300'
+                          className={`space-y-2 text-xs sm:text-sm ${
+                            theme === 'light' ? 'text-slate-700' : 'text-slate-300'
                           }`}
                         >
                           {selectedItem.detailedPoints.map((pt, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className={theme === 'light' ? 'text-sky-600 mt-0.5' : 'text-cyan-400 mt-0.5'}>
-                                •
+                            <li key={idx} className="flex items-start gap-2.5">
+                              <span className={`font-mono font-bold mt-0.5 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-400'}`}>
+                                0{idx + 1}.
                               </span>
                               <span>{pt}</span>
                             </li>

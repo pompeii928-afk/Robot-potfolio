@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { CategoryNav } from './components/CategoryNav';
 import { HeroSection } from './components/HeroSection';
 import { JourneySection } from './components/JourneySection';
 import { AwardsSection } from './components/AwardsSection';
@@ -16,6 +17,7 @@ import { AdminLoginView } from './components/AdminLoginView';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
 import { ThemeProvider, LanguageProvider, useTheme, useLanguage } from './context/ThemeContext';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   subscribeAboutConfig,
   saveAboutConfig,
@@ -56,7 +58,7 @@ function PortfolioApp() {
   const { showToast } = useToast();
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
-  const [activeSection, setActiveSection] = useState<string>('about');
+  const [activeSection, setActiveSection] = useState<string>('all');
 
   // Helper to determine if current URL targets admin
   const checkIsAdminPath = () => {
@@ -180,40 +182,11 @@ function PortfolioApp() {
     };
   }, []);
 
-  // Scroll spy effect
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['about', 'journey', 'awards', 'skills', 'experience'];
-      const scrollPosition = window.scrollY + 200;
-
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(sectionId);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const handleNavigate = (sectionId: string) => {
     setActiveSection(sectionId);
-    const el = document.getElementById(sectionId);
-    if (el) {
-      const header = document.querySelector('header');
-      const headerHeight = header ? header.getBoundingClientRect().height : 70;
-      const elementTop = el.getBoundingClientRect().top + window.pageYOffset;
-      const targetY = Math.max(0, elementTop - headerHeight - 12);
-
+    if (typeof window !== 'undefined') {
       window.scrollTo({
-        top: targetY,
+        top: 0,
         behavior: 'smooth',
       });
     }
@@ -435,46 +408,80 @@ function PortfolioApp() {
         />
       </header>
 
-      {/* Main Content Sections */}
-      <main className="relative z-10">
-        <HeroSection
-          aboutData={aboutData}
-          isAdmin={isEditingEnabled}
-          onEditAbout={() => setIsEditAboutOpen(true)}
-          onExploreProjects={() => handleNavigate('experience')}
-        />
+      {/* Category Navigation Bar */}
+      <CategoryNav
+        activeCategory={activeSection}
+        onSelectCategory={handleNavigate}
+        counts={{
+          journeys: journeys.length,
+          awards: awards.length,
+          skills: skills.length,
+          projects: projects.length,
+        }}
+      />
 
-        <JourneySection
-          journeys={journeys}
-          isAdmin={isEditingEnabled}
-          onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
-          onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
-          onDeleteJourney={handleDeleteJourney}
-        />
+      {/* Main Content Sections with AnimatePresence */}
+      <main className="relative z-10 min-h-[60vh]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSection}
+            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -16, filter: 'blur(6px)' }}
+            transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full space-y-6"
+          >
+            {(activeSection === 'all' || activeSection === 'about') && (
+              <HeroSection
+                aboutData={aboutData}
+                isAdmin={isEditingEnabled}
+                onEditAbout={() => setIsEditAboutOpen(true)}
+                onExploreProjects={() => handleNavigate('experience')}
+                onNavigate={handleNavigate}
+              />
+            )}
 
-        <AwardsSection
-          awards={awards}
-          isAdmin={isEditingEnabled}
-          onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
-          onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
-          onDeleteAward={handleDeleteAward}
-        />
+            {(activeSection === 'all' || activeSection === 'journey') && (
+              <JourneySection
+                journeys={journeys}
+                isAdmin={isEditingEnabled}
+                onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
+                onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
+                onDeleteJourney={handleDeleteJourney}
+              />
+            )}
 
-        <SkillsSection
-          skills={skills}
-          isAdmin={isEditingEnabled}
-          onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
-          onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
-          onDeleteSkill={handleDeleteSkill}
-        />
+            {(activeSection === 'all' || activeSection === 'awards') && (
+              <AwardsSection
+                awards={awards}
+                isAdmin={isEditingEnabled}
+                onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
+                onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
+                onDeleteAward={handleDeleteAward}
+              />
+            )}
 
-        <ProjectsSection
-          projects={projects}
-          isAdmin={isEditingEnabled}
-          onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
-          onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
-          onDeleteProject={handleDeleteProject}
-        />
+            {(activeSection === 'all' || activeSection === 'skills') && (
+              <SkillsSection
+                skills={skills}
+                isAdmin={isEditingEnabled}
+                onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
+                onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
+                onDeleteSkill={handleDeleteSkill}
+              />
+            )}
+
+            {(activeSection === 'all' || activeSection === 'experience') && (
+              <ProjectsSection
+                projects={projects}
+                isAdmin={isEditingEnabled}
+                onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
+                onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
+                onDeleteProject={handleDeleteProject}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}

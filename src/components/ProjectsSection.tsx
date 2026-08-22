@@ -4,6 +4,7 @@ import { ProjectItem } from '../types';
 import { ProjectModal } from './ProjectModal';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { getLocalizedProject } from '../utils/translationHelper';
 
 interface ProjectsSectionProps {
   projects: ProjectItem[];
@@ -22,6 +23,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 }) => {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
+
+  const localizedProjects = projects.map((p) => getLocalizedProject(p, lang));
 
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<ProjectItem | null>(null);
@@ -87,7 +90,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
         {/* Projects 2-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {projects.map((project) => {
+          {localizedProjects.map((project, idx) => {
+            const rawProject = projects[idx] || project;
             if (project.status === 'AWAITING') {
               if (!isAdmin) return null;
               return (
@@ -162,7 +166,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onEditProject(project);
+                          onEditProject(rawProject);
                         }}
                         className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
                           theme === 'light'
@@ -178,7 +182,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setProjectToDelete(project);
+                          setProjectToDelete(rawProject);
                         }}
                         className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
                           theme === 'light'

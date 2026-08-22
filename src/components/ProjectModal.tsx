@@ -2,15 +2,18 @@ import React from 'react';
 import { X, CheckCircle2, Cpu, Wrench, Layers } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { getLocalizedProject } from '../utils/translationHelper';
 
 interface ProjectModalProps {
   project: ProjectItem | null;
   onClose: () => void;
 }
 
-export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
+export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject, onClose }) => {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
+
+  const project = rawProject ? getLocalizedProject(rawProject, lang) : null;
 
   if (!project || project.status === 'AWAITING') return null;
 

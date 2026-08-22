@@ -19,6 +19,7 @@ import {
 import { SkillItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { getLocalizedSkill } from '../utils/translationHelper';
 
 interface SkillsSectionProps {
   skills: SkillItem[];
@@ -37,6 +38,8 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
 }) => {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
+
+  const localizedSkills = skills.map((s) => getLocalizedSkill(s, lang));
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [skillToDelete, setSkillToDelete] = useState<SkillItem | null>(null);
@@ -71,12 +74,12 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
-  const categories = ['ALL', ...Array.from(new Set(skills.map((s) => s.category)))];
+  const categories = ['ALL', ...Array.from(new Set(localizedSkills.map((s) => s.category)))];
 
   const filteredSkills =
     selectedCategory === 'ALL'
-      ? skills
-      : skills.filter((s) => s.category === selectedCategory);
+      ? localizedSkills
+      : localizedSkills.filter((s) => s.category === selectedCategory);
 
   const handleConfirmDelete = async () => {
     if (!skillToDelete || !onDeleteSkill) return;
@@ -174,7 +177,9 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSkills.map((skill) => (
+            {filteredSkills.map((skill) => {
+              const rawSkill = skills.find((s) => s.id === skill.id) || skill;
+              return (
               <div
                 key={skill.id}
                 className={`relative p-5 rounded-2xl backdrop-blur-xl border transition-all flex flex-col justify-between group ${
@@ -192,7 +197,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                   <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
                     {onEditSkill && (
                       <button
-                        onClick={() => onEditSkill(skill)}
+                        onClick={() => onEditSkill(rawSkill)}
                         className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
                           theme === 'light'
                             ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
@@ -205,7 +210,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                     )}
                     {onDeleteSkill && (
                       <button
-                        onClick={() => setSkillToDelete(skill)}
+                        onClick={() => setSkillToDelete(rawSkill)}
                         className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
                           theme === 'light'
                             ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
@@ -303,7 +308,8 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

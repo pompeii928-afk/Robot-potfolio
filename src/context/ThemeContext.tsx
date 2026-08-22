@@ -28,7 +28,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode;
       if (saved === 'light' || saved === 'dark') return saved;
     }
-    return 'dark'; // Default: cyber dark
+    return 'light'; // Default: Clean Light Mode
   });
 
   useEffect(() => {
@@ -103,6 +103,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'awards.subtitle': '국내외 로봇 경진대회 및 자율주행 챌린지에서 달성한 수상 기록입니다.',
     'awards.addBtn': '+ 새 수상 내역 추가',
     'awards.filterAll': '전체 보기',
+    'awards.unlocked': '최고 성과 달성',
     'awards.category': '분야',
     'awards.score': '점수/기록',
     'awards.rank': '순위',
@@ -115,6 +116,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'skills.title': '핵심 엔지니어링 역량',
     'skills.subtitle': '하드웨어 설계 및 제작부터 펌웨어, 자율주행 알고리즘까지 보유한 기술 스택입니다.',
     'skills.addBtn': '+ 새 기술 추가',
+    'skills.all': '전체 기술',
     'skills.filterAll': '전체 기술',
     'skills.proficiency': '숙련도',
     'skills.edit': '수정',
@@ -127,6 +129,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'projects.subtitle': '직접 설계하고 제작하여 대회 및 필드 테스트에서 검증한 로봇 시스템입니다.',
     'projects.addBtn': '+ 새 프로젝트 추가',
     'projects.viewDetails': '자세히 보기',
+    'projects.details': '상세 분석 보기',
     'projects.addPlaceholder': '새 프로젝트 등록하기',
     'projects.awaitingSummary': '새로운 로봇 프로젝트를 구상하고 개발 중입니다.',
     'projects.statusCompleted': '완료',
@@ -139,6 +142,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Project Modal
     'modal.abstract': '시스템 개요 & 목적',
     'modal.highlights': '핵심 혁신점 & 기술적 성과',
+    'modal.breakthroughs': '핵심 혁신점 & 기술적 성과',
     'modal.specs': '하드웨어 & 상세 기술 사양',
     'modal.controller': '컨트롤러 / MCU',
     'modal.physical': '물리 규격',
@@ -206,6 +210,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'awards.subtitle': 'Track record of accomplishments in national and international robotics olympiads and autonomous challenges.',
     'awards.addBtn': '+ Add Award',
     'awards.filterAll': 'All Awards',
+    'awards.unlocked': 'TOP ACHIEVEMENT UNLOCKED',
     'awards.category': 'Category',
     'awards.score': 'Score / Record',
     'awards.rank': 'Standing',
@@ -218,6 +223,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'skills.title': 'Engineering Matrix',
     'skills.subtitle': 'Full-stack engineering skill set spanning CAD design, firmware, precision actuation, and autonomous navigation algorithms.',
     'skills.addBtn': '+ Add Skill',
+    'skills.all': 'All Skills',
     'skills.filterAll': 'All Skills',
     'skills.proficiency': 'Proficiency',
     'skills.edit': 'Edit',
@@ -230,6 +236,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'projects.subtitle': 'Custom-engineered autonomous robots and precision manipulator mechanisms field-tested in competition environments.',
     'projects.addBtn': '+ Add Project',
     'projects.viewDetails': 'View Details',
+    'projects.details': 'View Analysis',
     'projects.addPlaceholder': 'Register New Project',
     'projects.awaitingSummary': 'Currently architecting and prototyping next-generation robotics systems.',
     'projects.statusCompleted': 'COMPLETED',
@@ -242,6 +249,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Project Modal
     'modal.abstract': 'System Abstract & Objectives',
     'modal.highlights': 'Key Innovations & Technical Feats',
+    'modal.breakthroughs': 'Key Innovations & Technical Feats',
     'modal.specs': 'Hardware & Engineering Specs',
     'modal.controller': 'Microcontroller / Mainboard',
     'modal.physical': 'Physical Dimensions',

@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { AwardItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { getLocalizedAward } from '../utils/translationHelper';
 
 interface AwardsSectionProps {
   awards: AwardItem[];
@@ -25,12 +26,15 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
 
+  const localizedAwards = awards.map((a) => getLocalizedAward(a, lang));
+
   const [, setSelectedAward] = useState<AwardItem | null>(null);
   const [awardToDelete, setAwardToDelete] = useState<AwardItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const mainAward = awards.find((a) => a.highlight) || awards[0];
-  const otherAwards = awards.filter((a) => a.id !== mainAward?.id);
+  const rawMainAward = awards.find((a) => a.highlight) || awards[0];
+  const mainAward = localizedAwards.find((a) => a.highlight) || localizedAwards[0];
+  const otherAwards = localizedAwards.filter((a) => a.id !== mainAward?.id);
 
   const handleTriggerCelebration = (e: React.MouseEvent, award: AwardItem) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -126,47 +130,47 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
             {/* Central Achievement Showcase Card */}
             {mainAward && (
               <div className="max-w-2xl mx-auto relative group">
-                {/* Admin Quick Edit Bar for Main Award */}
-                {isAdmin && (
-                  <div
-                    className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 p-1 rounded-lg border ${
-                      theme === 'light'
-                        ? 'bg-white/90 border-slate-300 shadow-sm'
-                        : 'bg-[#060c18]/90 border-cyan-500/40'
-                    }`}
-                  >
-                    {onEditAward && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditAward(mainAward);
-                        }}
-                        className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
+                    {/* Admin Quick Edit Bar for Main Award */}
+                    {isAdmin && rawMainAward && (
+                      <div
+                        className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 p-1 rounded-lg border ${
                           theme === 'light'
-                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                            : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
+                            ? 'bg-white/90 border-slate-300 shadow-sm'
+                            : 'bg-[#060c18]/90 border-cyan-500/40'
                         }`}
                       >
-                        <Edit3 className="w-3 h-3" /> {t('journey.edit')}
-                      </button>
+                        {onEditAward && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditAward(rawMainAward);
+                            }}
+                            className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
+                              theme === 'light'
+                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
+                            }`}
+                          >
+                            <Edit3 className="w-3 h-3" /> {t('journey.edit')}
+                          </button>
+                        )}
+                        {onDeleteAward && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAwardToDelete(rawMainAward);
+                            }}
+                            className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
+                              theme === 'light'
+                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                                : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
+                            }`}
+                          >
+                            <Trash2 className="w-3 h-3" /> {t('journey.delete')}
+                          </button>
+                        )}
+                      </div>
                     )}
-                    {onDeleteAward && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAwardToDelete(mainAward);
-                        }}
-                        className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                          theme === 'light'
-                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-600'
-                            : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
-                        }`}
-                      >
-                        <Trash2 className="w-3 h-3" /> {t('journey.delete')}
-                      </button>
-                    )}
-                  </div>
-                )}
 
                 <div
                   onClick={(e) => handleTriggerCelebration(e, mainAward)}
@@ -279,7 +283,9 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
             {/* Other Awards Grid */}
             {otherAwards.length > 0 && (
               <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {otherAwards.map((award) => (
+                {otherAwards.map((award, idx) => {
+                  const rawAward = awards.filter((a) => a.id !== rawMainAward?.id)[idx] || award;
+                  return (
                   <div
                     key={award.id}
                     onClick={(e) => handleTriggerCelebration(e, award)}
@@ -296,7 +302,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              onEditAward(award);
+                              onEditAward(rawAward);
                             }}
                             className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
                               theme === 'light'
@@ -312,7 +318,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setAwardToDelete(award);
+                              setAwardToDelete(rawAward);
                             }}
                             className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
                               theme === 'light'
@@ -371,7 +377,8 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                       {award.description}
                     </p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

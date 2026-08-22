@@ -3,6 +3,7 @@ import { TrendingUp, Users, CheckCircle2, AlertTriangle, Plus, Edit3, Trash2 } f
 import { JourneyItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useTheme, useLanguage } from '../context/ThemeContext';
+import { getLocalizedJourney } from '../utils/translationHelper';
 
 interface JourneySectionProps {
   journeys: JourneyItem[];
@@ -22,6 +23,9 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
 
+  // Localized items list for rendering
+  const localizedJourneys = journeys.map((j) => getLocalizedJourney(j, lang));
+
   const [selectedJourneyId, setSelectedJourneyId] = useState<string>(
     journeys[0]?.id || ''
   );
@@ -40,8 +44,11 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
     }
   }, [journeys, selectedJourneyId]);
 
-  const selectedItem: JourneyItem | undefined =
+  const rawSelectedItem: JourneyItem | undefined =
     journeys.find((j) => j.id === selectedJourneyId) || journeys[0];
+
+  const selectedItem: JourneyItem | undefined =
+    localizedJourneys.find((j) => j.id === selectedJourneyId) || localizedJourneys[0];
 
   const handleConfirmDelete = async () => {
     if (!journeyToDelete || !onDeleteJourney) return;
@@ -122,7 +129,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             {/* Timeline Stepper Navigation */}
             <div className="mb-10 overflow-x-auto pb-4 scrollbar-thin">
               <div className="flex items-center gap-3 min-w-max">
-                {journeys.map((item, idx) => {
+                {localizedJourneys.map((item, idx) => {
+                  const rawItem = journeys[idx] || item;
                   const isSelected = selectedItem?.id === item.id;
                   const itemYear = item.year || item.season || '';
                   const itemTitle = item.competition || item.title || '';
@@ -175,7 +183,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setJourneyToDelete(item);
+                            setJourneyToDelete(rawItem);
                           }}
                           className={`ml-1 p-1 rounded-md transition-all cursor-pointer ${
                             theme === 'light'
@@ -309,9 +317,9 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           STEP {selectedItem.step || 1}
                         </span>
                         <div className="flex items-center gap-2">
-                          {onEditJourney && (
+                          {onEditJourney && rawSelectedItem && (
                             <button
-                              onClick={() => onEditJourney(selectedItem)}
+                              onClick={() => onEditJourney(rawSelectedItem)}
                               className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 transition-all cursor-pointer ${
                                 theme === 'light'
                                   ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
@@ -321,9 +329,9 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                               <Edit3 className="w-3.5 h-3.5" /> {t('journey.edit')}
                             </button>
                           )}
-                          {onDeleteJourney && (
+                          {onDeleteJourney && rawSelectedItem && (
                             <button
-                              onClick={() => setJourneyToDelete(selectedItem)}
+                              onClick={() => setJourneyToDelete(rawSelectedItem)}
                               className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 transition-all cursor-pointer ${
                                 theme === 'light'
                                   ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200'

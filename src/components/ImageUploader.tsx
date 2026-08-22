@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Link2, X, Check, AlertTriangle } from 'lucide-react';
+import { Upload, Link2, X, Check, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+import { optimizeImageFile, formatBytes } from '../utils/imageOptimizer';
 
 interface ImageUploaderProps {
   currentImage?: string;
@@ -25,7 +26,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [mode, setMode] = useState<'url' | 'upload'>('upload');
   const [urlInput, setUrlInput] = useState(effectiveImage);
   const [preview, setPreview] = useState(effectiveImage);
-  const [warning, setWarning] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -34,34 +37,44 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   }, [effectiveImage]);
 
   const handleUrlSubmit = () => {
-    setWarning(null);
+    setError(null);
+    setCompressionInfo(null);
     setPreview(urlInput);
     triggerChange(urlInput);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setWarning(null);
-    if (file.size > 2 * 1024 * 1024) {
-      setWarning('이미지 파일 크기가 2MB를 초과하여 로딩 속도가 느려질 수 있습니다.');
-    }
+    setError(null);
+    setCompressionInfo(null);
+    setIsProcessing(true);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      setPreview(dataUrl);
-      setUrlInput(dataUrl);
-      triggerChange(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Automatically optimize & compress to < 200KB for fast Firestore sync
+      const result = await optimizeImageFile(file, 1200, 1200, 0.8);
+
+      setPreview(result.dataUrl);
+      setUrlInput(result.dataUrl);
+      triggerChange(result.dataUrl);
+
+      setCompressionInfo(
+        `최적화 완료 (${formatBytes(result.originalSize)} → ${formatBytes(result.compressedSize)}, ${result.width}x${result.height}px)`
+      );
+    } catch (err: any) {
+      console.error('Image compression error:', err);
+      setError(err?.message || '이미지 압축 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleClear = () => {
     setPreview('');
     setUrlInput('');
-    setWarning(null);
+    setCompressionInfo(null);
+    setError(null);
     triggerChange('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -94,10 +107,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         </div>
       </div>
 
-      {warning && (
-        <div className="flex items-center gap-1.5 p-2 rounded-lg bg-amber-950/60 border border-amber-500/40 text-amber-300 text-[11px] font-mono">
+      {error && (
+        <div className="flex items-center gap-1.5 p-2 rounded-lg bg-rose-950/80 border border-rose-500/50 text-rose-300 text-[11px] font-mono">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>{warning}</span>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {compressionInfo && (
+        <div className="flex items-center gap-1.5 p-2 rounded-lg bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-[11px] font-mono">
+          <Sparkles className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+          <span>{compressionInfo}</span>
         </div>
       )}
 
@@ -110,13 +130,25 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             accept="image/*"
             className="hidden"
             id="image-file-input"
+            disabled={isProcessing}
           />
           <label
             htmlFor="image-file-input"
-            className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-cyan-500/30 bg-[#060e1f]/60 hover:bg-cyan-950/30 hover:border-cyan-400/60 cursor-pointer transition-all text-xs font-mono text-slate-300"
+            className={`flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-cyan-500/30 bg-[#060e1f]/60 hover:bg-cyan-950/30 hover:border-cyan-400/60 transition-all text-xs font-mono text-slate-300 ${
+              isProcessing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+            }`}
           >
-            <Upload className="w-4 h-4 text-cyan-400" />
-            <span>로컬 기기에서 로봇/대회 사진 업로드하기</span>
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+                <span>이미지 최적화 및 압축 중...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 text-cyan-400" />
+                <span>로컬 기기에서 로봇/대회 사진 업로드하기 (자동 최적화)</span>
+              </>
+            )}
           </label>
         </div>
       ) : (
@@ -143,7 +175,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
       {/* Preview Box */}
       {preview && (
-        <div className="relative mt-2 aspect-video max-h-40 rounded-xl overflow-hidden border border-cyan-500/30 bg-slate-950 flex items-center justify-center">
+        <div className="relative mt-2 aspect-video max-h-48 rounded-xl overflow-hidden border border-cyan-500/30 bg-slate-950 flex items-center justify-center group">
           <img
             src={preview}
             alt="Preview"
@@ -153,7 +185,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute top-2 right-2 p-1 rounded-full bg-black/70 text-rose-400 hover:text-rose-300 border border-rose-500/40 transition-all cursor-pointer"
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 text-rose-400 hover:text-rose-300 border border-rose-500/40 transition-all cursor-pointer shadow-lg"
             title="이미지 제거"
           >
             <X className="w-3.5 h-3.5" />

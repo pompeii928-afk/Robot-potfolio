@@ -36,9 +36,9 @@ export const EditAboutModal: React.FC<EditAboutModalProps> = ({
     try {
       await onSave(formData);
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setErrorMessage('저장 중 오류가 발생했습니다. 권한을 확인해주세요.');
+      setErrorMessage(err?.message || '저장 중 오류가 발생했습니다. 권한 및 파일 크기를 확인해주세요.');
     } finally {
       setIsSaving(false);
     }

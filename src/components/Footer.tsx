@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Check, Copy, ExternalLink } from 'lucide-react';
+import { Mail, Check, Copy } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
 
 export const Footer: React.FC = () => {
@@ -34,35 +34,6 @@ export const Footer: React.FC = () => {
 
           {/* Right Links & Email */}
           <div className="flex flex-col items-center md:items-end space-y-3">
-            <div className="flex items-center gap-5 text-xs font-mono">
-              <button
-                onClick={copyEmail}
-                className="hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <span>Contact</span>
-              </button>
-              <span className="text-slate-700">•</span>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cyan-300 transition-colors flex items-center gap-1"
-              >
-                <span>LinkedIn</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <span className="text-slate-700">•</span>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cyan-300 transition-colors flex items-center gap-1"
-              >
-                <span>GitHub</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-
             {/* Email pill */}
             <button
               onClick={copyEmail}

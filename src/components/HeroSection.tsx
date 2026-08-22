@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Flag, Terminal, Cpu, Sparkles, Activity, ShieldCheck, Zap, Edit3 } from 'lucide-react';
+import React from 'react';
+import { Flag, Edit3 } from 'lucide-react';
 import { AboutConfig } from '../types';
 
 interface HeroSectionProps {
@@ -15,17 +15,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onEditAbout,
   onExploreProjects,
 }) => {
-  const [activeTab, setActiveTab] = useState<'work' | 'about'>('work');
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [jointAngle, setJointAngle] = useState(42.5);
-
-  const toggleSimulation = () => {
-    setIsSimulating(!isSimulating);
-    if (!isSimulating) {
-      setJointAngle((prev) => (prev > 70 ? 25.0 : prev + 15.2));
-    }
-  };
-
   return (
     <section id="about" className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 overflow-hidden">
       {/* Background ambient lighting effects */}
@@ -36,24 +25,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           {/* Left Column: Bio & Intro */}
           <div className="lg:col-span-6 flex flex-col space-y-6">
-            {/* Top Toolbar with Admin Edit Button */}
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-950/60 border border-cyan-500/40 text-cyan-400 text-xs font-mono w-fit box-glow-cyan">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                <span className="font-semibold tracking-wider">v1.0.0_INITIALIZED</span>
-              </div>
-
-              {isAdmin && onEditAbout && (
+            {/* Top Admin Toolbar */}
+            {isAdmin && onEditAbout && (
+              <div className="flex items-center justify-end">
                 <button
                   onClick={onEditAbout}
                   id="edit-about-btn"
-                  className="px-3 py-1 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-300 text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all"
+                  className="px-3.5 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-300 text-xs font-mono flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>소개 & 이미지 수정</span>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Main Title */}
             <div>
@@ -115,40 +99,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Cybernetic Robot Arm Visual Frame */}
+          {/* Right Column: Robot System Image Frame */}
           <div className="lg:col-span-6">
             <div className="relative rounded-2xl bg-[#081022] border border-cyan-500/30 overflow-hidden shadow-[0_0_35px_rgba(6,182,212,0.25)] group">
               {/* Window Titlebar */}
               <div className="px-4 py-3 bg-[#060c1a] border-b border-cyan-500/20 flex items-center justify-between">
-                {/* Traffic dots */}
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8]" />
                   <span className="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc]" />
                   <span className="text-xs font-mono text-slate-400 ml-2">ROBOT_SYS_VIEWER</span>
                 </div>
-
-                {/* Tab buttons */}
-                <div className="flex items-center gap-1.5 text-xs font-medium">
-                  <button
-                    onClick={() => setActiveTab('work')}
-                    className={`px-3 py-1 rounded transition-all ${
-                      activeTab === 'work'
-                        ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 text-glow-cyan'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Work
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('about')}
-                    className={`px-3 py-1 rounded transition-all ${
-                      activeTab === 'about'
-                        ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 text-glow-cyan'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    About
-                  </button>
+                <div className="text-[11px] font-mono text-cyan-400/80 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <span>ONLINE</span>
                 </div>
               </div>
 
@@ -156,56 +119,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div className="relative aspect-square sm:aspect-[4/3] w-full overflow-hidden bg-slate-950">
                 <img
                   src={aboutData.heroImage || '/src/assets/images/hero_robot_arm_1786764552106.jpg'}
-                  alt="Robotic Manipulator Arm System"
+                  alt="Robotic System"
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
 
-                {/* Cyber HUD Grid & Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#060c1a] via-transparent to-transparent opacity-80" />
-                <div className="absolute inset-0 bg-blueprint-dense opacity-20 pointer-events-none" />
-
-                {/* Live Telemetry Box Top Right */}
-                <div className="absolute top-3 right-3 px-3 py-2 rounded-lg bg-[#060e1d]/85 backdrop-blur-md border border-cyan-500/30 font-mono text-[11px] space-y-1 text-slate-300">
-                  <div className="flex items-center justify-between gap-3 text-cyan-400">
-                    <span className="flex items-center gap-1">
-                      <Zap className="w-3 h-3 text-cyan-400 animate-pulse" />
-                      JOINT_J1
-                    </span>
-                    <span className="font-bold">{jointAngle.toFixed(1)}°</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 text-slate-400">
-                    <span>TORQUE</span>
-                    <span className="text-emerald-400">NORMAL</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 text-slate-400">
-                    <span>STATUS</span>
-                    <span className="text-cyan-300">ARMED</span>
-                  </div>
-                </div>
-
-                {/* Bottom Left Tag */}
-                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 font-mono text-[11px] sm:text-xs text-slate-400 bg-[#060c1a]/80 px-2.5 py-1 rounded border border-slate-800">
-                  PROJECT: SENTINEL // CIRCUIT FABRICATION
-                </div>
-
-                {/* Bottom Right System Status */}
-                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex items-center gap-2 font-mono text-xs sm:text-sm font-semibold text-cyan-400 bg-[#060c1a]/90 px-3 py-1.5 rounded-lg border border-cyan-500/40 box-glow-cyan">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                  <span className="tracking-wider">SYS.RENDER_ACTIVE //</span>
-                </div>
-              </div>
-
-              {/* Interactive Telemetry Trigger Footer */}
-              <div className="px-4 py-2.5 bg-[#060c1a] border-t border-cyan-500/20 flex items-center justify-between text-xs font-mono text-slate-400">
-                <button
-                  onClick={toggleSimulation}
-                  className="hover:text-cyan-300 flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>[CLICK TO TEST SERVO ANGLE]</span>
-                </button>
-                <span className="text-[11px] text-slate-500">AUTONOMOUS FEED v2.4</span>
+                {/* Subtle bottom gradient to blend frame */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#060c1a]/60 via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
           </div>

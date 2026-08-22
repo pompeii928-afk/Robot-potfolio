@@ -97,6 +97,28 @@
         "updatedAt": { "type": "string" }
       },
       "required": ["projectId", "title", "summary", "status"]
+    },
+    "YouTubeVideo": {
+      "title": "YouTubeVideo",
+      "description": "Official YouTube channel media, competition match runs, and robotics logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "titleKo": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "youtubeUrl": { "type": "string", "maxLength": 500 },
+        "videoId": { "type": "string", "maxLength": 100 },
+        "thumbnail": { "type": "string", "maxLength": 2000000 },
+        "duration": { "type": "string", "maxLength": 50 },
+        "tags": { "type": "array" },
+        "category": { "type": "string", "maxLength": 100 },
+        "views": { "type": "string", "maxLength": 50 },
+        "isFeatured": { "type": "boolean" },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "youtubeUrl"]
     }
   },
   "firestore": {
@@ -119,6 +141,10 @@
     "/projects/{projectId}": {
       "schema": "Project",
       "description": "Robotics projects, specifications, and CAD blueprints"
+    },
+    "/youtube_videos/{videoId}": {
+      "schema": "YouTubeVideo",
+      "description": "YouTube showcase videos and field test recordings"
     }
   }
 }

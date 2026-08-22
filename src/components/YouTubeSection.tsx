@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   Share2,
   Video,
+  X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { YouTubeVideoItem } from '../types';
@@ -29,6 +30,26 @@ interface YouTubeSectionProps {
   onDeleteVideo?: (id: string) => Promise<void>;
 }
 
+// Helper to extract YouTube video ID from various YouTube URL formats
+const extractVideoId = (url: string): string | null => {
+  if (!url) return null;
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+};
+
+// Helper to get reliable YouTube thumbnail
+const getYouTubeThumbnail = (video: YouTubeVideoItem): string => {
+  if (video.thumbnail && !video.thumbnail.includes('unsplash.com')) {
+    return video.thumbnail;
+  }
+  const videoId = video.videoId || extractVideoId(video.youtubeUrl);
+  if (videoId) {
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  }
+  return 'https://img.youtube.com/vi/y4K_5A4wNrw/hqdefault.jpg';
+};
+
 export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
   videos,
   isAdmin = false,
@@ -39,7 +60,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
 
-  const [selectedVideo, setSelectedVideo] = useState<YouTubeVideoItem | null>(null);
+  const [activePlayingVideo, setActivePlayingVideo] = useState<YouTubeVideoItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
   const [deleteTarget, setDeleteTarget] = useState<YouTubeVideoItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -249,137 +270,236 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
 
       {/* Videos Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-        {filteredVideos.map((video) => (
-          <div
-            key={video.id}
-            className={`group rounded-2xl border transition-all duration-300 flex flex-col overflow-hidden ${
-              theme === 'light'
-                ? 'bg-white border-slate-200/90 hover:border-red-300 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.1)]'
-                : 'bg-[#070e1c] border-cyan-500/20 hover:border-red-500/50 shadow-[0_4px_25px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]'
-            }`}
-          >
-            {/* Thumbnail Box */}
-            <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-              <img
-                src={video.thumbnail || 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80'}
-                alt={video.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+        {filteredVideos.map((video) => {
+          const thumbUrl = getYouTubeThumbnail(video);
+          const videoId = video.videoId || extractVideoId(video.youtubeUrl);
 
-              {/* Gradient Scrim */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          return (
+            <div
+              key={video.id}
+              className={`group rounded-2xl border transition-all duration-300 flex flex-col overflow-hidden ${
+                theme === 'light'
+                  ? 'bg-white border-slate-200/90 hover:border-red-300 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.1)]'
+                  : 'bg-[#070e1c] border-cyan-500/20 hover:border-red-500/50 shadow-[0_4px_25px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]'
+              }`}
+            >
+              {/* Thumbnail Box */}
+              <div className="relative aspect-video w-full overflow-hidden bg-black">
+                <img
+                  src={thumbUrl}
+                  alt={video.title}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    // Fallback to standard YouTube thumbnail if high-res failed
+                    const target = e.currentTarget;
+                    if (videoId && !target.src.includes('hqdefault')) {
+                      target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                    }
+                  }}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
 
-              {/* Play Overlay Button */}
-              <a
-                href={video.youtubeUrl || channelInfo.channelUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 flex items-center justify-center group/play cursor-pointer"
-              >
-                <div className="w-13 h-13 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.8)] border border-red-400/60 transform transition-transform duration-300 group-hover/play:scale-115">
-                  <Play className="w-6 h-6 ml-0.5 fill-current" />
-                </div>
-              </a>
+                {/* Gradient Scrim */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-              {/* Duration Badge */}
-              {video.duration && (
-                <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/85 text-[11px] font-mono text-white flex items-center gap-1 border border-white/10">
-                  <Clock className="w-3 h-3 text-red-400" />
-                  <span>{video.duration}</span>
-                </div>
-              )}
-
-              {/* Category Badge */}
-              {video.category && (
-                <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-red-600/90 text-[10px] font-mono font-bold text-white uppercase tracking-wider shadow-sm">
-                  {video.category}
-                </div>
-              )}
-
-              {/* Views Badge */}
-              {video.views && (
-                <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/70 text-[10px] font-mono text-slate-300 flex items-center gap-1">
-                  <Eye className="w-3 h-3 text-cyan-400" />
-                  <span>{video.views}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Video Content */}
-            <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <h4
-                  className={`font-tech font-bold text-base sm:text-lg line-clamp-2 leading-snug ${
-                    theme === 'light' ? 'text-slate-900 group-hover:text-red-600' : 'text-white group-hover:text-red-400'
-                  }`}
+                {/* Play Trigger Button */}
+                <button
+                  type="button"
+                  onClick={() => setActivePlayingVideo(video)}
+                  className="absolute inset-0 flex items-center justify-center group/play cursor-pointer"
+                  title="영상 재생하기"
                 >
-                  {lang === 'ko' && video.titleKo ? video.titleKo : video.title}
-                </h4>
-                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {video.description}
-                </p>
-              </div>
+                  <div className="w-13 h-13 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.8)] border border-red-400/60 transform transition-transform duration-300 group-hover/play:scale-115">
+                    <Play className="w-6 h-6 ml-0.5 fill-current" />
+                  </div>
+                </button>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1">
-                {(video.tags || []).map((t, idx) => (
-                  <span
-                    key={idx}
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono ${
-                      theme === 'light'
-                        ? 'bg-slate-100 text-slate-600 border border-slate-200'
-                        : 'bg-cyan-950/40 text-cyan-300 border border-cyan-500/20'
-                    }`}
-                  >
-                    #{t}
-                  </span>
-                ))}
-              </div>
+                {/* Duration Badge */}
+                {video.duration && (
+                  <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/85 text-[11px] font-mono text-white flex items-center gap-1 border border-white/10">
+                    <Clock className="w-3 h-3 text-red-400" />
+                    <span>{video.duration}</span>
+                  </div>
+                )}
 
-              {/* Card Footer Actions */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-                <a
-                  href={video.youtubeUrl || channelInfo.channelUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono font-bold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <Youtube className="w-3.5 h-3.5" />
-                  <span>YouTube에서 시청</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                {/* Category Badge */}
+                {video.category && (
+                  <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-red-600/90 text-[10px] font-mono font-bold text-white uppercase tracking-wider shadow-sm">
+                    {video.category}
+                  </div>
+                )}
 
-                {/* Admin controls */}
-                {isAdmin && (
-                  <div className="flex items-center gap-1.5">
-                    {onEditVideo && (
-                      <button
-                        type="button"
-                        onClick={() => onEditVideo(video)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-cyan-950/50 cursor-pointer"
-                        title="수정"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    {onDeleteVideo && (
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(video)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 cursor-pointer"
-                        title="삭제"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                {/* Views Badge */}
+                {video.views && (
+                  <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/70 text-[10px] font-mono text-slate-300 flex items-center gap-1">
+                    <Eye className="w-3 h-3 text-cyan-400" />
+                    <span>{video.views}</span>
                   </div>
                 )}
               </div>
+
+              {/* Video Content */}
+              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                  <h4
+                    className={`font-tech font-bold text-base sm:text-lg line-clamp-2 leading-snug cursor-pointer ${
+                      theme === 'light' ? 'text-slate-900 group-hover:text-red-600' : 'text-white group-hover:text-red-400'
+                    }`}
+                    onClick={() => setActivePlayingVideo(video)}
+                  >
+                    {lang === 'ko' && video.titleKo ? video.titleKo : video.title}
+                  </h4>
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                    {video.description}
+                  </p>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1">
+                  {(video.tags || []).map((t, idx) => (
+                    <span
+                      key={idx}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono ${
+                        theme === 'light'
+                          ? 'bg-slate-100 text-slate-600 border border-slate-200'
+                          : 'bg-cyan-950/40 text-cyan-300 border border-cyan-500/20'
+                      }`}
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Card Footer Actions */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setActivePlayingVideo(video)}
+                      className="text-xs font-mono font-bold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>영상 재생</span>
+                    </button>
+
+                    <a
+                      href={video.youtubeUrl || channelInfo.channelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono text-slate-400 hover:text-slate-200 flex items-center gap-1 cursor-pointer"
+                      title="유튜브 새창에서 열기"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+
+                  {/* Admin controls */}
+                  {isAdmin && (
+                    <div className="flex items-center gap-1.5">
+                      {onEditVideo && (
+                        <button
+                          type="button"
+                          onClick={() => onEditVideo(video)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-cyan-950/50 cursor-pointer"
+                          title="수정"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onDeleteVideo && (
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(video)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 cursor-pointer"
+                          title="삭제"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* In-App YouTube Video Player Modal */}
+      <AnimatePresence>
+        {activePlayingVideo && (
+          <div
+            onClick={() => setActivePlayingVideo(null)}
+            className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-4xl rounded-2xl bg-[#081224] border border-red-500/40 shadow-[0_0_60px_rgba(220,38,38,0.4)] overflow-hidden text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-5 py-3.5 bg-[#050c1a] border-b border-red-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                  <h3 className="font-tech font-bold text-sm sm:text-base line-clamp-1">
+                    {lang === 'ko' && activePlayingVideo.titleKo ? activePlayingVideo.titleKo : activePlayingVideo.title}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activePlayingVideo.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded-lg text-xs font-mono bg-red-600 hover:bg-red-700 text-white flex items-center gap-1 transition-all"
+                  >
+                    <span>YouTube에서 보기</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                  <button
+                    onClick={() => setActivePlayingVideo(null)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* YouTube Iframe Player */}
+              <div className="relative aspect-video w-full bg-black">
+                {(() => {
+                  const vId = activePlayingVideo.videoId || extractVideoId(activePlayingVideo.youtubeUrl) || 'y4K_5A4wNrw';
+                  return (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${vId}?autoplay=1&rel=0&modestbranding=1`}
+                      title={activePlayingVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="w-full h-full border-0"
+                    />
+                  );
+                })()}
+              </div>
+
+              {/* Modal Footer Description */}
+              <div className="p-4 bg-[#050c1a] border-t border-slate-800">
+                <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                  {activePlayingVideo.description}
+                </p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {(activePlayingVideo.tags || []).map((t, idx) => (
+                    <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/30 text-red-300">
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Trash2, Youtube, Plus, Video, Image, Tag, Sparkles } from 'lucide-react';
+import { X, Save, Trash2, Youtube, Plus, Video, Image, Tag, Sparkles, RefreshCw, CheckCircle2, Play } from 'lucide-react';
 import { YouTubeVideoItem } from '../../types';
 import { ConfirmModal } from './ConfirmModal';
 
@@ -16,13 +16,13 @@ const getDefaultVideo = (): YouTubeVideoItem => ({
   title: '',
   titleKo: '',
   description: '',
-  youtubeUrl: 'http://www.youtube.com/@Wrocospace',
-  videoId: '',
-  thumbnail: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
-  duration: '02:30',
+  youtubeUrl: 'https://www.youtube.com/watch?v=y4K_5A4wNrw',
+  videoId: 'y4K_5A4wNrw',
+  thumbnail: 'https://img.youtube.com/vi/y4K_5A4wNrw/maxresdefault.jpg',
+  duration: '02:09',
   tags: ['WRO 2026', '자율주행'],
   category: 'Competition',
-  views: '1.0K',
+  views: '1.2K',
   isFeatured: false,
 });
 
@@ -38,16 +38,112 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
   const [formData, setFormData] = useState<YouTubeVideoItem>(initialData || getDefaultVideo());
   const [tagInput, setTagInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isFetchingInfo, setIsFetchingInfo] = useState(false);
+  const [fetchSuccess, setFetchSuccess] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Helper to extract YouTube video ID from various YouTube URL formats
+  const extractVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+  };
+
+  // Fetch real YouTube metadata (Title, High-Res Thumbnail, Author) via oEmbed
+  const fetchYouTubeMetadata = async (url: string) => {
+    if (!url) return;
+    const videoId = extractVideoId(url);
+    setIsFetchingInfo(true);
+    setFetchSuccess(false);
+
+    try {
+      // 1. If we have videoId, we can set direct high-res YouTube thumbnails instantly
+      let bestThumb = '';
+      if (videoId) {
+        bestThumb = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      }
+
+      // 2. Fetch title and official metadata via oEmbed
+      const oembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(url)}`;
+      const res = await fetch(oembedUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && !data.error) {
+          const autoTitle = data.title || '';
+          setFormData((prev) => ({
+            ...prev,
+            title: prev.title || autoTitle,
+            titleKo: prev.titleKo || autoTitle,
+            thumbnail: bestThumb || data.thumbnail_url || prev.thumbnail,
+            videoId: videoId || prev.videoId,
+            youtubeUrl: url,
+          }));
+          setFetchSuccess(true);
+          setTimeout(() => setFetchSuccess(false), 2500);
+          return;
+        }
+      }
+
+      // Fallback if oembed response didn't return title
+      if (videoId) {
+        setFormData((prev) => ({
+          ...prev,
+          thumbnail: bestThumb || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+          videoId,
+          youtubeUrl: url,
+        }));
+        setFetchSuccess(true);
+        setTimeout(() => setFetchSuccess(false), 2000);
+      }
+    } catch (e) {
+      console.warn('Could not auto-fetch oEmbed metadata:', e);
+      if (videoId) {
+        setFormData((prev) => ({
+          ...prev,
+          thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+          videoId,
+          youtubeUrl: url,
+        }));
+      }
+    } finally {
+      setIsFetchingInfo(false);
+    }
+  };
+
+  const handleUrlChange = (url: string) => {
+    const videoId = extractVideoId(url);
+    const updated: Partial<YouTubeVideoItem> = { youtubeUrl: url };
+    if (videoId) {
+      updated.videoId = videoId;
+      // Auto-set high resolution thumbnail
+      updated.thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    setFormData({ ...formData, ...updated });
+  };
+
   useEffect(() => {
     if (isOpen) {
-      setFormData(initialData || getDefaultVideo());
+      const initial = initialData || getDefaultVideo();
+      setFormData(initial);
       setTagInput('');
       setErrorMessage(null);
       setShowConfirmDelete(false);
+      setFetchSuccess(false);
+
+      // Auto-extract thumbnail if it was a generic placeholder
+      if (initial.youtubeUrl) {
+        const vId = extractVideoId(initial.youtubeUrl);
+        if (vId && (!initial.thumbnail || initial.thumbnail.includes('unsplash.com'))) {
+          setFormData((prev) => ({
+            ...prev,
+            videoId: vId,
+            thumbnail: `https://img.youtube.com/vi/${vId}/maxresdefault.jpg`,
+          }));
+        }
+      }
     }
   }, [isOpen, initialData]);
 
@@ -73,15 +169,24 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
     e.preventDefault();
     setIsSaving(true);
     setErrorMessage(null);
+
+    const videoId = extractVideoId(formData.youtubeUrl || '');
+    let finalThumbnail = formData.thumbnail;
+    if (videoId && (!finalThumbnail || finalThumbnail.includes('unsplash.com'))) {
+      finalThumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+
     try {
       await onSave({
         ...formData,
-        youtubeUrl: formData.youtubeUrl || 'http://www.youtube.com/@Wrocospace',
+        videoId: videoId || formData.videoId,
+        thumbnail: finalThumbnail,
+        youtubeUrl: formData.youtubeUrl || 'https://www.youtube.com/watch?v=y4K_5A4wNrw',
       });
       onClose();
     } catch (err) {
       console.error(err);
-      setErrorMessage('저장 중 오류가 발생했습니다. 네트워크 또는 권한을 확인해주세요.');
+      setErrorMessage('저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSaving(false);
     }
@@ -123,7 +228,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
                   {isEditing ? '유튜브 영상 항목 수정' : '새 유튜브 영상 등록'}
                 </h3>
                 <p className="text-[11px] font-mono text-red-400/80">
-                  @Wrocospace 공식 채널 영상 및 주행 영상 링크 관리
+                  @Wrocospace 공식 유튜브 영상 링크 및 썸네일 자동 연동
                 </p>
               </div>
             </div>
@@ -144,6 +249,86 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 max-h-[calc(90vh-140px)]">
+            {/* YouTube URL input & Sync Button */}
+            <div className="p-3.5 rounded-xl bg-[#040813] border border-red-500/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-red-400 flex items-center gap-1.5">
+                  <Youtube className="w-4 h-4 text-red-500" /> 유튜브 영상 URL (주소) *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => fetchYouTubeMetadata(formData.youtubeUrl)}
+                  disabled={isFetchingInfo || !formData.youtubeUrl}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1 bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/40 transition-all cursor-pointer disabled:opacity-40"
+                  title="유튜브에서 제목과 원본 썸네일을 자동으로 가져옵니다"
+                >
+                  {isFetchingInfo ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin text-red-400" />
+                      <span>불러오는 중...</span>
+                    </>
+                  ) : fetchSuccess ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      <span className="text-emerald-300">연동 완료!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span>유튜브 정보 & 썸네일 자동 연동</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <input
+                type="text"
+                required
+                value={formData.youtubeUrl || ''}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=y4K_5A4wNrw 또는 https://youtu.be/..."
+                className="w-full px-3.5 py-2 rounded-xl bg-[#081224] border border-red-500/40 text-white text-xs sm:text-sm font-mono focus:outline-none focus:border-red-400"
+              />
+              <p className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                <span>💡 유튜브 링크만 입력하면 유튜브에 올라간 실제 썸네일과 영상 ID가 자동으로 완벽히 동일하게 세팅됩니다.</span>
+              </p>
+            </div>
+
+            {/* Thumbnail Live Preview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-3 rounded-xl bg-[#050c1a] border border-slate-800">
+              <div className="sm:col-span-1 aspect-video w-full rounded-lg overflow-hidden relative bg-black border border-slate-700">
+                <img
+                  src={formData.thumbnail || 'https://img.youtube.com/vi/y4K_5A4wNrw/hqdefault.jpg'}
+                  alt="Thumbnail Preview"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    // Fallback to standard quality if maxres isn't available
+                    const target = e.currentTarget;
+                    const vId = extractVideoId(formData.youtubeUrl);
+                    if (vId && !target.src.includes('hqdefault')) {
+                      target.src = `https://img.youtube.com/vi/${vId}/hqdefault.jpg`;
+                    }
+                  }}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                  <Play className="w-6 h-6 text-white/80 fill-white/80" />
+                </div>
+              </div>
+              <div className="sm:col-span-2 space-y-1">
+                <span className="text-[11px] font-mono text-cyan-400 block font-bold">
+                  유튜브 썸네일 미리보기 (Live Preview)
+                </span>
+                <input
+                  type="text"
+                  value={formData.thumbnail || ''}
+                  onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                  placeholder="썸네일 주소 (자동 생성됨)"
+                  className="w-full px-3 py-1.5 rounded-lg bg-[#081224] border border-slate-700 text-slate-300 text-xs font-mono focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+            </div>
+
             {/* Title (Korean / English) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -155,7 +340,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
                   required
                   value={formData.titleKo || ''}
                   onChange={(e) => setFormData({ ...formData, titleKo: e.target.value })}
-                  placeholder="예: WRO 로보미션 고속 주행 테스트"
+                  placeholder="예: WRO 로봇 자율주행 실전 경기 주행 및 미션 결과 분석"
                   className="w-full px-3.5 py-2 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400"
                 />
               </div>
@@ -169,39 +354,10 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
                   required
                   value={formData.title || ''}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="예: WRO Autonomous Mission Run"
+                  placeholder="예: WRO Robot Autonomous Match Run & Mission Results"
                   className="w-full px-3.5 py-2 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400"
                 />
               </div>
-            </div>
-
-            {/* YouTube URL / Channel link */}
-            <div>
-              <label className="block text-xs font-mono text-red-400 mb-1">
-                유튜브 영상 링크 또는 채널 URL (YouTube URL) *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.youtubeUrl || ''}
-                onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-                placeholder="http://www.youtube.com/@Wrocospace 또는 https://www.youtube.com/watch?v=..."
-                className="w-full px-3.5 py-2 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs font-mono focus:outline-none focus:border-red-400"
-              />
-            </div>
-
-            {/* Thumbnail URL */}
-            <div>
-              <label className="block text-xs font-mono text-red-400 mb-1 flex items-center gap-1">
-                <Image className="w-3.5 h-3.5" /> 썸네일 이미지 URL (Thumbnail Image)
-              </label>
-              <input
-                type="text"
-                value={formData.thumbnail || ''}
-                onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-                placeholder="https://images.unsplash.com/... 또는 직접 입력"
-                className="w-full px-3.5 py-2 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs font-mono focus:outline-none focus:border-red-400"
-              />
             </div>
 
             {/* Category & Duration & Views */}
@@ -230,7 +386,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
                   type="text"
                   value={formData.duration || ''}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  placeholder="예: 02:45"
+                  placeholder="예: 02:09"
                   className="w-full px-3 py-2 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs font-mono focus:outline-none focus:border-red-400"
                 />
               </div>
@@ -258,7 +414,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
                 rows={3}
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="영상의 주요 내용, 기술적 포인트, 사용된 센서 및 알고리즘을 간략히 설명하세요."
+                placeholder="대회 때 로봇이 어떻게 움직였고 어떤 결과를 냈는지에 대한 설명"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400 resize-none"
               />
             </div>

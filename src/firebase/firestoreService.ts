@@ -627,6 +627,14 @@ export async function deleteProject(id: string): Promise<void> {
 // YOUTUBE VIDEOS CRUD
 // ========================
 
+// Helper to extract YouTube video ID
+const getExtractVideoId = (url?: string): string | null => {
+  if (!url) return null;
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+};
+
 export function subscribeYouTubeVideos(callback: (videos: YouTubeVideoItem[]) => void): () => void {
   const colRef = collection(db, YOUTUBE_COLLECTION);
 
@@ -656,14 +664,25 @@ export function subscribeYouTubeVideos(callback: (videos: YouTubeVideoItem[]) =>
             console.warn('[Firestore] YouTube seed error:', initErr);
           }
         }
-        callback([]);
-        setCachedData('cached_youtube_videos', []);
+        callback(DEFAULT_YOUTUBE_VIDEOS);
+        setCachedData('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS);
         return;
       }
 
       const items: YouTubeVideoItem[] = [];
       snapshot.forEach((docSnap) => {
-        items.push({ id: docSnap.id, ...docSnap.data() } as YouTubeVideoItem);
+        const data = docSnap.data() as YouTubeVideoItem;
+        const vId = data.videoId || getExtractVideoId(data.youtubeUrl);
+        let thumb = data.thumbnail;
+        if ((!thumb || thumb.includes('unsplash.com')) && vId) {
+          thumb = `https://img.youtube.com/vi/${vId}/hqdefault.jpg`;
+        }
+        items.push({
+          id: docSnap.id,
+          ...data,
+          videoId: vId || data.videoId,
+          thumbnail: thumb || data.thumbnail,
+        });
       });
 
       items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
@@ -682,12 +701,20 @@ export function subscribeYouTubeVideos(callback: (videos: YouTubeVideoItem[]) =>
 
 export async function saveYouTubeVideo(video: YouTubeVideoItem): Promise<void> {
   const path = `${YOUTUBE_COLLECTION}/${video.id}`;
+  const vId = video.videoId || getExtractVideoId(video.youtubeUrl);
+  let thumb = video.thumbnail;
+  if (vId && (!thumb || thumb.includes('unsplash.com'))) {
+    thumb = `https://img.youtube.com/vi/${vId}/maxresdefault.jpg`;
+  }
+
   try {
     const docRef = doc(db, YOUTUBE_COLLECTION, video.id);
     await setDoc(
       docRef,
       {
         ...video,
+        videoId: vId || video.videoId,
+        thumbnail: thumb || video.thumbnail,
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -756,8 +783,15 @@ export async function seedAllPortfolioData(): Promise<void> {
     });
     setCachedData(CACHE_KEYS.PROJECTS, PROJECTS_DATA);
 
+    // YouTube Videos
+    DEFAULT_YOUTUBE_VIDEOS.forEach((v, index) => {
+      const ref = doc(db, YOUTUBE_COLLECTION, v.id);
+      batch.set(ref, { ...v, order: index, updatedAt: new Date().toISOString() });
+    });
+    setCachedData('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS);
+
     // Initialize all markers
-    const markers = [JOURNEYS_COLLECTION, AWARDS_COLLECTION, SKILLS_COLLECTION, PROJECTS_COLLECTION, 'about'];
+    const markers = [JOURNEYS_COLLECTION, AWARDS_COLLECTION, SKILLS_COLLECTION, PROJECTS_COLLECTION, YOUTUBE_COLLECTION, 'about'];
     markers.forEach((name) => {
       const markerRef = doc(db, SYSTEM_COLLECTION, `${name}_init`);
       batch.set(markerRef, { initialized: true, updatedAt: new Date().toISOString() });

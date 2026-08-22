@@ -41,6 +41,11 @@ service cloud.firestore {
       allow write: if isValidId(projectId);
     }
 
+    match /youtube_videos/{videoId} {
+      allow read: if true;
+      allow write: if isValidId(videoId);
+    }
+
     match /system/{docId} {
       allow read: if true;
       allow write: if isValidId(docId);

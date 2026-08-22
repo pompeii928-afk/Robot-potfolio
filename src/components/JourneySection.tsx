@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, CheckCircle2, AlertTriangle, Plus, Edit3, Trash2 } from 'lucide-react';
+import { TrendingUp, Users, CheckCircle2, AlertTriangle, Plus, Edit3, Trash2, Gauge, Activity } from 'lucide-react';
 import { JourneyItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useTheme, useLanguage } from '../context/ThemeContext';
@@ -277,26 +277,71 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       </div>
                     </div>
 
-                    {/* Performance Metrics Ticker if Available */}
-                    {selectedItem.metrics && selectedItem.metrics.length > 0 && (
-                      <div className="mt-5 pt-5 border-t border-dashed border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {selectedItem.metrics.map((metric, mIdx) => (
-                          <div
-                            key={mIdx}
-                            className={`p-2.5 rounded-xl border flex flex-col ${
-                              theme === 'light'
-                                ? 'bg-sky-50/50 border-sky-100 text-slate-800'
-                                : 'bg-[#060c18] border-cyan-500/20 text-slate-200'
-                            }`}
+                    {/* Performance Metrics Ticker / Telemetry */}
+                    <div className="mt-5 pt-5 border-t border-dashed border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-500 dark:text-cyan-400 uppercase tracking-wider">
+                          <Gauge className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
+                          <span>{lang === 'en' ? 'Telemetry & Metrics' : '성능 지표 및 텔레메트리'}</span>
+                        </div>
+                        {isAdmin && onEditJourney && rawSelectedItem && (
+                          <button
+                            type="button"
+                            onClick={() => onEditJourney(rawSelectedItem)}
+                            className="text-[11px] font-mono text-sky-600 dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
                           >
-                            <span className="text-[10px] font-mono text-slate-400 truncate">{metric.label}</span>
-                            <span className={`text-xs sm:text-sm font-mono font-bold mt-0.5 ${theme === 'light' ? 'text-sky-700' : 'text-cyan-300'}`}>
-                              {metric.value}
-                            </span>
-                          </div>
-                        ))}
+                            <Edit3 className="w-3 h-3" />
+                            <span>{lang === 'en' ? 'Edit Metrics' : '지표 수정'}</span>
+                          </button>
+                        )}
                       </div>
-                    )}
+
+                      {selectedItem.metrics && selectedItem.metrics.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {selectedItem.metrics.map((metric, mIdx) => (
+                            <div
+                              key={mIdx}
+                              className={`p-2.5 rounded-xl border flex flex-col transition-all hover:scale-[1.02] ${
+                                theme === 'light'
+                                  ? 'bg-sky-50/70 border-sky-200/80 text-slate-800 shadow-xs'
+                                  : 'bg-[#060c18] border-cyan-500/30 text-slate-200 shadow-[0_0_10px_rgba(6,182,212,0.15)]'
+                              }`}
+                            >
+                              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">
+                                {metric.label}
+                              </span>
+                              <span
+                                className={`text-xs sm:text-sm font-mono font-extrabold mt-0.5 tracking-tight ${
+                                  theme === 'light' ? 'text-sky-700' : 'text-cyan-300'
+                                }`}
+                              >
+                                {metric.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          className={`p-3 rounded-xl border border-dashed text-center text-xs font-mono ${
+                            theme === 'light'
+                              ? 'bg-slate-50 border-slate-200 text-slate-500'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                          }`}
+                        >
+                          {isAdmin ? (
+                            <button
+                              type="button"
+                              onClick={() => onEditJourney && rawSelectedItem && onEditJourney(rawSelectedItem)}
+                              className="text-sky-600 dark:text-cyan-400 hover:underline cursor-pointer font-bold"
+                            >
+                              + 센서 반응 속도 / 미션 타임 / 완주율 지표 추가
+                            </button>
+                          ) : (
+                            <span>{lang === 'en' ? 'Telemetry logged for this stage' : '실시간 텔레메트리 기록 완료'}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Team Members List */}

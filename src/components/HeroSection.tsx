@@ -198,66 +198,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
             </div>
 
-            {/* Quick Action Navigation CTAs */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <button
-                onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('experience');
-                  } else if (onExploreProjects) {
-                    onExploreProjects();
-                  } else {
-                    scrollToSection('experience');
-                  }
-                }}
-                className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-mono flex items-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.02] ${
-                  theme === 'light'
-                    ? 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-600/20'
-                    : 'bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold shadow-[0_0_20px_rgba(6,182,212,0.4)]'
-                }`}
-              >
-                <Bot className="w-4 h-4" />
-                <span>{lang === 'en' ? 'Explore Projects' : '프로젝트 살펴보기'}</span>
-                <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
-              </button>
-
-              <button
-                onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('journey');
-                  } else {
-                    scrollToSection('journey');
-                  }
-                }}
-                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium font-mono flex items-center gap-2 transition-all cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 shadow-sm'
-                    : 'bg-[#081224] hover:bg-[#0c1a32] border border-cyan-500/30 text-cyan-300'
-                }`}
-              >
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
-                <span>{lang === 'en' ? 'Timeline Journey' : '대회 여정 타임라인'}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('awards');
-                  } else {
-                    scrollToSection('awards');
-                  }
-                }}
-                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium font-mono flex items-center gap-2 transition-all cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 shadow-sm'
-                    : 'bg-[#081224] hover:bg-[#0c1a32] border border-cyan-500/30 text-cyan-300'
-                }`}
-              >
-                <Trophy className="w-4 h-4 text-amber-500" />
-                <span>{lang === 'en' ? 'Awards' : '수상 기록'}</span>
-              </button>
-            </div>
-
             {/* Quick Status Ticker */}
             <div className="grid grid-cols-3 gap-3 font-mono text-xs">
               <div

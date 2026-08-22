@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, CheckCircle2, AlertTriangle, Plus, Edit3, Trash2 } from 'lucide-react';
 import { JourneyItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
@@ -24,7 +24,18 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   const [journeyToDelete, setJourneyToDelete] = useState<JourneyItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // If selectedJourneyId is not found, default to first item
+  // Sync selected journey if list changes or selected is deleted
+  useEffect(() => {
+    if (journeys.length > 0) {
+      const exists = journeys.some((j) => j.id === selectedJourneyId);
+      if (!exists) {
+        setSelectedJourneyId(journeys[0].id);
+      }
+    } else {
+      setSelectedJourneyId('');
+    }
+  }, [journeys, selectedJourneyId]);
+
   const selectedItem: JourneyItem | undefined =
     journeys.find((j) => j.id === selectedJourneyId) || journeys[0];
 
@@ -52,16 +63,20 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             <div className="hidden sm:block w-32 h-[1px] bg-gradient-to-r from-cyan-500/40 via-cyan-500/10 to-transparent" />
           </div>
 
-          {/* Admin Action: Add Journey Milestone */}
-          {isAdmin && onAddJourney && (
-            <button
-              onClick={onAddJourney}
-              id="add-journey-btn"
-              className="px-3.5 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/60 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>대회 여정 추가</span>
-            </button>
+          {/* Admin Action: Add & Delete Journey */}
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              {onAddJourney && (
+                <button
+                  onClick={onAddJourney}
+                  id="add-journey-btn"
+                  className="px-3.5 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/60 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>대회 여정 추가</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -71,7 +86,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           </div>
         ) : (
           <>
-            {/* Timeline Horizontal / Stepper Navigation */}
+            {/* Timeline Stepper Navigation */}
             <div className="mb-10 overflow-x-auto pb-4 scrollbar-thin">
               <div className="flex items-center gap-3 min-w-max">
                 {journeys.map((item, idx) => {
@@ -79,29 +94,49 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   const itemYear = item.year || item.season || '';
                   const itemTitle = item.competition || item.title || '';
                   return (
-                    <button
+                    <div
                       key={item.id}
-                      onClick={() => setSelectedJourneyId(item.id)}
-                      className={`flex items-center gap-3 px-5 py-3 rounded-xl border text-left transition-all duration-300 cursor-pointer ${
+                      className={`relative group flex items-center gap-3 px-5 py-3 rounded-xl border text-left transition-all duration-300 ${
                         isSelected
                           ? 'bg-cyan-950/80 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] text-white'
                           : 'bg-[#081224]/60 border-slate-800/80 text-slate-400 hover:border-cyan-500/40 hover:text-slate-200'
                       }`}
                     >
-                      <div
-                        className={`w-7 h-7 rounded-lg font-mono text-xs font-bold flex items-center justify-center border ${
-                          isSelected
-                            ? 'bg-cyan-400 text-black border-cyan-300 font-bold'
-                            : 'bg-slate-900 text-slate-400 border-slate-700'
-                        }`}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedJourneyId(item.id)}
+                        className="flex items-center gap-3 cursor-pointer text-left focus:outline-none"
                       >
-                        {item.step || idx + 1}
-                      </div>
-                      <div>
-                        <div className="text-xs font-mono text-cyan-400 font-semibold">{itemYear}</div>
-                        <div className="text-sm font-bold truncate max-w-[180px]">{itemTitle}</div>
-                      </div>
-                    </button>
+                        <div
+                          className={`w-7 h-7 rounded-lg font-mono text-xs font-bold flex items-center justify-center border ${
+                            isSelected
+                              ? 'bg-cyan-400 text-black border-cyan-300 font-bold'
+                              : 'bg-slate-900 text-slate-400 border-slate-700'
+                          }`}
+                        >
+                          {item.step || idx + 1}
+                        </div>
+                        <div>
+                          <div className="text-xs font-mono text-cyan-400 font-semibold">{itemYear}</div>
+                          <div className="text-sm font-bold truncate max-w-[170px]">{itemTitle}</div>
+                        </div>
+                      </button>
+
+                      {/* Admin Quick Delete Icon on Timeline Tab */}
+                      {isAdmin && onDeleteJourney && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setJourneyToDelete(item);
+                          }}
+                          className="ml-1 p-1 rounded-md bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white transition-all cursor-pointer opacity-70 hover:opacity-100"
+                          title="이 여정 삭제"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -134,7 +169,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     </div>
                   </div>
 
-                  {/* Team Members List if available */}
+                  {/* Team Members List */}
                   {selectedItem.members && selectedItem.members.length > 0 && (
                     <div className="p-5 rounded-2xl bg-[#081224]/60 border border-slate-800/80">
                       <div className="text-xs font-mono text-slate-400 uppercase mb-3">Team Lineup:</div>
@@ -161,7 +196,9 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     {/* Admin Item Edit/Delete Controls */}
                     {isAdmin && (
                       <div className="flex items-center justify-between mb-4 pb-3 border-b border-cyan-500/20">
-                        <span className="text-xs font-mono text-cyan-400">선택된 여정 관리</span>
+                        <span className="text-xs font-mono text-cyan-400 font-bold">
+                          선택된 여정 관리 (STEP {selectedItem.step || 1})
+                        </span>
                         <div className="flex items-center gap-2">
                           {onEditJourney && (
                             <button

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Check, Copy, Github, Linkedin, ExternalLink, Bot } from 'lucide-react';
+import { Mail, Check, Copy, ExternalLink } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
 
 export const Footer: React.FC = () => {

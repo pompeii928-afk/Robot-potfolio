@@ -12,6 +12,7 @@ import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
 import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
+import { AdminLoginView } from './components/AdminLoginView';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
 import {
@@ -47,14 +48,47 @@ import { EditJourneyModal } from './components/modals/EditJourneyModal';
 import { EditAwardModal } from './components/modals/EditAwardModal';
 import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
-import { GoogleLoginModal } from './components/GoogleLoginModal';
 
 function PortfolioApp() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState<string>('about');
 
-  // Firestore States
+  // URL Path Routing State ('/' vs '/admin')
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname.toLowerCase();
+      if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+        return '/admin';
+      }
+    }
+    return '/';
+  });
+
+  const navigateTo = (path: string) => {
+    setCurrentPath(path);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', path);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Listen to browser Back/Forward (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathname = window.location.pathname.toLowerCase();
+      if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+        setCurrentPath('/admin');
+      } else {
+        setCurrentPath('/');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Firestore Real-time States
   const [aboutData, setAboutData] = useState<AboutConfig>(DEFAULT_ABOUT_CONFIG);
   const [journeys, setJourneys] = useState<JourneyItem[]>(JOURNEY_DATA);
   const [awards, setAwards] = useState<AwardItem[]>(AWARDS_DATA);
@@ -151,7 +185,7 @@ function PortfolioApp() {
     }
   };
 
-  // CRUD Handlers with Toast Feedback
+  // CRUD Handlers with Toast Feedback (Real-time DB updates)
   const handleSaveAbout = async (data: AboutConfig) => {
     try {
       await saveAboutConfig(data);
@@ -276,14 +310,23 @@ function PortfolioApp() {
     }
   };
 
+  // If user requested /admin route:
+  // If not authenticated -> Show AdminLoginView
+  // If authenticated -> Show Admin Portfolio with AdminBar & Edit controls
+  if (currentPath === '/admin' && !isAdmin && !authLoading) {
+    return <AdminLoginView onBackToPublic={() => navigateTo('/')} />;
+  }
+
+  const isEditingEnabled = currentPath === '/admin' && isAdmin;
+
   return (
     <div className="min-h-screen bg-blueprint-grid text-slate-200 relative selection:bg-cyan-500 selection:text-black">
       {/* Subtle scanline / ambient overlay */}
       <div className="fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent opacity-60" />
 
-      {/* Combined Sticky Top Header: Admin Bar + Navbar */}
+      {/* Sticky Header: AdminBar is only visible when at /admin and logged in */}
       <header className="sticky top-0 z-50 w-full shadow-2xl">
-        <AdminBar />
+        {isEditingEnabled && <AdminBar onViewPublic={() => navigateTo('/')} />}
         <Navbar
           activeSection={activeSection}
           onNavigate={handleNavigate}
@@ -294,14 +337,14 @@ function PortfolioApp() {
       <main className="relative z-10">
         <HeroSection
           aboutData={aboutData}
-          isAdmin={isAdmin}
+          isAdmin={isEditingEnabled}
           onEditAbout={() => setIsEditAboutOpen(true)}
           onExploreProjects={() => handleNavigate('experience')}
         />
 
         <JourneySection
           journeys={journeys}
-          isAdmin={isAdmin}
+          isAdmin={isEditingEnabled}
           onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
           onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
           onDeleteJourney={handleDeleteJourney}
@@ -309,7 +352,7 @@ function PortfolioApp() {
 
         <AwardsSection
           awards={awards}
-          isAdmin={isAdmin}
+          isAdmin={isEditingEnabled}
           onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
           onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
           onDeleteAward={handleDeleteAward}
@@ -317,7 +360,7 @@ function PortfolioApp() {
 
         <SkillsSection
           skills={skills}
-          isAdmin={isAdmin}
+          isAdmin={isEditingEnabled}
           onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
           onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
           onDeleteSkill={handleDeleteSkill}
@@ -325,7 +368,7 @@ function PortfolioApp() {
 
         <ProjectsSection
           projects={projects}
-          isAdmin={isAdmin}
+          isAdmin={isEditingEnabled}
           onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
           onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
           onDeleteProject={handleDeleteProject}
@@ -335,47 +378,49 @@ function PortfolioApp() {
       {/* Footer */}
       <Footer />
 
-      {/* Modals for Editing Content */}
-      <EditAboutModal
-        isOpen={isEditAboutOpen}
-        initialData={aboutData}
-        onClose={() => setIsEditAboutOpen(false)}
-        onSave={handleSaveAbout}
-      />
+      {/* Modals for Editing Content (Only operable when admin modal is opened) */}
+      {isEditingEnabled && (
+        <>
+          <EditAboutModal
+            isOpen={isEditAboutOpen}
+            initialData={aboutData}
+            onClose={() => setIsEditAboutOpen(false)}
+            onSave={handleSaveAbout}
+          />
 
-      <EditJourneyModal
-        isOpen={journeyModalData.isOpen}
-        initialData={journeyModalData.item}
-        onClose={() => setJourneyModalData({ isOpen: false, item: null })}
-        onSave={handleSaveJourney}
-        onDelete={handleDeleteJourney}
-      />
+          <EditJourneyModal
+            isOpen={journeyModalData.isOpen}
+            initialData={journeyModalData.item}
+            onClose={() => setJourneyModalData({ isOpen: false, item: null })}
+            onSave={handleSaveJourney}
+            onDelete={handleDeleteJourney}
+          />
 
-      <EditAwardModal
-        isOpen={awardModalData.isOpen}
-        initialData={awardModalData.item}
-        onClose={() => setAwardModalData({ isOpen: false, item: null })}
-        onSave={handleSaveAward}
-        onDelete={handleDeleteAward}
-      />
+          <EditAwardModal
+            isOpen={awardModalData.isOpen}
+            initialData={awardModalData.item}
+            onClose={() => setAwardModalData({ isOpen: false, item: null })}
+            onSave={handleSaveAward}
+            onDelete={handleDeleteAward}
+          />
 
-      <EditSkillModal
-        isOpen={skillModalData.isOpen}
-        initialData={skillModalData.item}
-        onClose={() => setSkillModalData({ isOpen: false, item: null })}
-        onSave={handleSaveSkill}
-        onDelete={handleDeleteSkill}
-      />
+          <EditSkillModal
+            isOpen={skillModalData.isOpen}
+            initialData={skillModalData.item}
+            onClose={() => setSkillModalData({ isOpen: false, item: null })}
+            onSave={handleSaveSkill}
+            onDelete={handleDeleteSkill}
+          />
 
-      <EditProjectModal
-        isOpen={projectModalData.isOpen}
-        initialData={projectModalData.item}
-        onClose={() => setProjectModalData({ isOpen: false, item: null })}
-        onSave={handleSaveProject}
-        onDelete={handleDeleteProject}
-      />
-
-      <GoogleLoginModal />
+          <EditProjectModal
+            isOpen={projectModalData.isOpen}
+            initialData={projectModalData.item}
+            onClose={() => setProjectModalData({ isOpen: false, item: null })}
+            onSave={handleSaveProject}
+            onDelete={handleDeleteProject}
+          />
+        </>
+      )}
     </div>
   );
 }

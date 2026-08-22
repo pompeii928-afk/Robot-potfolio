@@ -1,150 +1,155 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { auth, googleProvider, testFirestoreConnection } from './config';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { testFirestoreConnection } from './config';
 import { seedAllPortfolioData } from './firestoreService';
 
-export const ADMIN_EMAIL = 'pompeii928@gmail.com';
+export const ADMIN_USERNAME = 'daniel321';
+
+interface AdminUser {
+  username: string;
+  role: 'admin';
+}
 
 interface AuthContextType {
-  user: User | null;
   isAdmin: boolean;
-  signInWithGoogle: () => Promise<boolean>;
-  signInWithGoogleCredential: (idToken: string) => Promise<boolean>;
-  logOut: () => Promise<void>;
+  adminUser: AdminUser | null;
   loading: boolean;
-  authError: string | null;
-  setAuthError: (error: string | null) => void;
+  loginError: string | null;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   syncDefaultData: () => Promise<void>;
-  isLoginModalOpen: boolean;
-  openLoginModal: () => void;
-  closeLoginModal: () => void;
+  clearLoginError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
   isAdmin: false,
-  signInWithGoogle: async () => false,
-  signInWithGoogleCredential: async () => false,
-  logOut: async () => {},
+  adminUser: null,
   loading: true,
-  authError: null,
-  setAuthError: () => {},
+  loginError: null,
+  login: async () => false,
+  logout: async () => {},
   syncDefaultData: async () => {},
-  isLoginModalOpen: false,
-  openLoginModal: () => {},
-  closeLoginModal: () => {},
+  clearLoginError: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Verify server-side session token on load
+  const verifySession = useCallback(async () => {
+    try {
+      const storedToken = localStorage.getItem('admin_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (storedToken) {
+        headers['Authorization'] = `Bearer ${storedToken}`;
+      }
+
+      const res = await fetch('/api/admin/verify', {
+        method: 'GET',
+        headers,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          setIsAdmin(true);
+          setAdminUser(data.user);
+          return;
+        }
+      }
+      // If not authenticated
+      setIsAdmin(false);
+      setAdminUser(null);
+    } catch (err) {
+      console.warn('[Auth] Session check fallback:', err);
+      // Check localStorage fallback if offline
+      const storedToken = localStorage.getItem('admin_token');
+      if (storedToken) {
+        setIsAdmin(true);
+        setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
+      } else {
+        setIsAdmin(false);
+        setAdminUser(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     testFirestoreConnection();
+    verifySession();
+  }, [verifySession]);
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleSuccessfulUser = (email: string | null | undefined): boolean => {
-    const userEmail = (email || '').toLowerCase().trim();
-    if (userEmail === ADMIN_EMAIL.toLowerCase()) {
-      setAuthError(null);
-      setIsLoginModalOpen(false);
-      return true;
-    } else {
-      setAuthError(
-        `로그인된 계정 (${userEmail || '이메일 없음'})은 관리자(${ADMIN_EMAIL})가 아닙니다.\n편집 모드는 ${ADMIN_EMAIL} 계정으로 로그인할 때만 활성화됩니다.`
-      );
-      return false;
-    }
-  };
-
-  const signInWithGoogle = async (): Promise<boolean> => {
-    setAuthError(null);
+  const login = async (username: string, password: string): Promise<boolean> => {
+    setLoginError(null);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      return handleSuccessfulUser(result.user?.email);
-    } catch (err: any) {
-      console.error('Google Sign-In popup error:', err);
-      let msg = err.message || 'Google 로그인 중 오류가 발생했습니다.';
-      if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('auth/unauthorized-domain'))) {
-        msg = `[승인되지 않은 도메인 오류 (auth/unauthorized-domain)]\n현재 웹앱 도메인이 Firebase Authentication 승인된 도메인에 등록되어 있지 않습니다.\n아래 안내에 따라 Firebase Console에서 현재 도메인을 승인 목록에 추가해 주세요.`;
-      } else if (err?.code === 'auth/popup-blocked') {
-        msg = '브라우저 팝업이 차단되었습니다. 브라우저 팝업을 허용하거나 아래 버튼을 이용해 주세요.';
-      } else if (err?.code === 'auth/popup-closed-by-user') {
-        msg = '로그인 팝업 창이 닫혔습니다. 다시 시도해 주세요.';
-      } else if (err?.code === 'auth/cancelled-popup-request') {
-        msg = '이전 로그인 요청이 진행 중입니다.';
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        const errMsg = data.error || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해 주세요.';
+        setLoginError(errMsg);
+        return false;
       }
-      setAuthError(msg);
-      return false;
-    }
-  };
 
-  const signInWithGoogleCredential = async (idToken: string): Promise<boolean> => {
-    setAuthError(null);
-    try {
-      const credential = GoogleAuthProvider.credential(idToken);
-      const result = await signInWithCredential(auth, credential);
-      return handleSuccessfulUser(result.user?.email);
+      if (data.token) {
+        localStorage.setItem('admin_token', data.token);
+      }
+
+      setIsAdmin(true);
+      setAdminUser(data.user || { username: ADMIN_USERNAME, role: 'admin' });
+      setLoginError(null);
+      return true;
     } catch (err: any) {
-      console.error('Google credential sign-in error:', err);
-      setAuthError(err.message || 'Google 자격 증명 로그인 중 오류가 발생했습니다.');
+      console.error('[Auth] Login error:', err);
+      setLoginError('서버와의 통신에 실패했습니다. 네트워크 상태를 확인해 주세요.');
       return false;
     }
   };
 
-  const logOut = async () => {
+  const logout = async () => {
     try {
-      await signOut(auth);
-      setAuthError(null);
+      await fetch('/api/admin/logout', { method: 'POST' });
     } catch (err) {
-      console.error('Sign Out failed:', err);
+      console.warn('[Auth] Logout API call error:', err);
+    } finally {
+      localStorage.removeItem('admin_token');
+      setIsAdmin(false);
+      setAdminUser(null);
+      setLoginError(null);
     }
   };
 
   const syncDefaultData = async () => {
     try {
       await seedAllPortfolioData();
-      alert('기본 포트폴리오 데이터가 Firestore에 성공적으로 동기화되었습니다!');
     } catch (err: any) {
-      alert(`데이터 동기화 실패: ${err.message}`);
+      console.error('Data sync failed:', err);
+      throw err;
     }
   };
 
-  const isAdmin = !!user && (user.email || '').toLowerCase().trim() === ADMIN_EMAIL.toLowerCase();
-
-  const openLoginModal = () => {
-    setAuthError(null);
-    setIsLoginModalOpen(true);
-  };
-
-  const closeLoginModal = () => {
-    setIsLoginModalOpen(false);
-  };
+  const clearLoginError = () => setLoginError(null);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
         isAdmin,
-        signInWithGoogle,
-        signInWithGoogleCredential,
-        logOut,
+        adminUser,
         loading,
-        authError,
-        setAuthError,
+        loginError,
+        login,
+        logout,
         syncDefaultData,
-        isLoginModalOpen,
-        openLoginModal,
-        closeLoginModal,
+        clearLoginError,
       }}
     >
       {children}
@@ -153,4 +158,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useAuth = () => useContext(AuthContext);
-

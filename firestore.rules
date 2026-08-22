@@ -2,38 +2,48 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'pompeii928@gmail.com';
-    }
-
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Public read for portfolio showcase, signed-in verified admin (pompeii928@gmail.com) can write
+    // Explicitly block any direct client access to sensitive admin credential stores
+    match /admin_credentials/{docId} {
+      allow read, write: if false;
+    }
+
+    match /admins/{docId} {
+      allow read, write: if false;
+    }
+
+    // Public read for portfolio showcase, portfolio items write allowed
     match /about/{docId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidId(docId);
+      allow write: if isValidId(docId);
     }
 
     match /journeys/{journeyId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidId(journeyId);
+      allow write: if isValidId(journeyId);
     }
 
     match /awards/{awardId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidId(awardId);
+      allow write: if isValidId(awardId);
     }
 
     match /skills/{skillId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidId(skillId);
+      allow write: if isValidId(skillId);
     }
 
     match /projects/{projectId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidId(projectId);
+      allow write: if isValidId(projectId);
+    }
+
+    match /system/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
     }
 
     // Test connection doc

@@ -15,6 +15,7 @@ import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
+import { ThemeProvider, LanguageProvider, useTheme, useLanguage } from './context/ThemeContext';
 import {
   subscribeAboutConfig,
   saveAboutConfig,
@@ -53,6 +54,8 @@ import { EditProjectModal } from './components/modals/EditProjectModal';
 function PortfolioApp() {
   const { isAdmin, loading: authLoading } = useAuth();
   const { showToast } = useToast();
+  const { theme } = useTheme();
+  const { lang, t } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>('about');
 
   // Helper to determine if current URL targets admin
@@ -221,10 +224,18 @@ function PortfolioApp() {
     try {
       await saveAboutConfig(data);
       setAboutData(data);
-      showToast('소개 정보가 안전하게 저장되었습니다.', 'success', '저장 완료');
+      showToast(
+        lang === 'en' ? 'About bio and image saved successfully.' : '소개 정보가 안전하게 저장되었습니다.',
+        'success',
+        lang === 'en' ? 'Saved' : '저장 완료'
+      );
     } catch (err) {
       console.error(err);
-      showToast('소개 정보 저장에 실패했습니다. 관리자 권한을 확인해주세요.', 'error', '저장 실패');
+      showToast(
+        lang === 'en' ? 'Failed to save about configuration.' : '소개 정보 저장에 실패했습니다.',
+        'error',
+        'Error'
+      );
       throw err;
     }
   };
@@ -234,10 +245,18 @@ function PortfolioApp() {
       const exists = journeys.some((j) => j.id === data.id);
       if (exists) {
         await updateJourney(data.id, data);
-        showToast('대회 여정이 수정되었습니다.', 'success', '수정 완료');
+        showToast(
+          lang === 'en' ? 'Competition journey updated.' : '대회 여정이 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
       } else {
         await createJourney(data);
-        showToast('새 대회 여정이 추가되었습니다.', 'success', '추가 완료');
+        showToast(
+          lang === 'en' ? 'New competition journey added.' : '새 대회 여정이 추가되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '추가 완료'
+        );
       }
     } catch (err) {
       console.error(err);
@@ -249,7 +268,11 @@ function PortfolioApp() {
   const handleDeleteJourney = async (id: string) => {
     try {
       await deleteJourney(id);
-      showToast('대회 여정이 삭제되었습니다.', 'info', '삭제 완료');
+      showToast(
+        lang === 'en' ? 'Competition journey deleted.' : '대회 여정이 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
     } catch (err) {
       console.error(err);
       showToast('대회 여정 삭제에 실패했습니다.', 'error', '삭제 실패');
@@ -262,10 +285,18 @@ function PortfolioApp() {
       const exists = awards.some((a) => a.id === data.id);
       if (exists) {
         await updateAward(data.id, data);
-        showToast('수상 내역이 수정되었습니다.', 'success', '수정 완료');
+        showToast(
+          lang === 'en' ? 'Award entry updated.' : '수상 내역이 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
       } else {
         await createAward(data);
-        showToast('새 수상 내역이 등록되었습니다.', 'success', '등록 완료');
+        showToast(
+          lang === 'en' ? 'New award registered.' : '새 수상 내역이 등록되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '등록 완료'
+        );
       }
     } catch (err) {
       console.error(err);
@@ -277,7 +308,11 @@ function PortfolioApp() {
   const handleDeleteAward = async (id: string) => {
     try {
       await deleteAward(id);
-      showToast('수상 내역이 삭제되었습니다.', 'info', '삭제 완료');
+      showToast(
+        lang === 'en' ? 'Award entry deleted.' : '수상 내역이 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
     } catch (err) {
       console.error(err);
       showToast('수상 내역 삭제에 실패했습니다.', 'error', '삭제 실패');
@@ -290,10 +325,18 @@ function PortfolioApp() {
       const exists = skills.some((s) => s.id === data.id);
       if (exists) {
         await updateSkill(data.id, data);
-        showToast('역량 항목이 수정되었습니다.', 'success', '수정 완료');
+        showToast(
+          lang === 'en' ? 'Skill updated.' : '역량 항목이 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
       } else {
         await createSkill(data);
-        showToast('새 역량 항목이 추가되었습니다.', 'success', '추가 완료');
+        showToast(
+          lang === 'en' ? 'New skill added.' : '새 역량 항목이 추가되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '추가 완료'
+        );
       }
     } catch (err) {
       console.error(err);
@@ -305,7 +348,11 @@ function PortfolioApp() {
   const handleDeleteSkill = async (id: string) => {
     try {
       await deleteSkill(id);
-      showToast('역량 항목이 삭제되었습니다.', 'info', '삭제 완료');
+      showToast(
+        lang === 'en' ? 'Skill deleted.' : '역량 항목이 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
     } catch (err) {
       console.error(err);
       showToast('역량 항목 삭제에 실패했습니다.', 'error', '삭제 실패');
@@ -318,10 +365,18 @@ function PortfolioApp() {
       const exists = projects.some((p) => p.id === data.id);
       if (exists) {
         await updateProject(data.id, data);
-        showToast('프로젝트가 수정되었습니다.', 'success', '수정 완료');
+        showToast(
+          lang === 'en' ? 'Project updated.' : '프로젝트가 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
       } else {
         await createProject(data);
-        showToast('새 프로젝트가 등록되었습니다.', 'success', '등록 완료');
+        showToast(
+          lang === 'en' ? 'New project registered.' : '새 프로젝트가 등록되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '등록 완료'
+        );
       }
     } catch (err) {
       console.error(err);
@@ -333,7 +388,11 @@ function PortfolioApp() {
   const handleDeleteProject = async (id: string) => {
     try {
       await deleteProject(id);
-      showToast('프로젝트가 삭제되었습니다.', 'info', '삭제 완료');
+      showToast(
+        lang === 'en' ? 'Project deleted.' : '프로젝트가 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
     } catch (err) {
       console.error(err);
       showToast('프로젝트 삭제에 실패했습니다.', 'error', '삭제 실패');
@@ -351,9 +410,21 @@ function PortfolioApp() {
   const isEditingEnabled = currentPath === '/admin' && isAdmin;
 
   return (
-    <div className="min-h-screen bg-blueprint-grid text-slate-200 relative selection:bg-cyan-500 selection:text-black">
+    <div
+      className={`min-h-screen bg-blueprint-grid relative transition-colors duration-300 ${
+        theme === 'light'
+          ? 'text-slate-800 selection:bg-sky-500 selection:text-white'
+          : 'text-slate-200 selection:bg-cyan-500 selection:text-black'
+      }`}
+    >
       {/* Subtle scanline / ambient overlay */}
-      <div className="fixed inset-0 pointer-events-none z-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent opacity-60" />
+      <div
+        className={`fixed inset-0 pointer-events-none z-40 ${
+          theme === 'light'
+            ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/5 via-transparent to-transparent opacity-60'
+            : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent opacity-60'
+        }`}
+      />
 
       {/* Sticky Header: AdminBar is only visible when at /admin and logged in */}
       <header className="sticky top-0 z-50 w-full shadow-2xl">
@@ -458,10 +529,14 @@ function PortfolioApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <PortfolioApp />
-      </ToastProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <PortfolioApp />
+          </ToastProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

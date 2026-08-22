@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, LogOut, RefreshCw, Eye } from 'lucide-react';
+import { ShieldCheck, LogOut } from 'lucide-react';
 import { useAuth, ADMIN_USERNAME } from '../firebase/AuthContext';
 import { useToast } from './Toast';
 import { useTheme, useLanguage } from '../context/ThemeContext';
@@ -9,25 +9,10 @@ interface AdminBarProps {
 }
 
 export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic }) => {
-  const { adminUser, logout, syncDefaultData } = useAuth();
+  const { adminUser, logout } = useAuth();
   const { showToast } = useToast();
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
-
-  const handleSyncData = async () => {
-    try {
-      await syncDefaultData();
-      showToast(
-        lang === 'en'
-          ? 'Default portfolio data successfully synced to Firestore!'
-          : '기본 포트폴리오 데이터가 Firestore에 성공적으로 동기화되었습니다!',
-        'success',
-        lang === 'en' ? 'Sync Completed' : '동기화 완료'
-      );
-    } catch (err: any) {
-      showToast(`데이터 동기화 실패: ${err.message}`, 'error', '동기화 오류');
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -61,31 +46,8 @@ export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic }) => {
           </span>
         </div>
 
-        {/* Right: Controls (View Public, Sync, Logout) */}
+        {/* Right: Controls (Logout) */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Switch to Public View */}
-          {onViewPublic && (
-            <button
-              onClick={onViewPublic}
-              className="px-2.5 py-1 rounded-lg bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 transition-all flex items-center gap-1.5 cursor-pointer text-xs"
-              title="Switch to Public View"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>{t('admin.viewPublic')}</span>
-            </button>
-          )}
-
-          {/* Sync Default Data */}
-          <button
-            onClick={handleSyncData}
-            id="sync-default-data-btn"
-            className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer text-xs"
-            title="Reset to Default Data"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">{t('admin.syncDefault')}</span>
-          </button>
-
           {/* Logout */}
           <button
             onClick={handleLogout}

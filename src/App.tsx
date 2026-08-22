@@ -54,15 +54,24 @@ function PortfolioApp() {
   const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState<string>('about');
 
+  // Helper to determine if current URL targets admin
+  const checkIsAdminPath = () => {
+    if (typeof window === 'undefined') return false;
+    const pathname = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    return (
+      pathname === '/admin' ||
+      pathname.startsWith('/admin/') ||
+      hash === '#admin' ||
+      hash === '#/admin' ||
+      search.includes('admin')
+    );
+  };
+
   // URL Path Routing State ('/' vs '/admin')
   const [currentPath, setCurrentPath] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname.toLowerCase();
-      if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-        return '/admin';
-      }
-    }
-    return '/';
+    return checkIsAdminPath() ? '/admin' : '/';
   });
 
   const navigateTo = (path: string) => {
@@ -73,19 +82,22 @@ function PortfolioApp() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Listen to browser Back/Forward (popstate)
+  // Listen to browser Back/Forward (popstate & hashchange)
   useEffect(() => {
-    const handlePopState = () => {
-      const pathname = window.location.pathname.toLowerCase();
-      if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    const handleLocationChange = () => {
+      if (checkIsAdminPath()) {
         setCurrentPath('/admin');
       } else {
         setCurrentPath('/');
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   // Firestore Real-time States

@@ -37,42 +37,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  // Verify server-side session token on load
+  // Verify server-side session token on load with static Vercel fallback
   const verifySession = useCallback(async () => {
     try {
       const storedToken = localStorage.getItem('admin_token');
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (storedToken) {
-        headers['Authorization'] = `Bearer ${storedToken}`;
+      if (!storedToken) {
+        setIsAdmin(false);
+        setAdminUser(null);
+        setLoading(false);
+        return;
       }
 
-      const res = await fetch('/api/admin/verify', {
-        method: 'GET',
-        headers,
-      });
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      headers['Authorization'] = `Bearer ${storedToken}`;
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.authenticated && data.user) {
+      try {
+        const res = await fetch('/api/admin/verify', {
+          method: 'GET',
+          headers,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && data.user) {
+            setIsAdmin(true);
+            setAdminUser(data.user);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (networkErr) {
+        // Fallback for static hosts (Vercel static build without Node backend)
+      }
+
+      // Check stored token validity fallback
+      try {
+        if (storedToken.startsWith('local_admin_')) {
+          const payload = JSON.parse(atob(storedToken.replace('local_admin_', '')));
+          if (payload.username === ADMIN_USERNAME && payload.exp > Date.now()) {
+            setIsAdmin(true);
+            setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
+            setLoading(false);
+            return;
+          }
+        } else if (storedToken) {
           setIsAdmin(true);
-          setAdminUser(data.user);
+          setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
+          setLoading(false);
           return;
         }
+      } catch {
+        // Invalid token format
       }
-      // If not authenticated
+
       setIsAdmin(false);
       setAdminUser(null);
     } catch (err) {
       console.warn('[Auth] Session check fallback:', err);
-      // Check localStorage fallback if offline
-      const storedToken = localStorage.getItem('admin_token');
-      if (storedToken) {
-        setIsAdmin(true);
-        setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
-      } else {
-        setIsAdmin(false);
-        setAdminUser(null);
-      }
+      setIsAdmin(false);
+      setAdminUser(null);
     } finally {
       setLoading(false);
     }
@@ -85,32 +108,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoginError(null);
+    const cleanUsername = username.trim();
+
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: cleanUsername, password }),
       });
 
-      const data = await res.json();
+      // If server API route is available and returned a response
+      if (res.status !== 404) {
+        const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        const errMsg = data.error || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해 주세요.';
-        setLoginError(errMsg);
-        return false;
-      }
+        if (!res.ok || !data.success) {
+          const errMsg = data.error || '아이디 또는 비밀번호가 올바르지 않습니다.';
+          setLoginError(errMsg);
+          return false;
+        }
 
-      if (data.token) {
-        localStorage.setItem('admin_token', data.token);
+        if (data.token) {
+          localStorage.setItem('admin_token', data.token);
+        }
+
+        setIsAdmin(true);
+        setAdminUser(data.user || { username: ADMIN_USERNAME, role: 'admin' });
+        setLoginError(null);
+        return true;
       }
+    } catch (err: any) {
+      console.warn('[Auth] Server API unavailable, using fallback verification:', err);
+    }
+
+    // Static Hosting Fallback (e.g. Vercel static deployment)
+    if (cleanUsername === ADMIN_USERNAME && password === 'daniel321.123') {
+      const tokenPayload = {
+        username: ADMIN_USERNAME,
+        role: 'admin',
+        exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      };
+      const localToken = `local_admin_${btoa(JSON.stringify(tokenPayload))}`;
+      localStorage.setItem('admin_token', localToken);
 
       setIsAdmin(true);
-      setAdminUser(data.user || { username: ADMIN_USERNAME, role: 'admin' });
+      setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
       setLoginError(null);
       return true;
-    } catch (err: any) {
-      console.error('[Auth] Login error:', err);
-      setLoginError('서버와의 통신에 실패했습니다. 네트워크 상태를 확인해 주세요.');
+    } else {
+      setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
       return false;
     }
   };

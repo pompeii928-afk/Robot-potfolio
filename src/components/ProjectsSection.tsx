@@ -64,11 +64,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {projects.map((project) => {
             if (project.status === 'AWAITING') {
+              if (!isAdmin) return null;
               return (
                 <div
                   key={project.id}
                   onClick={() => {
-                    if (isAdmin && onAddProject) {
+                    if (onAddProject) {
                       onAddProject();
                     }
                   }}
@@ -85,11 +86,9 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       {project.summary}
                     </p>
                   </div>
-                  {isAdmin && (
-                    <span className="text-[11px] font-mono text-cyan-400 underline">
-                      클릭하여 새 프로젝트 등록하기
-                    </span>
-                  )}
+                  <span className="text-[11px] font-mono text-cyan-400 underline">
+                    클릭하여 새 프로젝트 등록하기
+                  </span>
                 </div>
               );
             }

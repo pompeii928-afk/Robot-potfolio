@@ -173,7 +173,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
     const videoId = extractVideoId(formData.youtubeUrl || '');
     let finalThumbnail = formData.thumbnail;
     if (videoId && (!finalThumbnail || finalThumbnail.includes('unsplash.com'))) {
-      finalThumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      finalThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     }
 
     try {
@@ -405,18 +405,33 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
               </div>
             </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-xs font-mono text-red-400 mb-1">
-                영상 설명 (Description)
-              </label>
-              <textarea
-                rows={3}
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="대회 때 로봇이 어떻게 움직였고 어떤 결과를 냈는지에 대한 설명"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400 resize-none"
-              />
+            {/* Description (Korean / English) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-mono text-red-400 mb-1">
+                  영상 설명 (한국어 - Korean Description)
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.descriptionKo || ''}
+                  onChange={(e) => setFormData({ ...formData, descriptionKo: e.target.value })}
+                  placeholder="대회 때 로봇이 어떻게 움직였고 어떤 결과를 냈는지에 대한 한국어 설명"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-red-400 mb-1">
+                  영상 설명 (영문 - English Description)
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Match run and autonomous algorithm details in English..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#050c1a] border border-red-500/30 text-white text-xs sm:text-sm focus:outline-none focus:border-red-400 resize-none"
+                />
+              </div>
             </div>
 
             {/* Tags */}

@@ -97,11 +97,13 @@ export interface YouTubeVideoItem {
   title: string;
   titleKo?: string;
   description: string;
+  descriptionKo?: string;
   youtubeUrl: string;
   videoId?: string;
   thumbnail?: string;
   duration?: string;
   tags?: string[];
+  tagsKo?: string[];
   category?: string;
   views?: string;
   isFeatured?: boolean;

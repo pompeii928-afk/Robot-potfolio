@@ -68,8 +68,32 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
 
   const channelInfo = DEFAULT_CHANNEL_INFO;
 
-  // Filter categories
-  const categories = ['ALL', 'Competition', 'Algorithm', 'Hardware'];
+  // Category Translation Helper
+  const getCategoryLabel = (catKey: string): string => {
+    if (!catKey) return '';
+    const upper = catKey.toUpperCase();
+    if (upper === 'ALL') return lang === 'en' ? 'All Videos' : '전체 영상';
+    if (upper === 'COMPETITION') return lang === 'en' ? 'Competition' : '대회 및 실전 경기';
+    if (upper === 'ALGORITHM' || upper === 'CONTROL') return lang === 'en' ? 'Algorithm & Control' : '알고리즘 및 제어';
+    if (upper === 'HARDWARE' || upper === 'BUILD') return lang === 'en' ? 'Hardware & Build' : '하드웨어 및 기구';
+    if (upper === 'FIELD TEST' || upper === 'FIELD_TEST') return lang === 'en' ? 'Field Tests' : '필드 테스트';
+    return catKey;
+  };
+
+  const getCategoryBadgeLabel = (catKey?: string): string => {
+    if (!catKey) return '';
+    const upper = catKey.toUpperCase();
+    if (upper === 'COMPETITION') return lang === 'en' ? 'Competition' : '대회/경기';
+    if (upper === 'ALGORITHM' || upper === 'CONTROL') return lang === 'en' ? 'Algorithm' : '알고리즘/제어';
+    if (upper === 'HARDWARE' || upper === 'BUILD') return lang === 'en' ? 'Hardware' : '하드웨어/제작';
+    if (upper === 'FIELD TEST' || upper === 'FIELD_TEST') return lang === 'en' ? 'Field Test' : '필드 테스트';
+    return catKey;
+  };
+
+  // Standard filter categories list
+  const standardCategories = ['ALL', 'Competition', 'Algorithm', 'Hardware'];
+  const videoCategories = Array.from(new Set(videos.map((v) => v.category).filter(Boolean))) as string[];
+  const allCategoryKeys = Array.from(new Set(['ALL', ...standardCategories.slice(1), ...videoCategories]));
 
   const filteredVideos = videos.filter((v) => {
     if (activeFilter === 'ALL') return true;
@@ -97,6 +121,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
     }
   };
 
+  // Topics and Channel bio in current language
+  const channelBio = lang === 'en' && channelInfo.description ? channelInfo.description : (channelInfo.descriptionKo || channelInfo.description);
+  const channelTopics = lang === 'en' ? channelInfo.topics : (channelInfo.topicsKo || channelInfo.topics);
+
   return (
     <section id="youtube-section" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Section Header */}
@@ -107,7 +135,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               <Youtube className="w-5 h-5" />
             </div>
             <span className="font-mono text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
-              OFFICIAL MEDIA CHANNEL
+              {t('youtube.badge', 'OFFICIAL MEDIA CHANNEL')}
             </span>
           </div>
           <h2
@@ -115,12 +143,12 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               theme === 'light' ? 'text-slate-900' : 'text-white'
             }`}
           >
-            {lang === 'en' ? 'YouTube Media & Field Logs' : '유튜브 채널 및 주행 영상'}
+            {t('youtube.title', lang === 'en' ? 'Official YouTube Channel & Match Archives' : '공식 유튜브 채널 및 실전 주행')}
           </h2>
           <p className="mt-1 text-xs sm:text-sm font-mono text-slate-500 dark:text-cyan-400/80">
-            {lang === 'en'
+            {t('youtube.subtitle', lang === 'en'
               ? 'WRO match runs, autonomous algorithms & robotics build archives'
-              : 'WRO 경기 실전 주행, 자율주행 알고리즘 튜닝 및 하드웨어 제작 영상 기록'}
+              : 'WRO 경기 실전 주행, 자율주행 알고리즘 튜닝 및 하드웨어 제작 영상 기록')}
           </p>
         </div>
 
@@ -133,7 +161,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
             className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-tech font-bold flex items-center gap-2 transition-all cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-[0_0_20px_rgba(220,38,38,0.35)] hover:scale-[1.02]"
           >
             <Youtube className="w-4 h-4" />
-            <span>{channelInfo.handle} 바로가기</span>
+            <span>{channelInfo.handle} {lang === 'en' ? 'Channel' : '바로가기'}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </a>
 
@@ -145,10 +173,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                 ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
                 : 'bg-[#081224] hover:bg-[#0c1a32] text-cyan-300 border border-cyan-500/30'
             }`}
-            title="채널 링크 복사"
+            title={lang === 'en' ? 'Copy Channel Link' : '채널 링크 복사'}
           >
             {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-            <span>{copiedLink ? '복사됨!' : '공유'}</span>
+            <span>{copiedLink ? (lang === 'en' ? 'Copied!' : '복사됨!') : (lang === 'en' ? 'Share' : '공유')}</span>
           </button>
 
           {isAdmin && onAddVideo && (
@@ -158,7 +186,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               className="px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>영상 추가</span>
+              <span>{lang === 'en' ? '+ Add Video' : '영상 추가'}</span>
             </button>
           )}
         </div>
@@ -201,11 +229,11 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed font-sans">
-                {channelInfo.description}
+                {channelBio}
               </p>
               {/* Topic Pills */}
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {channelInfo.topics.map((topic, tIdx) => (
+                {channelTopics.map((topic, tIdx) => (
                   <span
                     key={tIdx}
                     className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono ${
@@ -229,7 +257,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               className="px-5 py-3 rounded-xl text-xs sm:text-sm font-tech font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-[0_0_25px_rgba(220,38,38,0.4)]"
             >
               <Youtube className="w-4 h-4" />
-              <span>채널 구독 및 전체 영상 시청</span>
+              <span>{lang === 'en' ? 'Subscribe & Watch All Videos' : '채널 구독 및 전체 영상 시청'}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
 
@@ -246,26 +274,31 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         </div>
       </div>
 
-      {/* Category Filter Tabs */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setActiveFilter(cat)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer select-none ${
-              activeFilter === cat
-                ? theme === 'light'
-                  ? 'bg-red-600 text-white font-bold shadow-sm'
-                  : 'bg-red-600 text-white font-bold shadow-[0_0_15px_rgba(220,38,38,0.5)]'
-                : theme === 'light'
-                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'
-                  : 'bg-[#081224] hover:bg-[#0c1a32] text-slate-400 hover:text-cyan-200 border border-cyan-500/20'
-            }`}
-          >
-            {cat === 'ALL' ? (lang === 'en' ? 'All Videos' : '전체 영상') : cat}
-          </button>
-        ))}
+      {/* Category Filter Tabs with Full Language Switching */}
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 no-scrollbar">
+        {allCategoryKeys.map((catKey) => {
+          const isSelected = activeFilter.toLowerCase() === catKey.toLowerCase();
+          const label = getCategoryLabel(catKey);
+
+          return (
+            <button
+              key={catKey}
+              type="button"
+              onClick={() => setActiveFilter(catKey)}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-tech font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+                isSelected
+                  ? theme === 'light'
+                    ? 'bg-red-600 text-white shadow-[0_4px_12px_rgba(220,38,38,0.35)] scale-[1.02]'
+                    : 'bg-red-600 text-white shadow-[0_0_18px_rgba(220,38,38,0.6)] scale-[1.02]'
+                  : theme === 'light'
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                    : 'bg-[#081224] hover:bg-[#0c1a32] text-slate-300 hover:text-cyan-200 border border-cyan-500/20'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Videos Grid */}
@@ -273,6 +306,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         {filteredVideos.map((video) => {
           const thumbUrl = getYouTubeThumbnail(video);
           const videoId = video.videoId || extractVideoId(video.youtubeUrl);
+          const videoTitle = lang === 'ko' && video.titleKo ? video.titleKo : video.title;
+          const videoDesc = lang === 'ko' && video.descriptionKo ? video.descriptionKo : video.description;
+          const videoTags = lang === 'ko' && video.tagsKo && video.tagsKo.length > 0 ? video.tagsKo : (video.tags || []);
+          const categoryBadge = getCategoryBadgeLabel(video.category);
 
           return (
             <div
@@ -287,7 +324,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               <div className="relative aspect-video w-full overflow-hidden bg-black">
                 <img
                   src={thumbUrl}
-                  alt={video.title}
+                  alt={videoTitle}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     // Fallback to standard YouTube thumbnail if high-res failed
@@ -307,7 +344,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                   type="button"
                   onClick={() => setActivePlayingVideo(video)}
                   className="absolute inset-0 flex items-center justify-center group/play cursor-pointer"
-                  title="영상 재생하기"
+                  title={lang === 'en' ? 'Play Video' : '영상 재생하기'}
                 >
                   <div className="w-13 h-13 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.8)] border border-red-400/60 transform transition-transform duration-300 group-hover/play:scale-115">
                     <Play className="w-6 h-6 ml-0.5 fill-current" />
@@ -323,9 +360,9 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                 )}
 
                 {/* Category Badge */}
-                {video.category && (
+                {categoryBadge && (
                   <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-red-600/90 text-[10px] font-mono font-bold text-white uppercase tracking-wider shadow-sm">
-                    {video.category}
+                    {categoryBadge}
                   </div>
                 )}
 
@@ -347,16 +384,16 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     }`}
                     onClick={() => setActivePlayingVideo(video)}
                   >
-                    {lang === 'ko' && video.titleKo ? video.titleKo : video.title}
+                    {videoTitle}
                   </h4>
                   <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                    {video.description}
+                    {videoDesc}
                   </p>
                 </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1">
-                  {(video.tags || []).map((t, idx) => (
+                  {videoTags.map((t, idx) => (
                     <span
                       key={idx}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono ${
@@ -379,7 +416,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                       className="text-xs font-mono font-bold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>영상 재생</span>
+                      <span>{lang === 'en' ? 'Play Video' : '영상 재생'}</span>
                     </button>
 
                     <a
@@ -387,7 +424,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-mono text-slate-400 hover:text-slate-200 flex items-center gap-1 cursor-pointer"
-                      title="유튜브 새창에서 열기"
+                      title={lang === 'en' ? 'Open in YouTube' : '유튜브 새창에서 열기'}
                     >
                       <ExternalLink className="w-3 h-3" />
                     </a>
@@ -401,7 +438,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                           type="button"
                           onClick={() => onEditVideo(video)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-cyan-950/50 cursor-pointer"
-                          title="수정"
+                          title={lang === 'en' ? 'Edit' : '수정'}
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
@@ -411,7 +448,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                           type="button"
                           onClick={() => setDeleteTarget(video)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 cursor-pointer"
-                          title="삭제"
+                          title={lang === 'en' ? 'Delete' : '삭제'}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -455,7 +492,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     rel="noopener noreferrer"
                     className="px-2.5 py-1 rounded-lg text-xs font-mono bg-red-600 hover:bg-red-700 text-white flex items-center gap-1 transition-all"
                   >
-                    <span>YouTube에서 보기</span>
+                    <span>{lang === 'en' ? 'Watch on YouTube' : 'YouTube에서 보기'}</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                   <button
@@ -486,10 +523,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               {/* Modal Footer Description */}
               <div className="p-4 bg-[#050c1a] border-t border-slate-800">
                 <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                  {activePlayingVideo.description}
+                  {lang === 'ko' && activePlayingVideo.descriptionKo ? activePlayingVideo.descriptionKo : activePlayingVideo.description}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {(activePlayingVideo.tags || []).map((t, idx) => (
+                  {((lang === 'ko' && activePlayingVideo.tagsKo && activePlayingVideo.tagsKo.length > 0 ? activePlayingVideo.tagsKo : activePlayingVideo.tags) || []).map((t, idx) => (
                     <span key={idx} className="px-2 py-0.5 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/30 text-red-300">
                       #{t}
                     </span>
@@ -504,10 +541,11 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="영상 삭제"
-        message="정말로 이 유튜브 영상 항목을 삭제하시겠습니까?"
-        itemName={deleteTarget?.title || ''}
-        confirmText={isDeleting ? '삭제 중...' : '삭제하기'}
+        title={lang === 'en' ? 'Delete Video' : '영상 삭제'}
+        message={lang === 'en' ? 'Are you sure you want to delete this YouTube video?' : '정말로 이 유튜브 영상 항목을 삭제하시겠습니까?'}
+        itemName={deleteTarget ? (lang === 'ko' && deleteTarget.titleKo ? deleteTarget.titleKo : deleteTarget.title) : ''}
+        confirmText={isDeleting ? (lang === 'en' ? 'Deleting...' : '삭제 중...') : (lang === 'en' ? 'Delete' : '삭제하기')}
+        cancelText={lang === 'en' ? 'Cancel' : '취소'}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />

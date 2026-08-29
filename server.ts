@@ -219,6 +219,45 @@ app.get('/api/admin/status', authenticateAdmin, (req: Request, res: Response) =>
   });
 });
 
+// YouTube Metadata & Thumbnail Extraction Proxy
+app.get('/api/youtube/info', async (req: Request, res: Response) => {
+  const url = req.query.url as string;
+  if (!url) {
+    return res.status(400).json({ error: 'URL parameter is required' });
+  }
+
+  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([a-zA-Z0-9_-]{11})/i;
+  const match = url.match(regExp);
+  const videoId = match ? match[1] : (/^[a-zA-Z0-9_-]{11}$/.test(url.trim()) ? url.trim() : null);
+
+  if (!videoId) {
+    return res.status(400).json({ error: 'Invalid YouTube URL' });
+  }
+
+  const defaultThumb = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+  try {
+    const oembedRes = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`);
+    if (oembedRes.ok) {
+      const data = await oembedRes.json();
+      return res.json({
+        videoId,
+        title: data.title || '',
+        author_name: data.author_name || '',
+        thumbnail_url: data.thumbnail_url || defaultThumb,
+      });
+    }
+  } catch (err) {
+    // fallback
+  }
+
+  return res.json({
+    videoId,
+    title: '',
+    thumbnail_url: defaultThumb,
+  });
+});
+
 // ==========================================
 // VITE SPA MIDDLEWARE / PRODUCTION STATIC
 // ==========================================

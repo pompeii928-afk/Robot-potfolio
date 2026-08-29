@@ -335,7 +335,7 @@ export const DEFAULT_YOUTUBE_VIDEOS: YouTubeVideoItem[] = [
     descriptionKo: '대회 때 로봇이 어떻게 움직였고 어떤 결과를 냈는지에 대한 실전 경기 주행 영상입니다.',
     youtubeUrl: 'https://www.youtube.com/watch?v=y4K_5A4wNrw',
     videoId: 'y4K_5A4wNrw',
-    thumbnail: 'https://img.youtube.com/vi/y4K_5A4wNrw/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/y4K_5A4wNrw/hqdefault.jpg',
     duration: '02:09',
     tags: ['WRO 2026', 'Autonomous', 'Match Run', 'Robotics'],
     tagsKo: ['WRO 2026', '자율주행', '실전경기', '로보틱스'],

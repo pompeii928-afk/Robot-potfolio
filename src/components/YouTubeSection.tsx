@@ -16,6 +16,7 @@ import { YouTubeVideoItem } from '../types';
 import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
 import { useLanguage } from '../context/ThemeContext';
 import { ConfirmModal } from './modals/ConfirmModal';
+import { extractVideoId, getYouTubeThumbnail, handleThumbnailError } from '../utils/youtubeHelper';
 
 interface YouTubeSectionProps {
   videos: YouTubeVideoItem[];
@@ -24,24 +25,6 @@ interface YouTubeSectionProps {
   onEditVideo?: (video: YouTubeVideoItem) => void;
   onDeleteVideo?: (id: string) => Promise<void>;
 }
-
-const extractVideoId = (url: string): string | null => {
-  if (!url) return null;
-  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regExp);
-  return match ? match[1] : null;
-};
-
-const getYouTubeThumbnail = (video: YouTubeVideoItem): string => {
-  if (video.thumbnail && !video.thumbnail.includes('unsplash.com')) {
-    return video.thumbnail;
-  }
-  const videoId = video.videoId || extractVideoId(video.youtubeUrl);
-  if (videoId) {
-    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-  }
-  return 'https://img.youtube.com/vi/y4K_5A4wNrw/hqdefault.jpg';
-};
 
 export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
   videos,
@@ -140,7 +123,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         {/* Notion Channel Callout Card */}
         <div className="mb-6 p-4 sm:p-5 rounded-xl bg-[#f7f6f3] border border-[#e3e2de] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white border border-[#e3e2de] flex items-center justify-center text-red-600 shrink-0">
+            <div className="w-10 h-10 rounded-full bg-white border border-[#e3e2de] flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
               <Youtube className="w-5 h-5" />
             </div>
             <div>
@@ -235,6 +218,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                       alt={video.title}
                       className="w-full h-full object-cover object-center group-hover/thumb:scale-[1.02] transition-transform duration-300"
                       referrerPolicy="no-referrer"
+                      onError={(e) => handleThumbnailError(e, videoId || undefined)}
                     />
 
                     {/* Play Overlay */}
@@ -248,6 +232,11 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     {video.category && (
                       <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-mono bg-black/70 text-white backdrop-blur-xs">
                         {video.category}
+                      </div>
+                    )}
+                    {video.duration && (
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-mono bg-black/70 text-white backdrop-blur-xs">
+                        {video.duration}
                       </div>
                     )}
                   </div>
@@ -272,7 +261,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     <div className="pt-2 border-t border-[#e3e2de] flex items-center justify-between text-xs font-mono text-[#787774]">
                       <button
                         onClick={() => setActivePlayingVideo(video)}
-                        className="text-[#2383e2] hover:underline cursor-pointer font-sans text-xs"
+                        className="text-[#2383e2] hover:underline cursor-pointer font-sans text-xs font-medium"
                       >
                         {lang === 'en' ? 'Watch Video' : '영상 재생'}
                       </button>
@@ -282,7 +271,8 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                           href={video.youtubeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-[#37352f] flex items-center gap-1"
+                          className="flex items-center gap-1 text-[#787774] hover:text-[#37352f] transition-colors font-sans text-xs"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <span>YouTube</span>
                           <ExternalLink className="w-3 h-3" />

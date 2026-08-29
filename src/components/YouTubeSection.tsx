@@ -17,6 +17,7 @@ import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
 import { useLanguage } from '../context/ThemeContext';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { extractVideoId, getYouTubeThumbnail, handleThumbnailError } from '../utils/youtubeHelper';
+import { ModalBackdrop } from './modals/ModalBackdrop';
 
 interface YouTubeSectionProps {
   videos: YouTubeVideoItem[];
@@ -287,63 +288,54 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         )}
       </div>
 
-      {/* Video Modal Player */}
-      <AnimatePresence>
+      {/* Video Modal Player (Centered Portal) */}
+      <ModalBackdrop
+        isOpen={!!activePlayingVideo}
+        onClose={() => setActivePlayingVideo(null)}
+        maxWidthClass="max-w-3xl"
+        zIndexClass="z-[9999]"
+      >
         {activePlayingVideo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4"
-            onClick={() => setActivePlayingVideo(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl border border-[#e3e2de] w-full max-w-3xl overflow-hidden shadow-2xl"
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#e3e2de] bg-[#f7f6f3]">
-                <div className="flex items-center gap-2 text-xs font-sans font-bold text-[#37352f] truncate pr-4">
-                  <Youtube className="w-4 h-4 text-red-600 shrink-0" />
-                  <span className="truncate">{activePlayingVideo.title}</span>
-                </div>
-                <button
-                  onClick={() => setActivePlayingVideo(null)}
-                  className="p-1 rounded text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          <>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e3e2de] bg-[#f7f6f3]">
+              <div className="flex items-center gap-2 text-xs font-sans font-bold text-[#37352f] truncate pr-4">
+                <Youtube className="w-4 h-4 text-red-600 shrink-0" />
+                <span className="truncate">{activePlayingVideo.title}</span>
               </div>
+              <button
+                onClick={() => setActivePlayingVideo(null)}
+                className="p-1 rounded text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] cursor-pointer transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="relative aspect-video w-full bg-black">
-                {extractVideoId(activePlayingVideo.youtubeUrl) ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${extractVideoId(
-                      activePlayingVideo.youtubeUrl
-                    )}?autoplay=1&rel=0`}
-                    title={activePlayingVideo.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white text-xs font-mono">
-                    Unable to load video stream
-                  </div>
-                )}
-              </div>
-
-              {activePlayingVideo.description && (
-                <div className="p-4 text-xs font-sans text-[#5a5854] bg-[#fdfdfd] border-t border-[#e3e2de]">
-                  {activePlayingVideo.description}
+            <div className="relative aspect-video w-full bg-black">
+              {extractVideoId(activePlayingVideo.youtubeUrl) ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractVideoId(
+                    activePlayingVideo.youtubeUrl
+                  )}?autoplay=1&rel=0`}
+                  title={activePlayingVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white text-xs font-mono">
+                  Unable to load video stream
                 </div>
               )}
-            </motion.div>
-          </motion.div>
+            </div>
+
+            {activePlayingVideo.description && (
+              <div className="p-4 text-xs font-sans text-[#5a5854] bg-[#fdfdfd] border-t border-[#e3e2de] max-h-36 overflow-y-auto">
+                {activePlayingVideo.description}
+              </div>
+            )}
+          </>
         )}
-      </AnimatePresence>
+      </ModalBackdrop>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

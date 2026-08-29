@@ -3,6 +3,7 @@ import { X, Save, Trash2, Youtube, Plus, Video, Image, Tag, Sparkles, RefreshCw,
 import { YouTubeVideoItem } from '../../types';
 import { ConfirmModal } from './ConfirmModal';
 import { extractVideoId, getYouTubeThumbnail, fetchYouTubeInfo, handleThumbnailError } from '../../utils/youtubeHelper';
+import { ModalBackdrop } from './ModalBackdrop';
 
 interface EditYouTubeModalProps {
   initialData?: YouTubeVideoItem | null;
@@ -196,36 +197,34 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
 
   return (
     <>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-xs animate-in fade-in"
+      <ModalBackdrop
+        isOpen={isOpen}
+        onClose={onClose}
+        maxWidthClass="max-w-2xl"
+        zIndexClass="z-[9999]"
       >
-        <div
-          className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-white border border-[#e3e2de] shadow-xl overflow-hidden text-[#37352f]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Notion Header */}
-          <div className="px-6 py-4 bg-[#fbfbfa] border-b border-[#e3e2de] flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-red-50 border border-red-100 text-red-600">
-                <Youtube className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-sans text-base font-bold text-[#37352f] tracking-tight">
-                  {isEditing ? '유튜브 영상 항목 수정' : '새 유튜브 영상 등록'}
-                </h3>
-                <p className="text-[11px] font-mono text-[#787774]">
-                  YouTube URL 입력 시 고화질 썸네일과 영상 정보가 자동 연동됩니다.
-                </p>
-              </div>
+        {/* Notion Header */}
+        <div className="px-6 py-4 bg-[#fbfbfa] border-b border-[#e3e2de] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-red-50 border border-red-100 text-red-600">
+              <Youtube className="w-5 h-5" />
             </div>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-md text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div>
+              <h3 className="font-sans text-base font-bold text-[#37352f] tracking-tight">
+                {isEditing ? '유튜브 영상 항목 수정' : '새 유튜브 영상 등록'}
+              </h3>
+              <p className="text-[11px] font-mono text-[#787774]">
+                YouTube URL 입력 시 고화질 썸네일과 영상 정보가 자동 연동됩니다.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-md text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
           {/* Error Alert */}
           {errorMessage && (
@@ -510,8 +509,7 @@ export const EditYouTubeModal: React.FC<EditYouTubeModalProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      </div>
+      </ModalBackdrop>
 
       {/* Confirm Delete Modal */}
       <ConfirmModal

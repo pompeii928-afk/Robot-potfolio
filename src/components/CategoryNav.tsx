@@ -139,9 +139,9 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                   />
                 )}
 
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
                   <Icon
-                    className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                       isYouTube
                         ? 'text-red-600 dark:text-red-400'
                         : isActive
@@ -153,11 +153,11 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                             : 'text-slate-500 group-hover:text-cyan-300'
                     }`}
                   />
-                  <span>{label}</span>
+                  <span className="whitespace-nowrap">{label}</span>
 
                   {cat.badge && (
                     <span
-                      className={`hidden md:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono tracking-tight transition-colors ${
+                      className={`hidden md:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono tracking-tight whitespace-nowrap shrink-0 transition-colors ${
                         isYouTube
                           ? 'bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/40 font-bold'
                           : isActive

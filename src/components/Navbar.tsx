@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RobotLogo } from './RobotLogo';
 import { Menu, X, Mail, Sun, Moon, Globe, LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useTheme, useLanguage } from '../context/ThemeContext';
 
 interface NavbarProps {
@@ -63,19 +62,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           id="nav-logo-btn"
           onClick={() => handleLinkClick('all')}
-          className="flex items-center gap-3 group text-left transition-transform hover:scale-[1.02] cursor-pointer"
+          className="flex items-center gap-3 group text-left transition-transform hover:scale-[1.02] cursor-pointer whitespace-nowrap shrink-0"
         >
           <RobotLogo size={36} />
-          <div className="flex flex-col">
+          <div className="flex flex-col whitespace-nowrap">
             <span
-              className={`font-display font-extrabold text-lg sm:text-xl tracking-tight ${
+              className={`font-display font-extrabold text-lg sm:text-xl tracking-tight whitespace-nowrap ${
                 theme === 'light' ? 'text-slate-900' : 'text-cyan-400 text-glow-cyan'
               }`}
             >
               K.F.C.Code Chaser
             </span>
             <span
-              className={`text-[11px] font-mono tracking-tight -mt-0.5 hidden sm:block ${
+              className={`text-[11px] font-mono tracking-tight -mt-0.5 hidden sm:block whitespace-nowrap ${
                 theme === 'light' ? 'text-slate-500 font-medium' : 'text-cyan-200/60'
               }`}
             >
@@ -84,67 +83,26 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </button>
 
-        {/* Desktop Nav Items + Theme & Lang Controls */}
-        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2">
-          <nav id="desktop-nav" className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/80">
-            {navItems.map((item) => {
-              const isActive = activeSection === item.id;
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  id={`nav-link-${item.id}`}
-                  onClick={() => handleLinkClick(item.id)}
-                  className={`relative px-3 py-1.5 text-xs xl:text-sm font-tech font-semibold transition-all rounded-lg cursor-pointer flex items-center gap-1.5 ${
-                    isActive
-                      ? theme === 'light'
-                        ? 'text-sky-950 font-bold'
-                        : 'text-white font-bold'
-                      : theme === 'light'
-                        ? 'text-slate-600 hover:text-sky-700 hover:bg-white/60'
-                        : 'text-slate-400 hover:text-cyan-300 hover:bg-slate-800/40'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="navbarGlidingIndicator"
-                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                      className={`absolute inset-0 rounded-lg ${
-                        theme === 'light'
-                          ? 'bg-white shadow-[0_2px_8px_rgba(2,132,199,0.15)] border border-sky-200 text-sky-900'
-                          : 'bg-cyan-950 border border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
-                      }`}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? (theme === 'light' ? 'text-sky-600' : 'text-cyan-400') : 'opacity-70'}`} />
-                    <span>{item.label}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
-
+        {/* Desktop Theme & Lang Controls + Contact */}
+        <div className="hidden sm:flex items-center gap-2">
           {/* Theme Switcher Toggle */}
           <button
             id="theme-toggle-btn"
             onClick={toggleTheme}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 select-none ${
               theme === 'light'
-                ? 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm'
-                : 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 shadow-sm'
+                : 'bg-[#081224] hover:bg-[#0c1a32] text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
             }`}
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             ) : (
-              <Moon className="w-3.5 h-3.5 text-sky-600" />
+              <Moon className="w-3.5 h-3.5 text-sky-600 shrink-0" />
             )}
-            <span className="text-[11px] font-bold">
+            <span className="text-[11px] font-bold tracking-wider whitespace-nowrap">
               {theme === 'dark' ? 'LIGHT' : 'DARK'}
             </span>
           </button>
@@ -153,19 +111,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="lang-toggle-btn"
             onClick={toggleLanguage}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 select-none ${
               theme === 'light'
-                ? 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm'
-                : 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 shadow-sm'
+                : 'bg-[#081224] hover:bg-[#0c1a32] text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
             }`}
-            title="Switch Language (한국어 / English)"
+            title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
             aria-label="Toggle language"
           >
-            <Globe className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
-            <span className="font-bold tracking-wider">
+            <Globe className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400 shrink-0" />
+            <span className="text-[11px] font-bold tracking-wider whitespace-nowrap inline-block">
               {lang === 'ko' ? 'EN' : '한국어'}
             </span>
           </button>
+
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-0.5" />
 
           {/* Contact Button */}
           <button
@@ -174,24 +134,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               const el = document.getElementById('contact-footer');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               theme === 'light'
                 ? 'text-sky-700 bg-sky-50 border border-sky-300 hover:bg-sky-100 shadow-sm'
                 : 'text-cyan-300 bg-cyan-950/60 border border-cyan-400/40 hover:bg-cyan-900/60 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]'
             }`}
             title="Contact & Info"
           >
-            <Mail className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
-            <span>{t('nav.contact')}</span>
+            <Mail className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400 shrink-0" />
+            <span className="whitespace-nowrap">{t('nav.contact')}</span>
           </button>
         </div>
 
-        {/* Medium and Small Screens Header controls */}
-        <div className="flex lg:hidden items-center gap-2">
+        {/* Mobile Screens Header controls */}
+        <div className="flex sm:hidden items-center gap-1.5">
           {/* Quick Theme Toggle on Mobile Header */}
           <button
             onClick={toggleTheme}
-            className={`p-2 rounded-lg text-xs transition-all cursor-pointer ${
+            className={`p-2 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               theme === 'light'
                 ? 'bg-slate-100 text-slate-700 border border-slate-300'
                 : 'bg-slate-900/80 text-cyan-300 border border-cyan-500/30'
@@ -208,14 +168,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Quick Lang Toggle on Mobile Header */}
           <button
             onClick={toggleLanguage}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               theme === 'light'
                 ? 'bg-slate-100 text-slate-700 border border-slate-300'
                 : 'bg-slate-900/80 text-cyan-300 border border-cyan-500/30'
             }`}
             aria-label="Toggle language"
           >
-            {lang === 'ko' ? 'EN' : 'KO'}
+            {lang === 'ko' ? 'EN' : '한국어'}
           </button>
 
           <button

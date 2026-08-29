@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme, useLanguage } from '../context/ThemeContext';
@@ -24,6 +24,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
 }) => {
   const { theme } = useTheme();
   const { lang } = useLanguage();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLButtonElement | null>(null);
 
   const safeCounts: CategoryCounts = counts || {};
 
@@ -93,16 +95,38 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
     },
   ];
 
+  // Auto-scroll category bar so the selected/active button is smoothly visible in view
+  useEffect(() => {
+    if (activeTabRef.current && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const tab = activeTabRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = tab.getBoundingClientRect();
+
+      // Calculate target scroll position to center the active category tab
+      const scrollOffset =
+        tab.offsetLeft - container.offsetWidth / 2 + tab.offsetWidth / 2;
+
+      container.scrollTo({
+        left: Math.max(0, scrollOffset),
+        behavior: 'smooth',
+      });
+    }
+  }, [activeCategory]);
+
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 my-2">
+    <div className="sticky top-[61px] sm:top-[69px] z-40 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 my-1">
       <div
         className={`p-1.5 sm:p-2 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
           theme === 'light'
-            ? 'bg-white/80 border-slate-200/90 shadow-[0_8px_25px_rgba(15,23,42,0.06)]'
-            : 'bg-[#081224]/85 border-cyan-500/25 shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
+            ? 'bg-white/90 border-slate-200/90 shadow-[0_8px_25px_rgba(15,23,42,0.06)]'
+            : 'bg-[#081224]/90 border-cyan-500/25 shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
         }`}
       >
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+        <div
+          ref={scrollContainerRef}
+          className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth px-0.5"
+        >
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             const Icon = cat.icon;
@@ -112,6 +136,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
             return (
               <button
                 key={cat.id}
+                ref={isActive ? (el) => { activeTabRef.current = el; } : null}
                 id={`cat-tab-${cat.id}`}
                 onClick={() => onSelectCategory(cat.id)}
                 className={`relative group shrink-0 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-tech font-semibold transition-all duration-200 cursor-pointer select-none ${

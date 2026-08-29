@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Trophy, Sparkles, Medal, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Trophy, Sparkles, Medal, Plus, Edit3, Trash2, Calendar, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AwardItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
-import { useTheme, useLanguage } from '../context/ThemeContext';
+import { useLanguage } from '../context/ThemeContext';
 import { getLocalizedAward } from '../utils/translationHelper';
 
 interface AwardsSectionProps {
@@ -23,7 +23,6 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
   onDeleteAward,
   onSelectAward,
 }) => {
-  const { theme } = useTheme();
   const { lang, t } = useLanguage();
 
   const localizedAwards = awards.map((a) => getLocalizedAward(a, lang));
@@ -42,10 +41,10 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
     const y = (rect.top + rect.height / 2) / window.innerHeight;
 
     confetti({
-      particleCount: 70,
-      spread: 70,
+      particleCount: 60,
+      spread: 60,
       origin: { x, y },
-      colors: ['#00f0ff', '#818cf8', '#c084fc', '#38bdf8', '#ffffff', '#0284c7'],
+      colors: ['#2383e2', '#f2994a', '#27ae60', '#9b51e0', '#37352f'],
       disableForReducedMotion: true,
     });
 
@@ -67,33 +66,20 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
   };
 
   return (
-    <section
-      id="awards"
-      className={`relative py-16 sm:py-24 border-t scroll-mt-20 sm:scroll-mt-24 ${
-        theme === 'light' ? 'border-slate-200' : 'border-cyan-500/10'
-      }`}
-    >
+    <section id="awards" className="relative py-10 sm:py-14 border-t border-[#e3e2de] scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center gap-2.5 font-display text-2xl sm:text-3xl font-bold tracking-wide ${
-                theme === 'light'
-                  ? 'text-sky-700'
-                  : 'text-cyan-400 text-glow-cyan'
-              }`}
-            >
-              <Trophy className={`w-7 h-7 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-400'}`} />
-              <span>{t('awards.title')}</span>
+        {/* Notion Section Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl select-none">🏆</span>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#37352f] tracking-tight">
+                {t('awards.title', '수상 및 성과 내역')}
+              </h2>
+              <p className="text-xs sm:text-sm text-[#787774] mt-0.5">
+                {t('awards.subtitle', '국내외 로봇 경진대회 및 자율주행 챌린지 수상 기록입니다.')}
+              </p>
             </div>
-            <div
-              className={`hidden sm:block w-32 h-[1px] ${
-                theme === 'light'
-                  ? 'bg-gradient-to-r from-sky-400/50 via-sky-300/20 to-transparent'
-                  : 'bg-gradient-to-r from-cyan-500/40 via-cyan-500/10 to-transparent'
-              }`}
-            />
           </div>
 
           {/* Admin Action: Add Award */}
@@ -101,188 +87,94 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
             <button
               onClick={onAddAward}
               id="add-award-btn"
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                theme === 'light'
-                  ? 'bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-700 shadow-sm'
-                  : 'bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-              }`}
+              className="px-3 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>{t('awards.addBtn')}</span>
+              <Plus className="w-3.5 h-3.5 text-[#787774]" />
+              <span>{t('awards.addBtn', '새 수상 추가')}</span>
             </button>
           )}
         </div>
 
         {awards.length === 0 ? (
-          <div
-            className={`p-12 text-center rounded-2xl border border-dashed font-mono text-sm ${
-              theme === 'light'
-                ? 'bg-slate-50 border-slate-300 text-slate-500'
-                : 'bg-[#081224]/50 border-cyan-500/20 text-slate-400'
-            }`}
-          >
+          <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
             {lang === 'en'
-              ? 'No awards recorded yet. Switch to admin mode to register competition awards.'
-              : '등록된 수상 내역이 없습니다. 관리자 모드에서 새로운 상을 추가해 보세요.'}
+              ? 'No awards recorded yet. Please add awards in admin mode.'
+              : '등록된 수상 내역이 없습니다. 관리자 모드에서 새 상을 추가해 보세요.'}
           </div>
         ) : (
-          <>
-            {/* Central Achievement Showcase Card */}
+          <div className="space-y-6">
+            {/* Main Highlight Award (Notion Callout Showcase) */}
             {mainAward && (
-              <div className="max-w-3xl mx-auto relative group">
-                {/* Admin Quick Edit Bar for Main Award */}
+              <div className="relative group bg-[#fdfaf2] border border-[#f5e9d3] rounded-xl p-6 sm:p-8">
+                {/* Admin Quick Action */}
                 {isAdmin && rawMainAward && (
-                  <div
-                    className={`absolute top-4 right-4 z-10 flex items-center gap-1.5 p-1 rounded-lg border backdrop-blur-md ${
-                      theme === 'light'
-                        ? 'bg-white/90 border-slate-300 shadow-sm'
-                        : 'bg-[#060c18]/90 border-cyan-500/40'
-                    }`}
-                  >
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
                     {onEditAward && (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditAward(rawMainAward);
-                        }}
-                        className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                          theme === 'light'
-                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                            : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
-                        }`}
+                        onClick={() => onEditAward(rawMainAward)}
+                        className="px-2.5 py-1 rounded text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1 cursor-pointer"
                       >
-                        <Edit3 className="w-3.5 h-3.5" /> {t('journey.edit')}
+                        <Edit3 className="w-3 h-3" /> {t('journey.edit', '수정')}
                       </button>
                     )}
                     {onDeleteAward && (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAwardToDelete(rawMainAward);
-                        }}
-                        className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                          theme === 'light'
-                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-600'
-                            : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
-                        }`}
+                        onClick={() => setAwardToDelete(rawMainAward)}
+                        className="p-1.5 rounded text-xs font-sans bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 cursor-pointer"
+                        title="Delete"
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> {t('journey.delete')}
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 )}
 
-                <div
-                  onClick={(e) => handleTriggerCelebration(e, mainAward)}
-                  className={`relative cursor-pointer p-8 sm:p-12 rounded-3xl backdrop-blur-xl border text-center transition-all duration-300 overflow-hidden ${
-                    theme === 'light'
-                      ? 'bg-white border-amber-300/80 shadow-[0_15px_45px_rgba(245,158,11,0.12)] hover:border-amber-400 hover:shadow-[0_20px_50px_rgba(245,158,11,0.2)]'
-                      : 'bg-[#0a152d]/90 border-amber-500/40 hover:border-amber-400/90 shadow-[0_0_50px_rgba(245,158,11,0.25)]'
-                  }`}
-                >
-                  {/* Corner Accent Brackets */}
-                  <div className={`absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
-                  <div className={`absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
-                  <div className={`absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
-                  <div className={`absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 ${theme === 'light' ? 'border-amber-500' : 'border-amber-400'}`} />
-
-                  {/* Ambient Radial Background Glow */}
-                  <div
-                    className={`absolute inset-0 opacity-75 pointer-events-none ${
-                      theme === 'light'
-                        ? 'bg-gradient-to-b from-amber-400/10 via-transparent to-sky-500/5'
-                        : 'bg-gradient-to-b from-amber-500/15 via-transparent to-purple-600/10'
-                    }`}
-                  />
-
-                  {/* Glowing Trophy / Medal Icon */}
-                  <div className="relative inline-flex items-center justify-center mb-6">
-                    <div
-                      className={`absolute inset-0 rounded-full blur-xl animate-pulse ${
-                        theme === 'light' ? 'bg-amber-400/40' : 'bg-amber-400/30'
-                      }`}
-                    />
-                    <div
-                      className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 flex items-center justify-center group-hover:scale-110 transition-transform ${
-                        theme === 'light'
-                          ? 'bg-gradient-to-br from-amber-100 to-yellow-50 border-amber-400 shadow-[0_6px_25px_rgba(245,158,11,0.3)]'
-                          : 'bg-gradient-to-br from-[#2a1e06] to-[#081329] border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.5)]'
-                      }`}
-                    >
-                      <Medal
-                        className={`w-10 h-10 sm:w-12 sm:h-12 ${
-                          theme === 'light'
-                            ? 'text-amber-600'
-                            : 'text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]'
-                        }`}
-                      />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#f5e9d3]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-white border border-[#f5e9d3] flex items-center justify-center text-2xl shadow-2xs">
+                      🥇
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#8f5b1d]">
+                          {lang === 'en' ? 'TOP HONORS' : '최고 수상 성과'}
+                        </span>
+                        <span className="text-xs font-mono text-[#787774]">• {mainAward.date}</span>
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-sans font-bold text-[#37352f]">
+                        {mainAward.competition}
+                      </h3>
                     </div>
                   </div>
 
-                  {/* Subtitle */}
-                  <div
-                    className={`text-xs sm:text-sm font-mono tracking-[0.25em] uppercase font-bold mb-2 flex items-center justify-center gap-2 ${
-                      theme === 'light' ? 'text-amber-700' : 'text-amber-400'
-                    }`}
+                  {/* Confetti Trigger Button */}
+                  <button
+                    onClick={(e) => handleTriggerCelebration(e, mainAward)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-sans font-semibold text-[#8f5b1d] bg-white hover:bg-[#fff9eb] border border-[#f5e9d3] transition-colors cursor-pointer shadow-2xs"
                   >
-                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-amber-600' : 'text-amber-300'}`} />
-                    <span>{t('awards.unlocked')}</span>
-                    <Sparkles className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-amber-600' : 'text-amber-300'}`} />
-                  </div>
+                    <span>🎉</span>
+                    <span>{lang === 'en' ? 'Celebrate' : '축하하기'}</span>
+                  </button>
+                </div>
 
-                  {/* Main Award Title */}
-                  <h3
-                    className={`font-display text-2xl sm:text-4xl font-extrabold tracking-wide mb-4 leading-tight ${
-                      theme === 'light' ? 'text-slate-900' : 'text-white'
-                    }`}
-                  >
-                    {mainAward.competition}
-                  </h3>
-
-                  {/* Pill Badge */}
-                  <div
-                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm sm:text-base border transition-all ${
-                      theme === 'light'
-                        ? 'bg-amber-50 border-amber-300 text-amber-900 shadow-sm group-hover:bg-amber-100'
-                        : 'bg-amber-950/80 border border-amber-400/70 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] group-hover:bg-amber-900/90'
-                    }`}
-                  >
-                    <Trophy className="w-4 h-4 text-amber-500" />
+                <div className="pt-4 space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm font-sans font-bold bg-white text-[#37352f] border border-[#f5e9d3]">
+                    <Trophy className="w-4 h-4 text-[#8f5b1d]" />
                     <span>{mainAward.title}</span>
                   </div>
 
-                  {/* Description & Rank */}
-                  <p
-                    className={`mt-6 text-sm sm:text-base max-w-xl mx-auto leading-relaxed whitespace-pre-line ${
-                      theme === 'light' ? 'text-slate-700' : 'text-slate-300'
-                    }`}
-                  >
+                  <p className="text-sm font-sans text-[#37352f] leading-relaxed max-w-3xl whitespace-pre-line">
                     {mainAward.description}
                   </p>
 
-                  <div
-                    className={`mt-6 inline-flex flex-wrap items-center justify-center gap-3 text-xs font-mono ${
-                      theme === 'light' ? 'text-slate-600' : 'text-cyan-300/90'
-                    }`}
-                  >
-                    <span className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                      Date: {mainAward.date}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-mono text-[#787774]">
                     {mainAward.rank && (
-                      <span className={`px-2.5 py-1 rounded font-bold border ${
-                        theme === 'light'
-                          ? 'bg-amber-50 border-amber-300 text-amber-800'
-                          : 'bg-amber-950/80 border-amber-500/50 text-amber-300'
-                      }`}>
+                      <span className="px-2.5 py-0.5 rounded bg-white text-[#8f5b1d] border border-[#f5e9d3] font-semibold">
                         Rank: {mainAward.rank}
                       </span>
                     )}
                     {mainAward.score && (
-                      <span className={`px-2.5 py-1 rounded font-bold border ${
-                        theme === 'light'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                          : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
-                      }`}>
+                      <span className="px-2.5 py-0.5 rounded bg-[#edf3ec] text-[#2b593f] border border-[#d3e5d0] font-semibold">
                         Score: {mainAward.score}
                       </span>
                     )}
@@ -291,108 +183,78 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
               </div>
             )}
 
-            {/* Other Awards Grid */}
+            {/* Other Awards (Notion Gallery Grid) */}
             {otherAwards.length > 0 && (
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {otherAwards.map((award, idx) => {
                   const rawAward = awards.filter((a) => a.id !== rawMainAward?.id)[idx] || award;
                   return (
-                  <div
-                    key={award.id}
-                    onClick={(e) => handleTriggerCelebration(e, award)}
-                    className={`relative p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between group ${
-                      theme === 'light'
-                        ? 'bg-white border-slate-200 hover:border-sky-300 hover:shadow-md'
-                        : 'bg-[#081224]/70 border-slate-800/80 hover:border-cyan-500/40 hover:bg-[#0a1832]'
-                    }`}
-                  >
-                    {/* Admin Item Actions */}
-                    {isAdmin && (
-                      <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
-                        {onEditAward && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEditAward(rawAward);
-                            }}
-                            className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
-                              theme === 'light'
-                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                                : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border-cyan-500/30'
-                            }`}
-                            title="Edit"
-                          >
-                            <Edit3 className="w-3 h-3" />
-                          </button>
-                        )}
-                        {onDeleteAward && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAwardToDelete(rawAward);
-                            }}
-                            className={`p-1 rounded text-[10px] font-mono border cursor-pointer ${
-                              theme === 'light'
-                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
-                                : 'bg-rose-950 hover:bg-rose-900 text-rose-300 border-rose-500/30'
-                            }`}
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    <div>
-                      <div
-                        className={`flex items-center justify-between text-xs font-mono mb-1 pr-12 ${
-                          theme === 'light' ? 'text-sky-700 font-semibold' : 'text-cyan-400'
-                        }`}
-                      >
-                        <span>{award.date}</span>
-                        {award.rank && (
-                          <span
-                            className={`px-2 py-0.5 rounded border text-[10px] ${
-                              theme === 'light'
-                                ? 'bg-sky-50 border-sky-200 text-sky-800'
-                                : 'bg-cyan-950/60 border-cyan-500/30'
-                            }`}
-                          >
-                            {award.rank}
-                          </span>
-                        )}
-                      </div>
-                      <h4
-                        className={`text-sm font-bold transition-colors mb-1 ${
-                          theme === 'light'
-                            ? 'text-slate-900 group-hover:text-sky-700'
-                            : 'text-white group-hover:text-cyan-300'
-                        }`}
-                      >
-                        {award.title}
-                      </h4>
-                      <div
-                        className={`text-xs mb-2 ${
-                          theme === 'light' ? 'text-slate-500 font-medium' : 'text-slate-400'
-                        }`}
-                      >
-                        {award.competition}
-                      </div>
-                    </div>
-                    <p
-                      className={`text-[11px] line-clamp-2 whitespace-pre-line ${
-                        theme === 'light' ? 'text-slate-600' : 'text-slate-400'
-                      }`}
+                    <div
+                      key={award.id}
+                      onClick={(e) => handleTriggerCelebration(e, award)}
+                      className="relative p-5 rounded-xl border border-[#e3e2de] bg-white hover:bg-[#fbfbfa] transition-colors cursor-pointer flex flex-col justify-between group shadow-2xs"
                     >
-                      {award.description}
-                    </p>
-                  </div>
+                      {/* Admin Quick Action */}
+                      {isAdmin && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
+                          {onEditAward && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditAward(rawAward);
+                              }}
+                              className="p-1 rounded text-xs bg-[#f7f6f3] hover:bg-[#efefed] text-[#787774] border border-[#e3e2de] cursor-pointer"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                            </button>
+                          )}
+                          {onDeleteAward && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAwardToDelete(rawAward);
+                              }}
+                              className="p-1 rounded text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-mono text-[#787774] mb-2 pr-12">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[#9b9a97]" />
+                            <span>{award.date}</span>
+                          </span>
+                          {award.rank && (
+                            <span className="px-2 py-0.5 rounded bg-[#f1f1ef] text-[#37352f] text-[11px] font-semibold">
+                              {award.rank}
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="text-base font-sans font-bold text-[#37352f] mb-1 group-hover:text-[#2383e2] transition-colors">
+                          {award.title}
+                        </h4>
+
+                        <div className="text-xs font-sans text-[#787774] mb-3">
+                          {award.competition}
+                        </div>
+                      </div>
+
+                      <p className="text-xs font-sans text-[#5a5854] leading-relaxed line-clamp-3 whitespace-pre-line">
+                        {award.description}
+                      </p>
+                    </div>
                   );
                 })}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 

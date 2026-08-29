@@ -117,15 +117,15 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
   return (
     <div className="sticky top-[61px] sm:top-[69px] z-40 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 my-1">
       <div
-        className={`p-1.5 sm:p-2 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${
+        className={`p-1.5 rounded-full border transition-all duration-200 ${
           theme === 'light'
-            ? 'bg-white/90 border-slate-200/90 shadow-[0_8px_25px_rgba(15,23,42,0.06)]'
-            : 'bg-[#081224]/90 border-cyan-500/25 shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
+            ? 'bg-white/95 border-zinc-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] backdrop-blur-md'
+            : 'bg-[#0a0f1d]/95 border-white/10 shadow-[0_4px_25px_rgba(0,0,0,0.5)] backdrop-blur-md'
         }`}
       >
         <div
           ref={scrollContainerRef}
-          className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth px-0.5"
+          className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scroll-smooth px-1"
         >
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
@@ -139,59 +139,59 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
                 ref={isActive ? (el) => { activeTabRef.current = el; } : null}
                 id={`cat-tab-${cat.id}`}
                 onClick={() => onSelectCategory(cat.id)}
-                className={`relative group shrink-0 flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-tech font-semibold transition-all duration-200 cursor-pointer select-none ${
+                className={`relative group shrink-0 flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-tech font-bold uppercase tracking-tight transition-all duration-150 cursor-pointer select-none ${
                   isActive
                     ? theme === 'light'
-                      ? 'text-sky-950 font-bold'
-                      : 'text-white font-bold'
+                      ? 'text-white'
+                      : 'text-white'
                     : theme === 'light'
-                      ? 'text-slate-600 hover:text-sky-800 hover:bg-slate-100/80'
-                      : 'text-slate-400 hover:text-cyan-200 hover:bg-cyan-950/30'
+                      ? 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {/* Active Indicator Background with smooth spring transition */}
                 {isActive && (
                   <motion.div
                     layoutId="activeCategoryPill"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                    className={`absolute inset-0 rounded-xl border ${
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                    className={`absolute inset-0 rounded-full ${
                       isYouTube
-                        ? 'bg-gradient-to-r from-red-600/20 to-rose-600/20 border-red-500/60 shadow-[0_0_18px_rgba(220,38,38,0.35)]'
+                        ? 'bg-red-600 shadow-[0_2px_12px_rgba(220,38,38,0.35)]'
                         : theme === 'light'
-                          ? 'bg-gradient-to-r from-sky-100/90 to-blue-50/90 border-sky-300 shadow-sm'
-                          : 'bg-gradient-to-r from-cyan-950/90 to-[#0c1f3d]/90 border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
+                          ? 'bg-zinc-950 shadow-[0_2px_10px_rgba(0,0,0,0.2)]'
+                          : 'bg-gradient-to-r from-cyan-950 to-zinc-900 border border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.35)]'
                     }`}
                   />
                 )}
 
                 <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
                   <Icon
-                    className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                      isYouTube
-                        ? 'text-red-600 dark:text-red-400'
-                        : isActive
-                          ? theme === 'light'
-                            ? 'text-sky-600'
-                            : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]'
+                    className={`w-3.5 h-3.5 shrink-0 transition-transform duration-150 ${
+                      isActive
+                        ? isYouTube || theme === 'light'
+                          ? 'text-white'
+                          : 'text-cyan-400'
+                        : isYouTube
+                          ? 'text-red-600 dark:text-red-400'
                           : theme === 'light'
-                            ? 'text-slate-500 group-hover:text-sky-600'
-                            : 'text-slate-500 group-hover:text-cyan-300'
+                            ? 'text-zinc-500 group-hover:text-zinc-950'
+                            : 'text-zinc-400 group-hover:text-white'
                     }`}
                   />
-                  <span className="whitespace-nowrap">{label}</span>
+                  <span className="whitespace-nowrap font-bold">{label}</span>
 
                   {cat.badge && (
                     <span
-                      className={`hidden md:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono tracking-tight whitespace-nowrap shrink-0 transition-colors ${
-                        isYouTube
-                          ? 'bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/40 font-bold'
-                          : isActive
-                            ? theme === 'light'
-                              ? 'bg-sky-200/80 text-sky-900 font-bold'
-                              : 'bg-cyan-900/80 text-cyan-200 border border-cyan-400/40'
+                      className={`hidden md:inline-block px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-tight whitespace-nowrap shrink-0 transition-colors ${
+                        isActive
+                          ? isYouTube
+                            ? 'bg-white/20 text-white'
                             : theme === 'light'
-                              ? 'bg-slate-100 text-slate-500'
-                              : 'bg-slate-900/80 text-slate-400'
+                              ? 'bg-white/20 text-zinc-100'
+                              : 'bg-cyan-900/60 text-cyan-200'
+                          : theme === 'light'
+                            ? 'bg-zinc-100 text-zinc-600'
+                            : 'bg-zinc-900 text-zinc-400'
                       }`}
                     >
                       {cat.badge}

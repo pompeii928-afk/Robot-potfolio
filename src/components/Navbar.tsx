@@ -1,43 +1,146 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RobotLogo } from './RobotLogo';
-import { Menu, X, Mail, Sun, Moon, Globe, LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
-import { useTheme, useLanguage } from '../context/ThemeContext';
+import {
+  Menu,
+  X,
+  Mail,
+  Globe,
+  LayoutGrid,
+  Bot,
+  TrendingUp,
+  Trophy,
+  Cpu,
+  FolderGit2,
+  Youtube,
+  ExternalLink,
+} from 'lucide-react';
+import { useLanguage } from '../context/ThemeContext';
+
+export interface CategoryCounts {
+  journeys?: number;
+  awards?: number;
+  skills?: number;
+  projects?: number;
+  videos?: number;
+}
 
 interface NavbarProps {
   activeSection: string;
   onNavigate: (sectionId: string) => void;
-  onOpenTerminal?: () => void;
+  counts?: CategoryCounts;
+  isAdmin?: boolean;
+  onOpenAdmin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeSection,
   onNavigate,
+  counts = {} as CategoryCounts,
+  isAdmin = false,
+  onOpenAdmin,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { id: 'all', label: lang === 'en' ? 'Overview' : '전체 보기', icon: LayoutGrid },
-    { id: 'about', label: t('nav.about'), icon: Bot },
-    { id: 'journey', label: t('nav.journey'), icon: TrendingUp },
-    { id: 'awards', label: t('nav.awards'), icon: Trophy },
-    { id: 'skills', label: t('nav.skills'), icon: Cpu },
-    { id: 'experience', label: t('nav.experience'), icon: FolderGit2 },
-    { id: 'youtube', label: t('nav.youtube', 'YouTube'), icon: Youtube },
+  // Auto-scroll the category bar so the active category button follows and stays visible in view
+  useEffect(() => {
+    const scrollCategoryIntoView = () => {
+      if (desktopNavRef.current) {
+        const activeBtn = desktopNavRef.current.querySelector<HTMLElement>(
+          `[data-category-id="${activeSection}"]`
+        );
+        if (activeBtn) {
+          activeBtn.scrollIntoView({
+            behavior: 'smooth',
+            inline: 'center',
+            block: 'nearest',
+          });
+        }
+      }
+
+      if (mobileNavRef.current) {
+        const activeMobileBtn = mobileNavRef.current.querySelector<HTMLElement>(
+          `[data-category-id="${activeSection}"]`
+        );
+        if (activeMobileBtn) {
+          activeMobileBtn.scrollIntoView({
+            behavior: 'smooth',
+            inline: 'center',
+            block: 'nearest',
+          });
+        }
+      }
+    };
+
+    // Timeout ensures DOM updates and layout paints have occurred
+    const timeoutId = setTimeout(scrollCategoryIntoView, 50);
+    return () => clearTimeout(timeoutId);
+  }, [activeSection]);
+
+  const categories = [
+    {
+      id: 'all',
+      labelEn: 'Overview',
+      labelKo: '전체 보기',
+      icon: LayoutGrid,
+      count: undefined,
+    },
+    {
+      id: 'about',
+      labelEn: 'About & Robot',
+      labelKo: '소개 & 비전',
+      icon: Bot,
+      count: undefined,
+    },
+    {
+      id: 'journey',
+      labelEn: 'Journey',
+      labelKo: '대회 여정',
+      icon: TrendingUp,
+      count: counts.journeys,
+    },
+    {
+      id: 'awards',
+      labelEn: 'Awards',
+      labelKo: '수상 내역',
+      icon: Trophy,
+      count: counts.awards,
+    },
+    {
+      id: 'skills',
+      labelEn: 'Skills',
+      labelKo: '핵심 역량',
+      icon: Cpu,
+      count: counts.skills,
+    },
+    {
+      id: 'experience',
+      labelEn: 'Projects',
+      labelKo: '로봇 시스템',
+      icon: FolderGit2,
+      count: counts.projects,
+    },
+    {
+      id: 'youtube',
+      labelEn: 'YouTube',
+      labelKo: '유튜브 채널',
+      icon: Youtube,
+      count: counts.videos,
+    },
   ];
 
-
-  const handleLinkClick = (id: string) => {
+  const handleSelectTab = (id: string) => {
     if (mobileMenuOpen) {
       setMobileMenuOpen(false);
     }
@@ -45,241 +148,231 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <div
+    <header
       id="navbar-header"
-      className={`w-full transition-all duration-300 ${
-        isScrolled
-          ? theme === 'light'
-            ? 'bg-white/95 backdrop-blur-md border-b border-slate-200/90 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-            : 'bg-[#060a15]/95 backdrop-blur-md border-b border-cyan-500/20 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
-          : theme === 'light'
-            ? 'bg-white/90 backdrop-blur-md py-2.5 sm:py-3 border-b border-slate-200/80'
-            : 'bg-[#070b13]/90 backdrop-blur-md py-2.5 sm:py-3 border-b border-cyan-500/15'
+      className={`sticky top-0 z-50 w-full transition-all duration-200 bg-white/95 backdrop-blur-md border-b border-[#e3e2de] ${
+        isScrolled ? 'shadow-[0_2px_10px_rgba(0,0,0,0.04)]' : ''
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Logo */}
-        <button
-          id="nav-logo-btn"
-          onClick={() => handleLinkClick('all')}
-          className="flex items-center gap-3 group text-left transition-transform hover:scale-[1.02] cursor-pointer whitespace-nowrap shrink-0"
-        >
-          <RobotLogo size={36} />
-          <div className="flex flex-col whitespace-nowrap">
-            <span
-              className={`font-display font-extrabold text-lg sm:text-xl tracking-tight whitespace-nowrap ${
-                theme === 'light' ? 'text-slate-900' : 'text-cyan-400 text-glow-cyan'
-              }`}
+      {/* Top Workspace Header Row */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-15 gap-3">
+          {/* Left: Notion Page Identity */}
+          <button
+            id="nav-logo-btn"
+            onClick={() => handleSelectTab('all')}
+            className="flex items-center gap-2.5 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0"
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#f7f6f3] border border-[#e3e2de] flex items-center justify-center text-zinc-900 shadow-2xs group-hover:bg-[#efefed]">
+              <RobotLogo size={22} />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-sans font-bold text-sm sm:text-base text-[#37352f] tracking-tight">
+                K.F.C.Code Chaser
+              </span>
+            </div>
+          </button>
+
+          {/* Center (Desktop/Tablet): Notion Integrated Category Bar */}
+          <nav
+            ref={desktopNavRef}
+            className="hidden lg:flex items-center gap-1 bg-[#f7f6f3] p-1 rounded-lg border border-[#e3e2de] overflow-x-auto no-scrollbar max-w-2xl scroll-smooth"
+          >
+            {categories.map((cat) => {
+              const isActive = activeSection === cat.id;
+              const Icon = cat.icon;
+              const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+              const isYouTube = cat.id === 'youtube';
+
+              return (
+                <button
+                  key={cat.id}
+                  id={`top-cat-${cat.id}`}
+                  data-category-id={cat.id}
+                  onClick={() => handleSelectTab(cat.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                    isActive
+                      ? 'bg-white text-[#37352f] font-semibold shadow-2xs border border-[#e3e2de]'
+                      : 'text-[#787774] hover:text-[#37352f] hover:bg-white/60 border border-transparent'
+                  }`}
+                >
+                  <Icon
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      isActive
+                        ? isYouTube
+                          ? 'text-red-600'
+                          : 'text-[#37352f]'
+                        : isYouTube
+                        ? 'text-red-500/70'
+                        : 'text-[#787774]'
+                    }`}
+                  />
+                  <span>{label}</span>
+                  {cat.count !== undefined && cat.count > 0 && (
+                    <span
+                      className={`text-[10px] font-mono px-1 rounded-sm leading-tight ${
+                        isActive
+                          ? 'bg-[#efefed] text-[#37352f]'
+                          : 'bg-[#e3e2de]/60 text-[#787774]'
+                      }`}
+                    >
+                      {cat.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Right Controls: Language Switcher & Contact */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Language Toggle (Notion pill) */}
+            <button
+              id="lang-toggle-btn"
+              onClick={toggleLanguage}
+              className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1.5 transition-colors cursor-pointer select-none"
+              title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
+              aria-label="Toggle language"
             >
-              K.F.C.Code Chaser
-            </span>
-            <span
-              className={`text-[11px] font-mono tracking-tight -mt-0.5 hidden sm:block whitespace-nowrap ${
-                theme === 'light' ? 'text-slate-500 font-medium' : 'text-cyan-200/60'
-              }`}
+              <Globe className="w-3.5 h-3.5 text-[#787774]" />
+              <span className="text-xs font-mono font-semibold">
+                {lang === 'ko' ? 'EN' : '한국어'}
+              </span>
+            </button>
+
+            {/* Contact Button (Notion style action) */}
+            <button
+              id="nav-contact-btn"
+              onClick={() => {
+                const el = document.getElementById('contact-footer');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] transition-colors cursor-pointer"
+              title="Contact"
             >
-              {t('nav.subtitle')}
-            </span>
+              <Mail className="w-3.5 h-3.5 text-[#787774]" />
+              <span>{t('nav.contact', 'Contact')}</span>
+            </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              id="mobile-menu-toggle"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-1.5 rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] transition-colors cursor-pointer"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
-        </button>
-
-        {/* Desktop Theme & Lang Controls + Contact */}
-        <div className="hidden sm:flex items-center gap-2">
-          {/* Theme Switcher Toggle */}
-          <button
-            id="theme-toggle-btn"
-            onClick={toggleTheme}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 select-none ${
-              theme === 'light'
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 shadow-sm'
-                : 'bg-[#081224] hover:bg-[#0c1a32] text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
-            }`}
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            ) : (
-              <Moon className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-            )}
-            <span className="text-[11px] font-bold tracking-wider whitespace-nowrap">
-              {theme === 'dark' ? 'LIGHT' : 'DARK'}
-            </span>
-          </button>
-
-          {/* Language Switcher Toggle */}
-          <button
-            id="lang-toggle-btn"
-            onClick={toggleLanguage}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 select-none ${
-              theme === 'light'
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 shadow-sm'
-                : 'bg-[#081224] hover:bg-[#0c1a32] text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
-            }`}
-            title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
-            aria-label="Toggle language"
-          >
-            <Globe className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400 shrink-0" />
-            <span className="text-[11px] font-bold tracking-wider whitespace-nowrap inline-block">
-              {lang === 'ko' ? 'EN' : '한국어'}
-            </span>
-          </button>
-
-          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-0.5" />
-
-          {/* Contact Button */}
-          <button
-            id="nav-contact-btn"
-            onClick={() => {
-              const el = document.getElementById('contact-footer');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-              theme === 'light'
-                ? 'text-sky-700 bg-sky-50 border border-sky-300 hover:bg-sky-100 shadow-sm'
-                : 'text-cyan-300 bg-cyan-950/60 border border-cyan-400/40 hover:bg-cyan-900/60 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-            }`}
-            title="Contact & Info"
-          >
-            <Mail className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400 shrink-0" />
-            <span className="whitespace-nowrap">{t('nav.contact')}</span>
-          </button>
         </div>
 
-        {/* Mobile Screens Header controls */}
-        <div className="flex sm:hidden items-center gap-1.5">
-          {/* Quick Theme Toggle on Mobile Header */}
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-lg text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-              theme === 'light'
-                ? 'bg-slate-100 text-slate-700 border border-slate-300'
-                : 'bg-slate-900/80 text-cyan-300 border border-cyan-500/30'
-            }`}
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-sky-600" />
-            )}
-          </button>
+        {/* Responsive Mobile / Tablet Sub-strip Category Navigation */}
+        <div
+          ref={mobileNavRef}
+          className="lg:hidden py-2 border-t border-[#e3e2de]/60 flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth"
+        >
+          {categories.map((cat) => {
+            const isActive = activeSection === cat.id;
+            const Icon = cat.icon;
+            const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+            const isYouTube = cat.id === 'youtube';
 
-          {/* Quick Lang Toggle on Mobile Header */}
-          <button
-            onClick={toggleLanguage}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-              theme === 'light'
-                ? 'bg-slate-100 text-slate-700 border border-slate-300'
-                : 'bg-slate-900/80 text-cyan-300 border border-cyan-500/30'
-            }`}
-            aria-label="Toggle language"
-          >
-            {lang === 'ko' ? 'EN' : '한국어'}
-          </button>
-
-          <button
-            id="mobile-menu-toggle"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`p-2 rounded-lg transition-all cursor-pointer ${
-              theme === 'light'
-                ? 'bg-slate-100 border border-slate-300 text-slate-800'
-                : 'bg-slate-900/80 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950'
-            }`}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            return (
+              <button
+                key={cat.id}
+                data-category-id={cat.id}
+                onClick={() => handleSelectTab(cat.id)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium shrink-0 transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'bg-[#37352f] text-white font-semibold shadow-2xs'
+                    : 'text-[#5a5854] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de]'
+                }`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 ${
+                    isActive
+                      ? isYouTube
+                        ? 'text-red-400'
+                        : 'text-white'
+                      : isYouTube
+                      ? 'text-red-600'
+                      : 'text-[#787774]'
+                  }`}
+                />
+                <span>{label}</span>
+                {cat.count !== undefined && cat.count > 0 && (
+                  <span
+                    className={`text-[10px] font-mono px-1 rounded-sm ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-[#e3e2de] text-[#787774]'
+                    }`}
+                  >
+                    {cat.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (When hamburger is opened) */}
       {mobileMenuOpen && (
         <div
           id="mobile-menu-drawer"
-          className={`lg:hidden px-4 pt-3 pb-5 backdrop-blur-xl border-b shadow-2xl animate-in slide-in-from-top duration-200 ${
-            theme === 'light'
-              ? 'bg-white/98 border-slate-200'
-              : 'bg-[#080e1d]/98 border-cyan-500/20'
-          }`}
+          className="lg:hidden px-4 pt-3 pb-5 bg-white border-b border-[#e3e2de] shadow-lg animate-in slide-in-from-top duration-200"
         >
-          <div className="flex flex-col gap-1.5">
-            {navItems.map((item) => {
+          <div className="flex flex-col gap-1">
+            {categories.map((item) => {
               const isActive = activeSection === item.id;
               const Icon = item.icon;
+              const label = lang === 'en' ? item.labelEn : item.labelKo;
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleLinkClick(item.id)}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-tech font-semibold flex items-center justify-between cursor-pointer transition-all ${
+                  onClick={() => handleSelectTab(item.id)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-sans font-medium flex items-center justify-between cursor-pointer transition-colors ${
                     isActive
-                      ? theme === 'light'
-                        ? 'text-sky-900 bg-sky-50 border border-sky-300 shadow-sm font-bold'
-                        : 'text-cyan-300 bg-cyan-950/80 border border-cyan-500/40 text-glow-cyan'
-                      : theme === 'light'
-                        ? 'text-slate-700 hover:bg-slate-100 hover:text-sky-700'
-                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-cyan-300'
+                      ? 'text-[#37352f] bg-[#efefed] font-semibold border border-[#e3e2de]'
+                      : 'text-[#5a5854] hover:bg-[#f7f6f3]'
                   }`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4 text-sky-600 dark:text-cyan-400" />
-                    <span>{item.label}</span>
+                    <Icon className="w-4 h-4 text-[#787774]" />
+                    <span>{label}</span>
                   </span>
-                  {isActive && (
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        theme === 'light'
-                          ? 'bg-sky-600 shadow-[0_0_8px_#0284c7]'
-                          : 'bg-cyan-400 shadow-[0_0_8px_#06b6d4]'
-                      }`}
-                    />
+                  {item.count !== undefined && (
+                    <span className="text-xs font-mono text-[#787774] bg-[#e3e2de] px-1.5 py-0.5 rounded">
+                      {item.count}
+                    </span>
                   )}
                 </button>
               );
             })}
 
-            {/* Quick Actions Row */}
-            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-              <button
-                onClick={toggleTheme}
-                className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-mono font-medium ${
-                  theme === 'light'
-                    ? 'bg-slate-100 text-slate-800 border border-slate-300'
-                    : 'bg-slate-900 text-cyan-300 border border-cyan-500/30'
-                }`}
-              >
-                {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-sky-600" />}
-                <span>{theme === 'dark' ? t('common.themeLight') : t('common.themeDark')}</span>
-              </button>
 
-              <button
-                onClick={toggleLanguage}
-                className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-mono font-medium ${
-                  theme === 'light'
-                    ? 'bg-slate-100 text-slate-800 border border-slate-300'
-                    : 'bg-slate-900 text-cyan-300 border border-cyan-500/30'
-                }`}
+
+            <div className="pt-3 mt-2 border-t border-[#e3e2de] flex items-center justify-between text-xs text-[#787774]">
+              <a
+                href="mailto:pompeii928@gmail.com"
+                className="flex items-center gap-1.5 hover:text-[#37352f]"
               >
-                <Globe className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
-                <span>{lang === 'ko' ? 'English' : '한국어'}</span>
-              </button>
+                <Mail className="w-3.5 h-3.5" />
+                <span>pompeii928@gmail.com</span>
+              </a>
+              <a
+                href="https://www.youtube.com/@Wrocospace"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-red-600 hover:underline"
+              >
+                <Youtube className="w-3.5 h-3.5" />
+                <span>@Wrocospace</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
-            
-            <a
-              href="mailto:pompeii928@gmail.com"
-              className={`mt-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-mono font-medium ${
-                theme === 'light'
-                  ? 'text-sky-700 bg-sky-50 border border-sky-300'
-                  : 'text-cyan-300 bg-cyan-950/40 border border-cyan-500/40'
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
-              <span>pompeii928@gmail.com</span>
-            </a>
           </div>
         </div>
       )}
-    </div>
+    </header>
   );
 };
-

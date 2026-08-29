@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -24,26 +25,39 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { theme } = useTheme();
   if (!isOpen) return null;
 
   return (
     <div
       onClick={onCancel}
-      className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in"
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in"
     >
       <div
-        className="relative w-full max-w-md bg-[#081224] border border-rose-500/40 rounded-2xl shadow-[0_0_50px_rgba(244,63,94,0.25)] overflow-hidden text-slate-200"
+        className={`relative w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden ${
+          theme === 'light'
+            ? 'bg-white border-zinc-200 text-zinc-900 shadow-2xl'
+            : 'bg-[#081224] border-white/10 text-zinc-200'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-rose-500/20 bg-[#060c18]">
-          <div className="flex items-center gap-2 text-rose-400 font-display font-bold text-base">
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
+        <div
+          className={`flex items-center justify-between px-6 py-4 border-b ${
+            theme === 'light'
+              ? 'bg-zinc-50 border-zinc-200 text-rose-600'
+              : 'bg-[#060c18] border-white/10 text-rose-400'
+          }`}
+        >
+          <div className="flex items-center gap-2 font-display font-black uppercase text-base tracking-tight">
+            <AlertTriangle className="w-5 h-5 text-rose-500" />
             <span>{title}</span>
           </div>
           <button
             onClick={onCancel}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+              theme === 'light' ? 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-200' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -51,38 +65,54 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
         {/* Body */}
         <div className="p-6 space-y-4">
-          <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+          <p className={`text-sm leading-relaxed whitespace-pre-line ${theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'}`}>
             {message}
           </p>
 
           {itemName && (
-            <div className="p-3 rounded-xl bg-slate-950/70 border border-rose-500/30 text-xs font-mono text-cyan-300">
-              <span className="text-slate-400 mr-1.5">대상 항목:</span>
-              <strong className="text-white">{itemName}</strong>
+            <div
+              className={`p-3 rounded-2xl border text-xs font-mono font-bold ${
+                theme === 'light'
+                  ? 'bg-zinc-100 border-zinc-200 text-zinc-900'
+                  : 'bg-zinc-950 border-white/10 text-cyan-300'
+              }`}
+            >
+              <span className="text-zinc-500 mr-1.5 font-normal">대상 항목:</span>
+              <strong className="text-zinc-950 dark:text-white">{itemName}</strong>
             </div>
           )}
 
-          <p className="text-xs text-rose-400/80 font-mono">
-            * 삭제된 데이터는 복구할 수 없으며 Firestore 데이터베이스에서 즉시 제거됩니다.
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-mono font-medium">
+            * 삭제된 데이터는 복구할 수 없으며 즉시 제거됩니다.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="px-6 py-4 bg-[#050b16] border-t border-rose-500/20 flex items-center justify-end gap-3">
+        <div
+          className={`px-6 py-4 border-t flex items-center justify-end gap-3 ${
+            theme === 'light'
+              ? 'bg-zinc-50 border-zinc-200'
+              : 'bg-[#050b16] border-white/10'
+          }`}
+        >
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-xs font-mono text-slate-300 bg-slate-800/80 hover:bg-slate-700 transition-all cursor-pointer"
+            className={`px-5 py-2 rounded-full text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
+              theme === 'light'
+                ? 'text-zinc-700 bg-zinc-200 hover:bg-zinc-300'
+                : 'text-zinc-300 bg-zinc-800 hover:bg-zinc-700'
+            }`}
           >
             {cancelText}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-5 py-2 rounded-full text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition-all cursor-pointer ${
               isDangerous
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]'
-                : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs'
+                : 'bg-zinc-950 hover:bg-zinc-800 text-white shadow-xs'
             }`}
           >
             <Trash2 className="w-3.5 h-3.5" />

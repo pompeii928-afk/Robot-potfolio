@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Bot, Plus, ArrowUpRight, Edit3, Trash2 } from 'lucide-react';
+import { Bot, Plus, ArrowUpRight, Edit3, Trash2, ExternalLink } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { ProjectModal } from './ProjectModal';
 import { ConfirmModal } from './modals/ConfirmModal';
-import { useTheme, useLanguage } from '../context/ThemeContext';
+import { useLanguage } from '../context/ThemeContext';
 import { getLocalizedProject } from '../utils/translationHelper';
 
 interface ProjectsSectionProps {
@@ -21,7 +21,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   onEditProject,
   onDeleteProject,
 }) => {
-  const { theme } = useTheme();
   const { lang, t } = useLanguage();
 
   const localizedProjects = projects.map((p) => getLocalizedProject(p, lang));
@@ -42,33 +41,20 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   };
 
   return (
-    <section
-      id="experience"
-      className={`relative py-16 sm:py-24 border-t scroll-mt-20 sm:scroll-mt-24 ${
-        theme === 'light' ? 'border-slate-200' : 'border-cyan-500/10'
-      }`}
-    >
+    <section id="experience" className="relative py-10 sm:py-14 border-t border-[#e3e2de] scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center gap-2.5 font-display text-2xl sm:text-3xl font-bold tracking-wide ${
-                theme === 'light'
-                  ? 'text-sky-700'
-                  : 'text-cyan-400 text-glow-cyan'
-              }`}
-            >
-              <Bot className={`w-7 h-7 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-400'}`} />
-              <span>{t('projects.title')}</span>
+        {/* Notion Section Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl select-none">📦</span>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#37352f] tracking-tight">
+                {t('projects.title', '로봇 시스템 및 프로젝트')}
+              </h2>
+              <p className="text-xs sm:text-sm text-[#787774] mt-0.5">
+                {t('projects.subtitle', '직접 설계하고 제작한 자율주행 및 하드웨어 시스템입니다.')}
+              </p>
             </div>
-            <div
-              className={`hidden sm:block w-32 h-[1px] ${
-                theme === 'light'
-                  ? 'bg-gradient-to-r from-sky-400/50 via-sky-300/20 to-transparent'
-                  : 'bg-gradient-to-r from-cyan-500/40 via-cyan-500/10 to-transparent'
-              }`}
-            />
           </div>
 
           {/* Admin Action: Add Project */}
@@ -76,20 +62,16 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             <button
               onClick={onAddProject}
               id="add-project-btn"
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                theme === 'light'
-                  ? 'bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-700 shadow-sm'
-                  : 'bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/60 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-              }`}
+              className="px-3 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>{t('projects.addBtn')}</span>
+              <Plus className="w-3.5 h-3.5 text-[#787774]" />
+              <span>{t('projects.addBtn', '새 프로젝트 추가')}</span>
             </button>
           )}
         </div>
 
-        {/* Projects 2-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        {/* Projects 2-Column Notion Gallery Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {localizedProjects.map((project, idx) => {
             const rawProject = projects[idx] || project;
             if (project.status === 'AWAITING') {
@@ -102,43 +84,21 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       onAddProject();
                     }
                   }}
-                  className={`rounded-2xl border border-dashed p-8 flex flex-col items-center justify-center text-center space-y-4 transition-colors group cursor-pointer min-h-[360px] ${
-                    theme === 'light'
-                      ? 'border-sky-300 bg-sky-50/40 hover:border-sky-500 hover:bg-sky-50/80'
-                      : 'border-cyan-500/30 bg-[#061022]/40 hover:border-cyan-400/60'
-                  }`}
+                  className="rounded-xl border border-dashed border-[#e3e2de] bg-[#f7f6f3] p-8 flex flex-col items-center justify-center text-center space-y-3 transition-colors hover:bg-[#efefed] cursor-pointer min-h-[300px]"
                 >
-                  <div
-                    className={`w-14 h-14 rounded-full border flex items-center justify-center group-hover:scale-110 transition-transform ${
-                      theme === 'light'
-                        ? 'bg-sky-100 border-sky-300 text-sky-600 shadow-sm'
-                        : 'bg-cyan-950/80 border-cyan-500/30 text-cyan-400'
-                    }`}
-                  >
-                    <Plus className="w-6 h-6" />
+                  <div className="w-10 h-10 rounded-full bg-white border border-[#e3e2de] flex items-center justify-center text-[#787774]">
+                    <Plus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3
-                      className={`font-display text-lg font-bold mb-1 ${
-                        theme === 'light' ? 'text-slate-900' : 'text-white'
-                      }`}
-                    >
+                    <h3 className="text-sm font-sans font-bold text-[#37352f] mb-1">
                       {project.title}
                     </h3>
-                    <p
-                      className={`text-xs font-mono ${
-                        theme === 'light' ? 'text-slate-500' : 'text-slate-400'
-                      }`}
-                    >
+                    <p className="text-xs text-[#787774]">
                       {project.summary}
                     </p>
                   </div>
-                  <span
-                    className={`text-[11px] font-mono underline ${
-                      theme === 'light' ? 'text-sky-700' : 'text-cyan-400'
-                    }`}
-                  >
-                    {lang === 'en' ? 'Click to register a new project' : '클릭하여 새 프로젝트 등록하기'}
+                  <span className="text-xs font-sans font-medium text-[#2383e2] underline">
+                    {lang === 'en' ? 'Register a new project' : '새 프로젝트 등록하기'}
                   </span>
                 </div>
               );
@@ -147,35 +107,21 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             return (
               <div
                 key={project.id}
-                className={`group relative rounded-2xl backdrop-blur-xl border transition-all duration-300 overflow-hidden flex flex-col justify-between ${
-                  theme === 'light'
-                    ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-[0_12px_40px_rgba(2,132,199,0.12)]'
-                    : 'bg-[#081224]/80 border-cyan-500/20 hover:border-cyan-400/60 hover:shadow-[0_10px_35px_rgba(0,240,255,0.12)]'
-                }`}
+                className="group relative rounded-xl border border-[#e3e2de] bg-white hover:bg-[#fbfbfa] transition-colors overflow-hidden flex flex-col justify-between shadow-2xs"
               >
                 {/* Admin Item Controls */}
                 {isAdmin && (
-                  <div
-                    className={`absolute top-3 right-3 flex items-center gap-1 z-20 p-1 rounded-lg border ${
-                      theme === 'light'
-                        ? 'bg-white/95 border-slate-300 shadow-md'
-                        : 'bg-[#060c18]/90 border-cyan-500/40'
-                    }`}
-                  >
+                  <div className="absolute top-3 right-3 flex items-center gap-1 z-20">
                     {onEditProject && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onEditProject(rawProject);
                         }}
-                        className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                          theme === 'light'
-                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
-                            : 'bg-cyan-950 hover:bg-cyan-900 text-cyan-300'
-                        }`}
+                        className="px-2.5 py-1 rounded text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1 cursor-pointer shadow-2xs"
                         title="Edit Project"
                       >
-                        <Edit3 className="w-3 h-3" /> {t('journey.edit')}
+                        <Edit3 className="w-3 h-3" /> {t('journey.edit', '수정')}
                       </button>
                     )}
                     {onDeleteProject && (
@@ -184,126 +130,82 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                           e.stopPropagation();
                           setProjectToDelete(rawProject);
                         }}
-                        className={`px-2 py-1 rounded text-xs font-mono flex items-center gap-1 cursor-pointer ${
-                          theme === 'light'
-                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200'
-                            : 'bg-rose-950 hover:bg-rose-900 text-rose-300'
-                        }`}
+                        className="p-1.5 rounded text-xs bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 cursor-pointer shadow-2xs"
                         title="Delete Project"
                       >
-                        <Trash2 className="w-3 h-3" /> {t('journey.delete')}
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 )}
 
                 {/* Project Image Header */}
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+                <div
+                  onClick={() => setSelectedProject(project)}
+                  className="relative aspect-video w-full overflow-hidden bg-[#f7f6f3] border-b border-[#e3e2de] cursor-pointer"
+                >
                   {project.image ? (
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-900 text-slate-500 font-mono text-xs">
-                      No Image Configured
+                    <div className="w-full h-full flex items-center justify-center text-xs font-mono text-[#9b9a97]">
+                      No Image Attached
                     </div>
                   )}
-                  <div
-                    className={`absolute inset-0 pointer-events-none opacity-80 ${
-                      theme === 'light'
-                        ? 'bg-gradient-to-t from-slate-900/60 via-transparent to-transparent'
-                        : 'bg-gradient-to-t from-[#081224] via-transparent to-transparent'
-                    }`}
-                  />
 
                   {/* Project ID Tag */}
-                  <div className="absolute top-3 left-3 font-mono text-[11px] text-cyan-300 bg-[#060c1a]/90 backdrop-blur-md px-2.5 py-1 rounded-md border border-cyan-500/30">
+                  <div className="absolute top-3 left-3 font-mono font-semibold text-[11px] text-[#37352f] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded border border-[#e3e2de] shadow-2xs">
                     {project.projectId}
                   </div>
-
-                  {/* Top Right Quick Badge (e.g. ROS2, C++) if not admin */}
-                  {!isAdmin && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                      {project.tags.slice(0, 2).map((t, idx) => (
-                        <span
-                          key={idx}
-                          className="font-mono text-[10px] text-cyan-300 bg-cyan-950/90 border border-cyan-400/40 px-2 py-0.5 rounded"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Card Content */}
-                <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
                       <h3
-                        className={`font-display text-xl sm:text-2xl font-bold transition-colors ${
-                          theme === 'light'
-                            ? 'text-slate-900 group-hover:text-sky-700'
-                            : 'text-white group-hover:text-cyan-300'
-                        }`}
+                        onClick={() => setSelectedProject(project)}
+                        className="text-lg font-sans font-bold text-[#37352f] group-hover:text-[#2383e2] transition-colors cursor-pointer"
                       >
                         {project.title}
                       </h3>
                       <button
                         onClick={() => setSelectedProject(project)}
-                        className={`p-1 cursor-pointer transition-colors ${
-                          theme === 'light'
-                            ? 'text-slate-400 hover:text-sky-600'
-                            : 'text-slate-400 hover:text-cyan-300'
-                        }`}
+                        className="text-[#9b9a97] hover:text-[#37352f] cursor-pointer p-1"
                         aria-label="View project details"
                       >
-                        <ArrowUpRight className="w-5 h-5" />
+                        <ArrowUpRight className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <p
-                      className={`text-xs sm:text-sm leading-relaxed line-clamp-3 whitespace-pre-line ${
-                        theme === 'light' ? 'text-slate-600' : 'text-slate-300'
-                      }`}
-                    >
+                    <p className="text-xs sm:text-sm font-sans text-[#5a5854] leading-relaxed line-clamp-3 whitespace-pre-line">
                       {project.summary}
                     </p>
                   </div>
 
-                  {/* Bottom Action Area */}
-                  <div
-                    className={`pt-3 border-t flex items-center justify-between ${
-                      theme === 'light' ? 'border-slate-200' : 'border-cyan-500/15'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {project.tags[0] && (
+                  {/* Bottom Tags & Button */}
+                  <div className="pt-3 border-t border-[#e3e2de] flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {project.tags.slice(0, 3).map((tag, tIdx) => (
                         <span
-                          className={`px-2.5 py-1 rounded text-xs font-mono border ${
-                            theme === 'light'
-                              ? 'bg-sky-50 border-sky-200 text-sky-800'
-                              : 'text-cyan-300 bg-cyan-950/70 border-cyan-500/30'
-                          }`}
+                          key={tIdx}
+                          className="px-2 py-0.5 rounded text-[11px] font-mono bg-[#f1f1ef] text-[#37352f] border border-[#e3e2de]"
                         >
-                          {project.tags[0]}
+                          {tag}
                         </span>
-                      )}
+                      ))}
                     </div>
 
                     <button
                       id={`project-btn-${project.id}`}
                       onClick={() => setSelectedProject(project)}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all cursor-pointer ${
-                        theme === 'light'
-                          ? 'bg-sky-600 hover:bg-sky-700 text-white shadow-sm'
-                          : 'text-cyan-300 bg-cyan-950/80 border border-cyan-400/50 hover:bg-cyan-500 hover:text-black hover:shadow-[0_0_15px_#00f0ff]'
-                      }`}
+                      className="px-3 py-1 rounded text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] transition-colors cursor-pointer whitespace-nowrap"
                     >
-                      {t('projects.details')}
+                      {t('projects.details', '상세 보기')}
                     </button>
                   </div>
                 </div>

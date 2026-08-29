@@ -23,32 +23,21 @@ export const THEME_STORAGE_KEY = 'kfc_theme_mode';
 export const LANG_STORAGE_KEY = 'kfc_language';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode;
-      if (saved === 'light' || saved === 'dark') return saved;
-    }
-    return 'light'; // Default: Clean Light Mode
-  });
+  const theme: ThemeMode = 'light';
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.remove('dark');
-      root.classList.add('light');
-    } else {
-      root.classList.remove('light');
-      root.classList.add('dark');
-    }
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
+    root.classList.remove('dark');
+    root.classList.add('light');
+    localStorage.setItem(THEME_STORAGE_KEY, 'light');
+  }, []);
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    // Kept for interface compatibility; no-op in clean Notion light mode
   };
 
-  const setTheme = (newTheme: ThemeMode) => {
-    setThemeState(newTheme);
+  const setTheme = () => {
+    // Kept for interface compatibility
   };
 
   return (

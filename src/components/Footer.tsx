@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Mail, Check, Copy, Youtube, ExternalLink } from 'lucide-react';
+import { Mail, Check, Copy, Youtube, ExternalLink, Lock } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
-import { useTheme, useLanguage } from '../context/ThemeContext';
+import { useLanguage } from '../context/ThemeContext';
 import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
 
-export const Footer: React.FC = () => {
-  const { theme } = useTheme();
-  const { lang, t } = useLanguage();
+interface FooterProps {
+  onOpenAdmin?: () => void;
+  isAdmin?: boolean;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, isAdmin }) => {
+  const { lang } = useLanguage();
   const [copied, setCopied] = useState(false);
   const email = 'pompeii928@gmail.com';
 
@@ -19,67 +23,63 @@ export const Footer: React.FC = () => {
   return (
     <footer
       id="contact-footer"
-      className={`relative mt-20 border-t py-12 font-sans transition-colors ${
-        theme === 'light'
-          ? 'bg-slate-100/80 border-slate-200 text-slate-600'
-          : 'bg-[#040813] border-cyan-500/20 text-slate-400'
-      }`}
+      className="relative border-t border-[#e3e2de] py-8 bg-[#f7f6f3] text-[#37352f]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Left Brand info */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-1">
-            <div className="flex items-center gap-2.5">
-              <RobotLogo size={24} />
-              <span
-                className={`font-display font-bold text-base tracking-wide ${
-                  theme === 'light' ? 'text-slate-900' : 'text-white text-glow-cyan'
-                }`}
-              >
+          <div className="flex items-center gap-2.5">
+            <RobotLogo size={20} />
+            <div className="flex flex-col">
+              <span className="font-sans font-bold text-xs text-[#37352f]">
                 K.F.C.Code Chaser
               </span>
+              <span className="text-[11px] text-[#787774] font-mono">
+                © 2026 Jihoon Bae • Robotics Engineering Portfolio
+              </span>
             </div>
-            <p className="text-xs text-slate-500 font-mono">
-              © 2026 Jihoon Bae | Robotics Engineering Portfolio
-            </p>
           </div>
 
-          {/* Right Links & Email */}
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
-            {/* YouTube Channel Button */}
+          {/* Right Links, Admin & Email */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Admin Portal Button */}
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#787774] hover:text-[#37352f] transition-colors cursor-pointer"
+                title="Admin Control"
+              >
+                <Lock className="w-3.5 h-3.5 text-[#787774]" />
+                <span>{isAdmin ? (lang === 'en' ? 'Admin Active' : '관리자 모드') : (lang === 'en' ? 'Admin Login' : '관리자 로그인')}</span>
+              </button>
+            )}
+
+            {/* YouTube Link */}
             <a
               href={DEFAULT_CHANNEL_INFO.channelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer group ${
-                theme === 'light'
-                  ? 'bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 shadow-sm'
-                  : 'bg-red-950/40 border border-red-500/30 text-red-400 hover:bg-red-900/60 hover:border-red-400'
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] transition-colors"
             >
-              <Youtube className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
-              <span>YouTube @Wrocospace</span>
-              <ExternalLink className="w-3 h-3 opacity-70" />
+              <Youtube className="w-3.5 h-3.5 text-red-600" />
+              <span>@Wrocospace</span>
+              <ExternalLink className="w-3 h-3 text-[#787774]" />
             </a>
 
             {/* Email pill */}
             <button
               onClick={copyEmail}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer group ${
-                theme === 'light'
-                  ? 'bg-white border border-slate-300 text-sky-800 hover:border-sky-400 hover:bg-sky-50 shadow-sm'
-                  : 'bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/60 hover:border-cyan-400'
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] transition-colors cursor-pointer"
               title="Click to copy email address"
             >
-              <Mail className={`w-3.5 h-3.5 ${theme === 'light' ? 'text-sky-600' : 'text-cyan-400'}`} />
+              <Mail className="w-3.5 h-3.5 text-[#787774]" />
               <span>{email}</span>
               {copied ? (
-                <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-0.5 ml-1">
-                  <Check className="w-3 h-3" /> {lang === 'en' ? 'Copied!' : '복사됨!'}
+                <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-0.5 ml-1">
+                  <Check className="w-3 h-3" /> {lang === 'en' ? 'Copied' : '복사됨'}
                 </span>
               ) : (
-                <Copy className="w-3 h-3 text-slate-400 group-hover:text-sky-600 dark:group-hover:text-cyan-300 ml-1" />
+                <Copy className="w-3 h-3 text-[#9b9a97] ml-1" />
               )}
             </button>
           </div>

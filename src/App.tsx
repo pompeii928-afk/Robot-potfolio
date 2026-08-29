@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
-import { CategoryNav } from './components/CategoryNav';
 import { HeroSection } from './components/HeroSection';
 import { JourneySection } from './components/JourneySection';
 import { AwardsSection } from './components/AwardsSection';
@@ -18,6 +17,7 @@ import { AdminLoginView } from './components/AdminLoginView';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
 import { ThemeProvider, LanguageProvider, useTheme, useLanguage } from './context/ThemeContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   subscribeAboutConfig,
@@ -428,43 +428,27 @@ function PortfolioApp() {
   const isEditingEnabled = currentPath === '/admin' && isAdmin;
 
   return (
-    <div
-      className={`min-h-screen bg-blueprint-grid relative transition-colors duration-300 ${
-        theme === 'light'
-          ? 'text-slate-800 selection:bg-sky-500 selection:text-white'
-          : 'text-slate-200 selection:bg-cyan-500 selection:text-black'
-      }`}
-    >
-      {/* Subtle scanline / ambient overlay */}
-      <div
-        className={`fixed inset-0 pointer-events-none z-40 ${
-          theme === 'light'
-            ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/5 via-transparent to-transparent opacity-60'
-            : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent opacity-60'
-        }`}
-      />
+    <div className="min-h-screen relative bg-white text-[#37352f] selection:bg-[#efefed] selection:text-[#37352f] antialiased">
+      {/* Subtle Notion page top border/gradient */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[#ffffff]" />
 
-      {/* Sticky Header: AdminBar is only visible when at /admin and logged in */}
-      <header className="sticky top-0 z-50 w-full shadow-2xl">
+      {/* Sticky Header with Integrated Category Bar */}
+      <div className="sticky top-0 z-50 w-full">
         {isEditingEnabled && <AdminBar onViewPublic={() => navigateTo('/')} />}
         <Navbar
           activeSection={activeSection}
           onNavigate={handleNavigate}
+          isAdmin={isAdmin}
+          onOpenAdmin={() => navigateTo('/admin')}
+          counts={{
+            journeys: journeys.length,
+            awards: awards.length,
+            skills: skills.length,
+            projects: projects.length,
+            videos: youtubeVideos.length,
+          }}
         />
-      </header>
-
-      {/* Category Navigation Bar */}
-      <CategoryNav
-        activeCategory={activeSection}
-        onSelectCategory={handleNavigate}
-        counts={{
-          journeys: journeys.length,
-          awards: awards.length,
-          skills: skills.length,
-          projects: projects.length,
-          videos: youtubeVideos.length,
-        }}
-      />
+      </div>
 
       {/* Main Content Sections with AnimatePresence */}
       <main className="relative z-10 min-h-[60vh]">
@@ -541,7 +525,7 @@ function PortfolioApp() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
 
       {/* Modals for Editing Content (Only operable when admin modal is opened) */}
       {isEditingEnabled && (
@@ -600,14 +584,16 @@ function PortfolioApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <PortfolioApp />
-          </ToastProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <PortfolioApp />
+            </ToastProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

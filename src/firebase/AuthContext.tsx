@@ -64,10 +64,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setAdminUser(data.user);
             setLoading(false);
             return;
+          } else {
+            // Server explicitly said not authenticated
+            localStorage.removeItem('admin_token');
+            setIsAdmin(false);
+            setAdminUser(null);
+            setLoading(false);
+            return;
           }
         }
       } catch (networkErr) {
-        // Fallback for static hosts (Vercel static build without Node backend)
+        // Fallback for static hosts or offline
       }
 
       // Check stored token validity fallback
@@ -80,16 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setLoading(false);
             return;
           }
-        } else if (storedToken) {
-          setIsAdmin(true);
-          setAdminUser({ username: ADMIN_USERNAME, role: 'admin' });
-          setLoading(false);
-          return;
         }
       } catch {
         // Invalid token format
       }
 
+      // If token is invalid or expired, clear it
+      localStorage.removeItem('admin_token');
       setIsAdmin(false);
       setAdminUser(null);
     } catch (err) {

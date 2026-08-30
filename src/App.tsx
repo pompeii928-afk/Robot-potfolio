@@ -58,6 +58,8 @@ import { EditAwardModal } from './components/modals/EditAwardModal';
 import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
 import { EditYouTubeModal } from './components/modals/EditYouTubeModal';
+import { AdminUsersView } from './components/AdminUsersView';
+import { UserLoginModal } from './components/UserLoginModal';
 
 function PortfolioApp() {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -159,6 +161,9 @@ function PortfolioApp() {
     isOpen: boolean;
     item: YouTubeVideoItem | null;
   }>({ isOpen: false, item: null });
+
+  const [isUsersViewOpen, setIsUsersViewOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Real-time Firestore Subscriptions
   useEffect(() => {
@@ -434,12 +439,18 @@ function PortfolioApp() {
 
       {/* Sticky Header with Integrated Category Bar */}
       <div className="sticky top-0 z-50 w-full">
-        {isEditingEnabled && <AdminBar onViewPublic={() => navigateTo('/')} />}
+        {isEditingEnabled && (
+          <AdminBar
+            onViewPublic={() => navigateTo('/')}
+            onOpenUsersView={() => setIsUsersViewOpen(true)}
+          />
+        )}
         <Navbar
           activeSection={activeSection}
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
-          onOpenAdmin={() => navigateTo('/admin')}
+          onOpenLogin={() => setIsLoginModalOpen(true)}
+          onOpenUsersView={() => setIsUsersViewOpen(true)}
           counts={{
             journeys: journeys.length,
             awards: awards.length,
@@ -578,6 +589,27 @@ function PortfolioApp() {
           />
         </>
       )}
+
+      {/* Admin Users & Login Audit Logs Modal Overlay */}
+      {isUsersViewOpen && (
+        <div
+          id="admin-users-modal-overlay"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsUsersViewOpen(false);
+          }}
+        >
+          <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl animate-in zoom-in-95 duration-150">
+            <AdminUsersView onClose={() => setIsUsersViewOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Regular User Login Modal (Clean, No Admin Clues) */}
+      <UserLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 }

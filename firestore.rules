@@ -46,6 +46,16 @@ service cloud.firestore {
       allow write: if isValidId(videoId);
     }
 
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isValidId(userId);
+    }
+
+    match /login_logs/{logId} {
+      allow read: if true;
+      allow write: if isValidId(logId);
+    }
+
     match /system/{docId} {
       allow read: if true;
       allow write: if isValidId(docId);

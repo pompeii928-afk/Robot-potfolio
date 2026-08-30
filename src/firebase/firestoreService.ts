@@ -7,10 +7,13 @@ import {
   deleteDoc,
   onSnapshot,
   writeBatch,
+  query,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db } from './config';
 import { handleFirestoreError, OperationType } from './errorHandling';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog } from '../types';
 import {
   DEFAULT_ABOUT_CONFIG,
   JOURNEY_DATA,
@@ -27,6 +30,8 @@ const AWARDS_COLLECTION = 'awards';
 const SKILLS_COLLECTION = 'skills';
 const PROJECTS_COLLECTION = 'projects';
 const YOUTUBE_COLLECTION = 'youtube_videos';
+const USERS_COLLECTION = 'users';
+const LOGIN_LOGS_COLLECTION = 'login_logs';
 const SYSTEM_COLLECTION = 'system';
 
 
@@ -809,3 +814,215 @@ export async function seedAllPortfolioData(): Promise<void> {
     throw error;
   }
 }
+
+// ========================
+// USERS & LOGIN LOGS CRUD
+// ========================
+
+/**
+ * Record user profile and log their login session to Firestore
+ */
+export async function recordUserLogin(userData: {
+  uid: string;
+  email: string;
+  displayName?: string | null;
+  photoURL?: string | null;
+  providerId?: string;
+}): Promise<UserProfile> {
+  const { uid, email, displayName, photoURL, providerId = 'google.com' } = userData;
+  const now = new Date().toISOString();
+  const userDocRef = doc(db, USERS_COLLECTION, uid);
+
+  let existingUser: UserProfile | null = null;
+  try {
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      existingUser = snap.data() as UserProfile;
+    }
+  } catch (err) {
+    console.warn('[Firestore] Could not check existing user record:', err);
+  }
+
+  // Detect admin email
+  const isAdminEmail = email.toLowerCase() === 'pompeii928@gmail.com';
+  const role: 'admin' | 'visitor' = isAdminEmail || existingUser?.role === 'admin' ? 'admin' : 'visitor';
+
+  const userProfile: UserProfile = {
+    uid,
+    email: email.toLowerCase(),
+    displayName: displayName || existingUser?.displayName || email.split('@')[0],
+    photoURL: photoURL || existingUser?.photoURL || '',
+    providerId,
+    role,
+    loginCount: (existingUser?.loginCount || 0) + 1,
+    lastLoginAt: now,
+    createdAt: existingUser?.createdAt || now,
+  };
+
+  try {
+    // 1. Save / Update User Profile
+    await setDoc(userDocRef, userProfile, { merge: true });
+
+    // 2. Create Audit Log Entry
+    const logId = `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const logDocRef = doc(db, LOGIN_LOGS_COLLECTION, logId);
+
+    const logEntry: LoginLog = {
+      id: logId,
+      uid,
+      email: email.toLowerCase(),
+      displayName: userProfile.displayName,
+      photoURL: userProfile.photoURL,
+      providerId,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      platform: typeof navigator !== 'undefined' ? (navigator as any).platform || 'Web' : 'Web',
+      timestamp: now,
+    };
+
+    await setDoc(logDocRef, logEntry);
+
+    return userProfile;
+  } catch (error) {
+    console.error('[Firestore] Failed to record user login:', error);
+    handleFirestoreError(error, OperationType.WRITE, `users/${uid}`);
+    throw error;
+  }
+}
+
+/**
+ * Subscribe to all registered users (for Admin Dashboard)
+ */
+export function subscribeAllUsers(
+  onUpdate: (users: UserProfile[]) => void,
+  onError?: (error: unknown) => void
+) {
+  const colRef = collection(db, USERS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const users: UserProfile[] = [];
+      snapshot.forEach((docSnap) => {
+        users.push(docSnap.data() as UserProfile);
+      });
+      // Sort by lastLoginAt descending
+      users.sort((a, b) => new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime());
+      onUpdate(users);
+    },
+    (error) => {
+      console.error('Error listening to users collection:', error);
+      if (onError) onError(error);
+      handleFirestoreError(error, OperationType.GET, USERS_COLLECTION);
+    }
+  );
+}
+
+/**
+ * Subscribe to login audit logs (for Admin Dashboard)
+ */
+export function subscribeLoginLogs(
+  onUpdate: (logs: LoginLog[]) => void,
+  onError?: (error: unknown) => void
+) {
+  const colRef = collection(db, LOGIN_LOGS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const logs: LoginLog[] = [];
+      snapshot.forEach((docSnap) => {
+        logs.push(docSnap.data() as LoginLog);
+      });
+      // Sort by timestamp descending
+      logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      onUpdate(logs);
+    },
+    (error) => {
+      console.error('Error listening to login logs collection:', error);
+      if (onError) onError(error);
+      handleFirestoreError(error, OperationType.GET, LOGIN_LOGS_COLLECTION);
+    }
+  );
+}
+
+/**
+ * Fetch all registered users once
+ */
+export async function getAllUsers(): Promise<UserProfile[]> {
+  try {
+    const colRef = collection(db, USERS_COLLECTION);
+    const snap = await getDocs(colRef);
+    const users: UserProfile[] = [];
+    snap.forEach((d) => users.push(d.data() as UserProfile));
+    users.sort((a, b) => new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime());
+    return users;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, USERS_COLLECTION);
+    return [];
+  }
+}
+
+/**
+ * Fetch recent login logs once
+ */
+export async function getLoginLogs(): Promise<LoginLog[]> {
+  try {
+    const colRef = collection(db, LOGIN_LOGS_COLLECTION);
+    const snap = await getDocs(colRef);
+    const logs: LoginLog[] = [];
+    snap.forEach((d) => logs.push(d.data() as LoginLog));
+    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return logs;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, LOGIN_LOGS_COLLECTION);
+    return [];
+  }
+}
+
+/**
+ * Delete a single login log entry
+ */
+export async function deleteLoginLog(logId: string): Promise<void> {
+  const path = `${LOGIN_LOGS_COLLECTION}/${logId}`;
+  try {
+    const docRef = doc(db, LOGIN_LOGS_COLLECTION, logId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
+/**
+ * Delete all login audit logs
+ */
+export async function clearAllLoginLogs(): Promise<number> {
+  try {
+    const colRef = collection(db, LOGIN_LOGS_COLLECTION);
+    const snap = await getDocs(colRef);
+    if (snap.empty) return 0;
+
+    const batch = writeBatch(db);
+    snap.docs.forEach((docSnap) => {
+      batch.delete(docSnap.ref);
+    });
+    await batch.commit();
+    return snap.size;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, LOGIN_LOGS_COLLECTION);
+    throw error;
+  }
+}
+
+/**
+ * Delete a registered user profile
+ */
+export async function deleteUserProfile(uid: string): Promise<void> {
+  const path = `${USERS_COLLECTION}/${uid}`;
+  try {
+    const docRef = doc(db, USERS_COLLECTION, uid);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+

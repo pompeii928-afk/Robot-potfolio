@@ -111,3 +111,27 @@ export interface YouTubeVideoItem {
   updatedAt?: string;
 }
 
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  providerId: string; // 'google.com' | 'password' | 'custom'
+  role: 'admin' | 'visitor';
+  loginCount: number;
+  lastLoginAt: string;
+  createdAt: string;
+}
+
+export interface LoginLog {
+  id: string;
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  providerId: string;
+  userAgent?: string;
+  platform?: string;
+  timestamp: string;
+}
+

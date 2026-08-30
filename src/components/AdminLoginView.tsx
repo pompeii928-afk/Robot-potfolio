@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowLeft, Loader2, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  ArrowLeft,
+  Loader2,
+  KeyRound,
+  AlertCircle,
+} from 'lucide-react';
 import { useAuth, ADMIN_USERNAME } from '../firebase/AuthContext';
 import { RobotLogo } from './RobotLogo';
 
@@ -8,23 +17,27 @@ interface AdminLoginViewProps {
 }
 
 export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }) => {
-  const { login, loginError, clearLoginError } = useAuth();
+  const {
+    loginWithAdminMaster,
+    loginError,
+    clearLoginError,
+  } = useAuth();
 
-  const [username, setUsername] = useState('daniel321');
-  const [password, setPassword] = useState('');
+  // Master key credentials state
+  const [masterUsername, setMasterUsername] = useState(ADMIN_USERNAME);
+  const [masterPassword, setMasterPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle Master Key Sign In
+  const handleMasterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password) return;
+    if (!masterUsername.trim() || !masterPassword) return;
 
     setIsSubmitting(true);
+    if (loginError) clearLoginError();
     try {
-      const success = await login(username.trim(), password);
-      if (success) {
-        // App will automatically re-render into admin mode
-      }
+      await loginWithAdminMaster(masterUsername.trim(), masterPassword);
     } finally {
       setIsSubmitting(false);
     }
@@ -43,7 +56,7 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }
         </button>
 
         <span className="text-[11px] font-mono text-[#787774] flex items-center gap-1">
-          <span>🔒 관리자 인증</span>
+          <span>🔒 관리자 전용 인증</span>
         </span>
       </div>
 
@@ -55,32 +68,20 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }
             <RobotLogo size={24} />
             <div>
               <h2 className="text-sm font-sans font-bold text-[#37352f] tracking-tight">
-                K.F.C.Code Chaser 관리자 로그인
+                K.F.C.Code Chaser 관리자 접속
               </h2>
-              <p className="text-[11px] font-mono text-[#787774]">
-                콘텐츠 수정 및 데이터 관리 권한 인증
+              <p className="text-[11px] font-sans text-[#787774]">
+                관리자 전용 인증 포털 (/admin)
               </p>
             </div>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f1f1ef] text-[#787774] border border-[#e3e2de]">
-            /admin
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0] font-semibold">
+            Admin Only
           </span>
         </div>
 
         {/* Card Body */}
         <div className="p-6 sm:p-7 space-y-5">
-          {/* Preset Helper Card */}
-          <div className="p-3.5 rounded-lg bg-[#f7f6f3] border border-[#e3e2de] text-xs font-sans space-y-1">
-            <div className="flex items-center gap-1.5 text-[#37352f] font-semibold">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>관리자 계정 안내</span>
-            </div>
-            <div className="text-[11px] text-[#787774] flex items-center justify-between pt-1">
-              <span>아이디: <strong className="text-[#37352f] font-mono">{ADMIN_USERNAME}</strong></span>
-              <span className="text-[#9b9a97]">비밀번호 입력 필요</span>
-            </div>
-          </div>
-
           {/* Error Alert */}
           {loginError && (
             <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-sans flex items-start gap-2 animate-in fade-in">
@@ -89,87 +90,84 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Input */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-sans font-semibold text-[#37352f]">
-                관리자 ID
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#787774]">
-                  <User className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    if (loginError) clearLoginError();
-                  }}
-                  placeholder="아이디를 입력하세요 (예: daniel321)"
-                  className="w-full pl-9 pr-3.5 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] focus:ring-1 focus:ring-[#2383e2] rounded-lg text-xs font-mono text-[#37352f] placeholder-[#9b9a97] outline-none transition-colors"
-                />
+          {/* Master Key Admin Form */}
+          <div className="space-y-4">
+            <div className="p-3.5 rounded-lg bg-[#f7f6f3] border border-[#e3e2de] text-xs font-sans space-y-1">
+              <div className="flex items-center gap-1.5 text-[#37352f] font-semibold">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>관리자 마스터 인증</span>
               </div>
+              <p className="text-[11px] text-[#787774] leading-relaxed">
+                포트폴리오 콘텐츠 실시간 수정 및 사용자 접속 로그 관리를 위해 인증을 진행해 주세요.
+              </p>
             </div>
 
-            {/* Password Input */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-sans font-semibold text-[#37352f]">
-                비밀번호
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#787774]">
-                  <KeyRound className="w-4 h-4" />
+            <form onSubmit={handleMasterSubmit} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="block text-xs font-sans font-semibold text-[#37352f]">
+                  관리자 계정 ID
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-[#787774] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    required
+                    value={masterUsername}
+                    onChange={(e) => setMasterUsername(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] rounded-lg text-xs font-mono text-[#37352f] outline-none"
+                  />
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (loginError) clearLoginError();
-                  }}
-                  placeholder="비밀번호를 입력하세요 (예: daniel321.123)"
-                  className="w-full pl-9 pr-10 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] focus:ring-1 focus:ring-[#2383e2] rounded-lg text-xs font-mono text-[#37352f] placeholder-[#9b9a97] outline-none transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#787774] hover:text-[#37352f] transition-colors cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || !username.trim() || !password}
-              className="w-full mt-3 py-2.5 px-4 rounded-lg bg-[#2383e2] hover:bg-[#1a6cb8] active:bg-[#155a9c] text-white font-sans font-semibold text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>인증 확인 중...</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>관리자 모드 접속</span>
-                </>
-              )}
-            </button>
-          </form>
+              <div className="space-y-1">
+                <label className="block text-xs font-sans font-semibold text-[#37352f]">
+                  비밀번호
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-[#787774] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={masterPassword}
+                    onChange={(e) => setMasterPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full pl-9 pr-9 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] rounded-lg text-xs font-mono text-[#37352f] outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#787774] hover:text-[#37352f]"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !masterUsername.trim() || !masterPassword}
+                className="w-full mt-2 py-2.5 px-4 rounded-lg bg-[#37352f] hover:bg-[#22211e] text-white font-sans font-semibold text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>관리자 인증 확인 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>관리자 모드로 접속</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Card Footer */}
-        <div className="px-6 py-3 bg-[#fbfbfa] border-t border-[#e3e2de] text-center">
-          <p className="text-[11px] font-mono text-[#787774]">
-            ID: <span className="font-semibold text-[#37352f]">daniel321</span> &bull; PW: <span className="font-semibold text-[#37352f]">daniel321.123</span>
-          </p>
+        <div className="px-6 py-3 bg-[#fbfbfa] border-t border-[#e3e2de] text-center flex items-center justify-center gap-1.5 text-[11px] font-sans text-[#787774]">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>보안 인증 완료 시 콘텐츠 실시간 편집 권한이 부여됩니다</span>
         </div>
       </div>
     </div>

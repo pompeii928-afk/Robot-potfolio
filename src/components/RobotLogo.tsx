@@ -1,5 +1,5 @@
 import React from 'react';
-import kfcLogoImg from '../assets/images/kfc_codechaser_logo_1788080360188.jpg';
+import kfcLogoImg from '../assets/images/kfc_codechaser_logo_transparent.png';
 
 interface RobotLogoProps {
   size?: number;

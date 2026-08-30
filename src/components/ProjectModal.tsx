@@ -209,19 +209,19 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
                     >
                       {project.specs.dimensions && (
                         <div>
-                          {lang === 'en' ? 'Dimensions: ' : '규격: '}
+                          <span className="text-[#787774] mr-1">{t('modal.dimensions', 'Dimensions')}:</span>
                           <span className="font-semibold text-zinc-900 dark:text-white">{project.specs.dimensions}</span>
                         </div>
                       )}
                       {project.specs.weight && (
                         <div>
-                          {lang === 'en' ? 'Weight: ' : '무게: '}
+                          <span className="text-[#787774] mr-1">{t('modal.weight', 'Weight')}:</span>
                           <span className="font-semibold text-zinc-900 dark:text-white">{project.specs.weight}</span>
                         </div>
                       )}
                       {project.specs.speed && (
                         <div>
-                          {lang === 'en' ? 'Max Speed: ' : '최대 속도: '}
+                          <span className="text-[#787774] mr-1">{t('modal.speed', 'Max Speed')}:</span>
                           <span className="font-semibold text-zinc-900 dark:text-white">{project.specs.speed}</span>
                         </div>
                       )}

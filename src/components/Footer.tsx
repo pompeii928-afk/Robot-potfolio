@@ -10,7 +10,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = () => {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const email = 'pompeii928@gmail.com';
 
@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = () => {
               <span>{email}</span>
               {copied ? (
                 <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-0.5 ml-1">
-                  <Check className="w-3 h-3" /> {lang === 'en' ? 'Copied' : '복사됨'}
+                  <Check className="w-3 h-3" /> {t('youtube.copied', '복사됨')}
                 </span>
               ) : (
                 <Copy className="w-3 h-3 text-[#9b9a97] ml-1" />

@@ -73,12 +73,16 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
     }
   };
 
-  const categories = ['ALL', ...Array.from(new Set(localizedSkills.map((s) => s.category)))];
+  const rawCategories = Array.from(new Set(skills.map((s) => s.category)));
+  const categories = ['ALL', ...rawCategories];
 
   const filteredSkills =
     selectedCategory === 'ALL'
       ? localizedSkills
-      : localizedSkills.filter((s) => s.category === selectedCategory);
+      : localizedSkills.filter((s, idx) => {
+          const raw = skills[idx] || s;
+          return raw.category === selectedCategory || s.category === selectedCategory;
+        });
 
   const handleConfirmDelete = async () => {
     if (!skillToDelete || !onDeleteSkill) return;
@@ -89,6 +93,11 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const getCategoryLabel = (cat: string) => {
+    if (cat === 'ALL') return t('skills.all', '전체 역량');
+    return t(`skills.cat.${cat}`, cat);
   };
 
   // Color mapper for Notion category tag
@@ -153,7 +162,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                     : 'bg-[#f7f6f3] text-[#787774] border-[#e3e2de] hover:bg-[#efefed] hover:text-[#37352f]'
                 }`}
               >
-                {cat === 'ALL' ? (lang === 'en' ? 'All Skills' : '전체 역량') : cat}
+                {getCategoryLabel(cat)}
               </button>
             );
           })}
@@ -161,16 +170,12 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
 
         {filteredSkills.length === 0 ? (
           <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
-            {lang === 'en'
-              ? 'No skills in this category.'
-              : '해당 카테고리에 등록된 기술 역량이 없습니다.'}
+            {t('skills.empty', '해당 카테고리에 등록된 기술 역량이 없습니다.')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredSkills.map((skill, idx) => {
-              const rawSkill = skills.filter((s) =>
-                selectedCategory === 'ALL' ? true : s.category === selectedCategory
-              )[idx] || skill;
+            {filteredSkills.map((skill) => {
+              const rawSkill = skills.find((s) => s.id === skill.id) || skill;
 
               return (
                 <div
@@ -255,21 +260,13 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!skillToDelete}
-        title={t('skills.deleteConfirm')}
-        message={
-          lang === 'en'
-            ? 'Are you sure you want to permanently delete this skill entry?'
-            : '선택하신 기술 역량 항목을 정말 삭제하시겠습니까?'
-        }
+        title={t('skills.delete', '역량 삭제')}
+        message={t('skills.deleteConfirm', '이 기술 역량 항목을 삭제하시겠습니까?')}
         itemName={skillToDelete ? `${skillToDelete.name} (${skillToDelete.category})` : ''}
         confirmText={
           isDeleting
-            ? lang === 'en'
-              ? 'Deleting...'
-              : '삭제 중...'
-            : lang === 'en'
-              ? 'Delete'
-              : '삭제하기'
+            ? t('youtube.deleting', '삭제 중...')
+            : t('skills.delete', '삭제')
         }
         onConfirm={handleConfirmDelete}
         onCancel={() => setSkillToDelete(null)}

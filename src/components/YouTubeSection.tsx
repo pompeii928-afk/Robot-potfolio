@@ -17,6 +17,7 @@ import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
 import { useLanguage } from '../context/ThemeContext';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { extractVideoId, getYouTubeThumbnail, handleThumbnailError } from '../utils/youtubeHelper';
+import { getLocalizedYouTubeVideo, getLocalizedChannelInfo } from '../utils/translationHelper';
 import { ModalBackdrop } from './modals/ModalBackdrop';
 
 interface YouTubeSectionProps {
@@ -36,21 +37,25 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
 }) => {
   const { lang, t } = useLanguage();
 
+  const localizedVideos = videos.map((v) => getLocalizedYouTubeVideo(v, lang));
+
   const [activePlayingVideo, setActivePlayingVideo] = useState<YouTubeVideoItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('ALL');
   const [deleteTarget, setDeleteTarget] = useState<YouTubeVideoItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const channelInfo = DEFAULT_CHANNEL_INFO;
+  const rawChannelInfo = DEFAULT_CHANNEL_INFO;
+  const channelInfo = getLocalizedChannelInfo(rawChannelInfo, lang);
 
   const standardCategories = ['ALL', 'Competition', 'Algorithm', 'Hardware'];
   const videoCategories = Array.from(new Set(videos.map((v) => v.category).filter(Boolean))) as string[];
   const allCategoryKeys = Array.from(new Set(['ALL', ...standardCategories.slice(1), ...videoCategories]));
 
-  const filteredVideos = videos.filter((v) => {
+  const filteredVideos = localizedVideos.filter((v, idx) => {
     if (activeFilter === 'ALL') return true;
-    return v.category?.toLowerCase() === activeFilter.toLowerCase();
+    const rawCat = videos[idx]?.category || v.category;
+    return rawCat?.toLowerCase() === activeFilter.toLowerCase();
   });
 
   const handleShareChannel = () => {
@@ -74,8 +79,18 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
     }
   };
 
-  const channelBio = lang === 'en' && channelInfo.description ? channelInfo.description : (channelInfo.descriptionKo || channelInfo.description);
-  const channelTopics = lang === 'en' ? channelInfo.topics : (channelInfo.topicsKo || channelInfo.topics);
+  const channelBio = channelInfo.description;
+  const channelTopics = channelInfo.topics;
+
+  const getCategoryLabel = (catKey: string) => {
+    if (catKey === 'ALL') return t('youtube.catAll', '전체 영상');
+    const lower = catKey.toLowerCase();
+    if (lower === 'competition') return t('youtube.catCompetition', '대회 및 실전 경기');
+    if (lower === 'algorithm') return t('youtube.catAlgorithm', '알고리즘 및 제어');
+    if (lower === 'hardware') return t('youtube.catHardware', '하드웨어 및 기구');
+    if (lower === 'fieldtest' || lower === 'field test') return t('youtube.catFieldTest', '필드 테스트');
+    return catKey;
+  };
 
   return (
     <section id="youtube-section" className="relative py-10 sm:py-14 border-t border-[#e3e2de] scroll-mt-20">
@@ -86,10 +101,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
             <span className="text-2xl select-none">📺</span>
             <div>
               <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#37352f] tracking-tight">
-                {t('youtube.sectionTitle', '유튜브 & 실전 주행 영상')}
+                {t('youtube.title', '공식 유튜브 채널 및 실전 주행')}
               </h2>
               <p className="text-xs sm:text-sm text-[#787774] mt-0.5">
-                {t('youtube.sectionDesc', '대회 경기 주행, 센서 튜닝, 미션 수행 영상 기록입니다.')}
+                {t('youtube.subtitle', 'World Robot Olympiad (WRO) 및 자율주행 주행 테스트, PID 제어 튜닝, 하드웨어 빌드 메이킹 영상 아카이브입니다.')}
               </p>
             </div>
           </div>
@@ -144,7 +159,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               className="px-2.5 py-1 rounded text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1 cursor-pointer"
             >
               {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-[#787774]" />}
-              <span>{copiedLink ? (lang === 'en' ? 'Copied' : '복사됨') : (lang === 'en' ? 'Share' : '공유')}</span>
+              <span>{copiedLink ? t('youtube.copied', '복사됨!') : t('youtube.share', '공유')}</span>
             </button>
           </div>
         </div>
@@ -163,7 +178,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     : 'bg-[#f7f6f3] text-[#787774] border-[#e3e2de] hover:bg-[#efefed] hover:text-[#37352f]'
                 }`}
               >
-                {catKey === 'ALL' ? (lang === 'en' ? 'All Videos' : '전체 영상') : catKey}
+                {getCategoryLabel(catKey)}
               </button>
             );
           })}
@@ -172,7 +187,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         {/* Videos Gallery Grid */}
         {filteredVideos.length === 0 ? (
           <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
-            {lang === 'en' ? 'No videos found in this category.' : '해당 카테고리에 영상이 없습니다.'}
+            {t('youtube.noVideos', '해당 카테고리에 영상이 없습니다.')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -232,7 +247,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     {/* Duration / Tag */}
                     {video.category && (
                       <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-mono bg-black/70 text-white backdrop-blur-xs">
-                        {video.category}
+                        {getCategoryLabel(video.category)}
                       </div>
                     )}
                     {video.duration && (
@@ -264,7 +279,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                         onClick={() => setActivePlayingVideo(video)}
                         className="text-[#2383e2] hover:underline cursor-pointer font-sans text-xs font-medium"
                       >
-                        {lang === 'en' ? 'Watch Video' : '영상 재생'}
+                        {t('youtube.watchVideo', '영상 재생')}
                       </button>
 
                       {video.youtubeUrl && (
@@ -340,14 +355,10 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title={t('youtube.deleteConfirm', '영상 삭제 확인')}
-        message={
-          lang === 'en'
-            ? 'Are you sure you want to delete this video item?'
-            : '이 영상 항목을 삭제하시겠습니까?'
-        }
+        title={t('youtube.delete', '영상 삭제')}
+        message={t('youtube.deleteConfirm', '정말로 이 유튜브 영상 항목을 삭제하시겠습니까?')}
         itemName={deleteTarget?.title}
-        confirmText={isDeleting ? '...' : lang === 'en' ? 'Delete' : '삭제하기'}
+        confirmText={isDeleting ? t('youtube.deleting', '삭제 중...') : t('youtube.delete', '삭제')}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />

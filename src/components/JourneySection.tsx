@@ -103,9 +103,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
         {journeys.length === 0 ? (
           <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
-            {lang === 'en'
-              ? 'No journey entries found. Please add milestones in admin mode.'
-              : '등록된 여정 기록이 없습니다. 관리자 모드에서 새 대회 여정을 추가해 보세요.'}
+            {t('journey.empty', '등록된 여정 기록이 없습니다.')}
           </div>
         ) : (
           <div className="space-y-6">
@@ -179,7 +177,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   {/* Award Tag (Notion Yellow/Gold Tag) */}
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#fbf3db] border border-[#f5e9d3] text-xs font-sans font-medium text-[#8f5b1d]">
                     <span>🏆</span>
-                    <span>{selectedItem.award || (lang === 'en' ? 'Participant / In Progress' : '대회 참가 / 진행')}</span>
+                    <span>{selectedItem.award || t('journey.inProgress', '대회 참가 / 진행')}</span>
                   </div>
 
                   {/* Summary Text */}
@@ -191,7 +189,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   <div className="p-3 rounded-lg bg-[#f7f6f3] border border-[#e3e2de] flex items-center gap-2.5 text-xs text-[#37352f]">
                     <Users className="w-4 h-4 text-[#787774] shrink-0" />
                     <div>
-                      <span className="text-[#787774] mr-1.5">Team:</span>
+                      <span className="text-[#787774] mr-1.5">{t('journey.team', '팀')}:</span>
                       <span className="font-semibold">{selectedItem.teamName || selectedItem.team || 'Team K.F.C.Code Chaser'}</span>
                     </div>
                   </div>
@@ -201,7 +199,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     <div className="flex items-center justify-between text-xs font-mono text-[#787774]">
                       <span className="flex items-center gap-1 font-semibold text-[#37352f]">
                         <Gauge className="w-3.5 h-3.5" />
-                        <span>{lang === 'en' ? 'Key Metrics' : '주요 성능 지표'}</span>
+                        <span>{t('journey.keyMetrics', '주요 성능 지표')}</span>
                       </span>
                       {isAdmin && onEditJourney && rawSelectedItem && (
                         <button
@@ -210,7 +208,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           className="hover:underline flex items-center gap-1 text-[#787774]"
                         >
                           <Edit3 className="w-3 h-3" />
-                          <span>Edit</span>
+                          <span>{t('journey.edit', '수정')}</span>
                         </button>
                       )}
                     </div>
@@ -233,7 +231,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       </div>
                     ) : (
                       <div className="text-xs text-[#9b9a97] italic">
-                        {lang === 'en' ? 'Telemetry logged' : '실시간 텔레메트리 기록 완료'}
+                        {t('journey.telemetryLogged', '실시간 텔레메트리 기록 완료')}
                       </div>
                     )}
                   </div>
@@ -327,12 +325,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!journeyToDelete}
-        title={t('journey.deleteConfirm')}
-        message={
-          lang === 'en'
-            ? 'Are you sure you want to permanently delete this competition journey milestone?'
-            : '선택하신 대회 여정 기록을 정말 삭제하시겠습니까?'
-        }
+        title={t('journey.delete', '여정 기록 삭제')}
+        message={t('journey.deleteConfirm', '이 대회 여정 기록을 삭제하시겠습니까?')}
         itemName={
           journeyToDelete
             ? `${journeyToDelete.year || journeyToDelete.season || ''} ${
@@ -342,12 +336,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
         }
         confirmText={
           isDeleting
-            ? lang === 'en'
-              ? 'Deleting...'
-              : '삭제 중...'
-            : lang === 'en'
-              ? 'Delete'
-              : '삭제하기'
+            ? t('youtube.deleting', '삭제 중...')
+            : t('journey.delete', '삭제')
         }
         onConfirm={handleConfirmDelete}
         onCancel={() => setJourneyToDelete(null)}

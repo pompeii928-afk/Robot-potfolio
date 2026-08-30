@@ -97,9 +97,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
 
         {awards.length === 0 ? (
           <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
-            {lang === 'en'
-              ? 'No awards recorded yet. Please add awards in admin mode.'
-              : '등록된 수상 내역이 없습니다. 관리자 모드에서 새 상을 추가해 보세요.'}
+            {t('awards.empty', '등록된 수상 내역이 없습니다.')}
           </div>
         ) : (
           <div className="space-y-6">
@@ -137,7 +135,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#8f5b1d]">
-                          {lang === 'en' ? 'TOP HONORS' : '최고 수상 성과'}
+                          {t('awards.unlocked', 'TOP HONORS')}
                         </span>
                         <span className="text-xs font-mono text-[#787774]">• {mainAward.date}</span>
                       </div>
@@ -153,7 +151,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-sans font-semibold text-[#8f5b1d] bg-white hover:bg-[#fff9eb] border border-[#f5e9d3] transition-colors cursor-pointer shadow-2xs"
                   >
                     <span>🎉</span>
-                    <span>{lang === 'en' ? 'Celebrate' : '축하하기'}</span>
+                    <span>{t('awards.celebrate', 'Celebrate')}</span>
                   </button>
                 </div>
 
@@ -261,21 +259,13 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!awardToDelete}
-        title={t('awards.deleteConfirm')}
-        message={
-          lang === 'en'
-            ? 'Are you sure you want to permanently delete this award entry?'
-            : '선택하신 수상 내역을 정말 삭제하시겠습니까?'
-        }
+        title={t('awards.delete', '수상 내역 삭제')}
+        message={t('awards.deleteConfirm', '이 수상 내역을 삭제하시겠습니까?')}
         itemName={awardToDelete ? `${awardToDelete.competition} - ${awardToDelete.title}` : ''}
         confirmText={
           isDeleting
-            ? lang === 'en'
-              ? 'Deleting...'
-              : '삭제 중...'
-            : lang === 'en'
-              ? 'Delete'
-              : '삭제하기'
+            ? t('youtube.deleting', '삭제 중...')
+            : t('awards.delete', '삭제')
         }
         onConfirm={handleConfirmDelete}
         onCancel={() => setAwardToDelete(null)}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flag, Edit3, Sparkles, BookOpen, Compass, Terminal } from 'lucide-react';
 import { AboutConfig } from '../types';
 import { useLanguage } from '../context/ThemeContext';
+import { getLocalizedAbout } from '../utils/translationHelper';
 
 interface HeroSectionProps {
   aboutData: AboutConfig;
@@ -21,30 +22,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const { lang, t } = useLanguage();
   const [imageZoomed, setImageZoomed] = useState(false);
 
-  // Smart English fallback for default text
-  const isDefaultBio = aboutData.bio?.includes('여러 로봇 대회에 참가하며');
-  const isDefaultQuote = aboutData.quote?.includes('결과 뿐만 아니라');
-  const isDefaultGoal = aboutData.goal?.includes('로봇을 직접 창작할 수 있도록');
+  const localizedAbout = getLocalizedAbout(aboutData, lang);
 
-  const displayQuote =
-    lang === 'en' && isDefaultQuote
-      ? '"Demonstrating not only the final outcomes, but also the growth, trials, and iterative breakthroughs throughout the journey."'
-      : aboutData.quote;
-
-  const displayBio =
-    lang === 'en' && isDefaultBio
-      ? 'Accumulating extensive engineering expertise and coding knowledge through active participation in competitive robotics olympiads. Conducting in-depth mechanical and algorithmic research to design, build, and deploy custom autonomous robots.'
-      : aboutData.bio;
-
-  const displaySubBio =
-    lang === 'en' && aboutData.subBio?.includes('로봇 공학에 열정을 품고')
-      ? 'An ambitious robotics enthusiast architecting autonomous systems, precision motor controls, and intelligent navigation algorithms for next-generation platforms.'
-      : aboutData.subBio;
-
-  const displayGoal =
-    lang === 'en' && isDefaultGoal
-      ? 'Gaining deep engineering experience to independently design and deploy autonomous robotic innovations'
-      : aboutData.goal;
+  const displayQuote = localizedAbout.quote;
+  const displayBio = localizedAbout.bio;
+  const displaySubBio = localizedAbout.subBio;
+  const displayGoal = localizedAbout.goal;
 
   return (
     <section id="about" className="relative pt-6 pb-12 sm:pt-8 sm:pb-14 scroll-mt-20">
@@ -76,7 +59,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span className="text-xl shrink-0 select-none">💡</span>
               <div className="space-y-1">
                 <div className="text-xs font-mono uppercase tracking-wider text-[#787774] font-bold">
-                  {lang === 'en' ? 'CORE PHILOSOPHY' : '핵심 철학'}
+                  {t('hero.corePhilosophy', 'CORE PHILOSOPHY')}
                 </div>
                 <p className="text-sm sm:text-base font-sans font-medium text-[#37352f] leading-relaxed italic">
                   {displayQuote}
@@ -115,7 +98,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div
                 onClick={() => setImageZoomed(!imageZoomed)}
                 className="relative aspect-4/3 sm:aspect-4/3 w-full rounded-lg overflow-hidden bg-[#fbfbfa] border border-[#e3e2de] flex items-center justify-center p-2 cursor-pointer group"
-                title={lang === 'en' ? 'Click to inspect image' : '클릭하여 이미지 확대'}
+                title={lang === 'ko' ? '클릭하여 이미지 확대' : 'Click to inspect image'}
               >
                 <img
                   src={aboutData.heroImage || '/src/assets/images/hero_robot_arm_1786764552106.jpg'}

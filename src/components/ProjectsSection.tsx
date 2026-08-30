@@ -98,7 +98,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     </p>
                   </div>
                   <span className="text-xs font-sans font-medium text-[#2383e2] underline">
-                    {lang === 'en' ? 'Register a new project' : '새 프로젝트 등록하기'}
+                    {t('projects.addPlaceholder', '새 프로젝트 등록하기')}
                   </span>
                 </div>
               );
@@ -182,7 +182,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       </button>
                     </div>
 
-                    <p className="text-xs sm:text-sm font-sans text-[#5a5854] leading-relaxed line-clamp-3 whitespace-pre-line">
+                    <p className="text-xs sm:text-sm font-sans text-[#787774] leading-relaxed line-clamp-3 whitespace-pre-line">
                       {project.summary}
                     </p>
                   </div>
@@ -224,21 +224,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!projectToDelete}
-        title={t('projects.deleteConfirm')}
-        message={
-          lang === 'en'
-            ? 'Are you sure you want to permanently delete this project?'
-            : '선택하신 프로젝트를 정말 삭제하시겠습니까?'
-        }
+        title={t('projects.delete', '프로젝트 삭제')}
+        message={t('projects.deleteConfirm', '이 프로젝트를 삭제하시겠습니까?')}
         itemName={projectToDelete ? `${projectToDelete.projectId} - ${projectToDelete.title}` : ''}
         confirmText={
           isDeleting
-            ? lang === 'en'
-              ? 'Deleting...'
-              : '삭제 중...'
-            : lang === 'en'
-              ? 'Delete'
-              : '삭제하기'
+            ? t('youtube.deleting', '삭제 중...')
+            : t('projects.delete', '삭제')
         }
         onConfirm={handleConfirmDelete}
         onCancel={() => setProjectToDelete(null)}

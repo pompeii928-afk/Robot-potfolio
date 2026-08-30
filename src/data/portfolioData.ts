@@ -227,7 +227,7 @@ export const PROJECTS_DATA: ProjectItem[] = [
     id: 'wro-2025-robot',
     projectId: 'PROJECT_ID: WRO_25',
     title: 'WRO 2025 Robot',
-    summary: 'WRO 2025 KOREA에서 쓴 로봇에 대한 조립도 및 설계 구조 분석.',
+    summary: 'WRO 2025 KOREA에서 사용한 로봇의 조립도 및 기구 설계 구조 분석.',
     detailedDescription: 'WRO 2025 KOREA 본선에 출전한 고속 정밀 자율주행 로봇입니다. 저중심 섀시 설계와 4채널 광학 센서 어레이, 랙-앤-피니언 방식의 고속 그리퍼를 결합하여 미션 완수율 98%를 달성했습니다.',
     image: '/src/assets/images/robot_blueprint_1786764563396.jpg',
     tags: ['Studio 2.0', 'Hardware CAD', 'PID Control', 'Dual Gyro'],

@@ -23,7 +23,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
   counts,
 }) => {
   const { theme } = useTheme();
-  const { lang } = useLanguage();
+  const { t } = useLanguage();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement | null>(null);
 
@@ -32,66 +32,52 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
   const categories = [
     {
       id: 'all',
-      labelEn: 'Overview',
-      labelKo: '전체 보기',
+      key: 'nav.overview',
+      fallback: 'Overview',
       icon: LayoutGrid,
       badge: null,
-      descEn: 'Full portfolio overview',
-      descKo: '전체 내용 한눈에 보기',
     },
     {
       id: 'about',
-      labelEn: 'About & Robot',
-      labelKo: '소개 & 비전',
+      key: 'nav.about',
+      fallback: 'About & Robot',
       icon: Bot,
       badge: 'PROT V4',
-      descEn: 'Bio, mission & robot system',
-      descKo: '엔지니어 소개 및 핵심 목표',
     },
     {
       id: 'journey',
-      labelEn: 'Competition Journey',
-      labelKo: '대회 여정',
+      key: 'nav.journey',
+      fallback: 'Journey',
       icon: TrendingUp,
-      badge: safeCounts.journeys ? `${safeCounts.journeys} Stages` : 'WRO',
-      descEn: 'Milestones & lessons learned',
-      descKo: '대회 단계별 분석 및 인사이트',
+      badge: safeCounts.journeys ? `${safeCounts.journeys}` : 'WRO',
     },
     {
       id: 'awards',
-      labelEn: 'Awards & Honors',
-      labelKo: '수상 내역',
+      key: 'nav.awards',
+      fallback: 'Awards',
       icon: Trophy,
-      badge: safeCounts.awards ? `${safeCounts.awards} Wins` : 'Top Award',
-      descEn: 'Accreditations & trophies',
-      descKo: '수상 트로피 및 순위 기록',
+      badge: safeCounts.awards ? `${safeCounts.awards}` : 'Wins',
     },
     {
       id: 'skills',
-      labelEn: 'Core Tech Skills',
-      labelKo: '핵심 역량',
+      key: 'nav.skills',
+      fallback: 'Skills',
       icon: Cpu,
-      badge: safeCounts.skills ? `${safeCounts.skills} Domains` : 'Hardware/SW',
-      descEn: 'Hardware, ROS2 & control logic',
-      descKo: '하드웨어/소프트웨어 기술 스택',
+      badge: safeCounts.skills ? `${safeCounts.skills}` : 'Matrix',
     },
     {
       id: 'experience',
-      labelEn: 'Robots & Projects',
-      labelKo: '로봇 시스템',
+      key: 'nav.experience',
+      fallback: 'Projects',
       icon: FolderGit2,
-      badge: safeCounts.projects ? `${safeCounts.projects} Systems` : 'Engineering',
-      descEn: 'Autonomous platforms & CAD specs',
-      descKo: '자율주행 플랫폼 및 엔지니어링',
+      badge: safeCounts.projects ? `${safeCounts.projects}` : 'Robots',
     },
     {
       id: 'youtube',
-      labelEn: 'YouTube Channel',
-      labelKo: '유튜브 채널',
+      key: 'nav.youtube',
+      fallback: 'YouTube',
       icon: Youtube,
       badge: '@Wrocospace',
-      descEn: 'Official YouTube Channel & Match Videos',
-      descKo: '공식 유튜브 채널 및 실전 주행 영상',
     },
   ];
 
@@ -130,7 +116,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             const Icon = cat.icon;
-            const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+            const label = t(cat.key, cat.fallback);
             const isYouTube = cat.id === 'youtube';
 
             return (

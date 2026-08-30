@@ -13,8 +13,10 @@ import {
   FolderGit2,
   Youtube,
   ExternalLink,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
-import { useLanguage } from '../context/ThemeContext';
+import { useLanguage, SUPPORTED_LANGUAGES, Language } from '../context/ThemeContext';
 
 export interface CategoryCounts {
   journeys?: number;
@@ -41,9 +43,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { lang, toggleLanguage, t } = useLanguage();
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const { lang, setLanguage, toggleLanguage, t } = useLanguage();
   const desktopNavRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,6 +55,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle outside click for language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        langDropdownRef.current &&
+        !langDropdownRef.current.contains(event.target as Node)
+      ) {
+        setLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Auto-scroll the category bar so the active category button follows and stays visible in view
@@ -83,7 +101,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       }
     };
 
-    // Timeout ensures DOM updates and layout paints have occurred
     const timeoutId = setTimeout(scrollCategoryIntoView, 50);
     return () => clearTimeout(timeoutId);
   }, [activeSection]);
@@ -91,50 +108,50 @@ export const Navbar: React.FC<NavbarProps> = ({
   const categories = [
     {
       id: 'all',
-      labelEn: 'Overview',
-      labelKo: '전체 보기',
+      key: 'nav.overview',
+      fallback: '전체 보기',
       icon: LayoutGrid,
       count: undefined,
     },
     {
       id: 'about',
-      labelEn: 'About & Robot',
-      labelKo: '소개 & 비전',
+      key: 'nav.about',
+      fallback: '소개 & 비전',
       icon: Bot,
       count: undefined,
     },
     {
       id: 'journey',
-      labelEn: 'Journey',
-      labelKo: '대회 여정',
+      key: 'nav.journey',
+      fallback: '대회 여정',
       icon: TrendingUp,
       count: counts.journeys,
     },
     {
       id: 'awards',
-      labelEn: 'Awards',
-      labelKo: '수상 내역',
+      key: 'nav.awards',
+      fallback: '수상 내역',
       icon: Trophy,
       count: counts.awards,
     },
     {
       id: 'skills',
-      labelEn: 'Skills',
-      labelKo: '핵심 역량',
+      key: 'nav.skills',
+      fallback: '핵심 역량',
       icon: Cpu,
       count: counts.skills,
     },
     {
       id: 'experience',
-      labelEn: 'Projects',
-      labelKo: '로봇 시스템',
+      key: 'nav.experience',
+      fallback: '로봇 시스템',
       icon: FolderGit2,
       count: counts.projects,
     },
     {
       id: 'youtube',
-      labelEn: 'YouTube',
-      labelKo: '유튜브 채널',
+      key: 'nav.youtube',
+      fallback: '유튜브 채널',
       icon: Youtube,
       count: counts.videos,
     },
@@ -146,6 +163,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
     onNavigate(id);
   };
+
+  const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
   return (
     <header
@@ -181,7 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {categories.map((cat) => {
               const isActive = activeSection === cat.id;
               const Icon = cat.icon;
-              const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+              const label = t(cat.key, cat.fallback);
               const isYouTube = cat.id === 'youtube';
 
               return (
@@ -224,21 +243,57 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Controls: Language Switcher & Contact */}
+          {/* Right Controls: Multi-Language Selector & Contact */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Language Toggle (Notion pill) */}
-            <button
-              id="lang-toggle-btn"
-              onClick={toggleLanguage}
-              className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1.5 transition-colors cursor-pointer select-none"
-              title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
-              aria-label="Toggle language"
-            >
-              <Globe className="w-3.5 h-3.5 text-[#787774]" />
-              <span className="text-xs font-mono font-semibold">
-                {lang === 'ko' ? 'EN' : '한국어'}
-              </span>
-            </button>
+            {/* Multi-Language Dropdown */}
+            <div className="relative" ref={langDropdownRef}>
+              <button
+                id="lang-toggle-btn"
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1.5 transition-colors cursor-pointer select-none"
+                title="Select language"
+                aria-label="Select language"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#787774]" />
+                <span className="text-xs font-sans font-medium flex items-center gap-1">
+                  <span>{currentLangObj.flag}</span>
+                  <span className="font-mono font-semibold">{currentLangObj.code.toUpperCase()}</span>
+                </span>
+                <ChevronDown className="w-3 h-3 text-[#787774]" />
+              </button>
+
+              {/* Language Dropdown Menu */}
+              {langDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-44 rounded-lg bg-white border border-[#e3e2de] shadow-lg py-1 z-50 animate-in fade-in-50 zoom-in-95 duration-100">
+                  <div className="px-2.5 py-1 text-[11px] font-mono text-[#787774] border-b border-[#e3e2de] uppercase">
+                    Select Language
+                  </div>
+                  {SUPPORTED_LANGUAGES.map((item) => {
+                    const isSelected = item.code === lang;
+                    return (
+                      <button
+                        key={item.code}
+                        onClick={() => {
+                          setLanguage(item.code);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full px-2.5 py-1.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#f7f6f3] text-[#37352f] font-semibold'
+                            : 'text-[#5a5854] hover:bg-[#fbfbfa] hover:text-[#37352f]'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-sm">{item.flag}</span>
+                          <span>{item.nativeName}</span>
+                        </span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#2383e2]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Contact Button (Notion style action) */}
             <button
@@ -251,7 +306,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Contact"
             >
               <Mail className="w-3.5 h-3.5 text-[#787774]" />
-              <span>{t('nav.contact', 'Contact')}</span>
+              <span>{t('nav.contact', 'CONTACT')}</span>
             </button>
 
             {/* Mobile Menu Button */}
@@ -274,7 +329,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {categories.map((cat) => {
             const isActive = activeSection === cat.id;
             const Icon = cat.icon;
-            const label = lang === 'en' ? cat.labelEn : cat.labelKo;
+            const label = t(cat.key, cat.fallback);
             const isYouTube = cat.id === 'youtube';
 
             return (
@@ -325,7 +380,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {categories.map((item) => {
               const isActive = activeSection === item.id;
               const Icon = item.icon;
-              const label = lang === 'en' ? item.labelEn : item.labelKo;
+              const label = t(item.key, item.fallback);
               return (
                 <button
                   key={item.id}
@@ -349,7 +404,34 @@ export const Navbar: React.FC<NavbarProps> = ({
               );
             })}
 
-
+            {/* Mobile Language Selector */}
+            <div className="pt-3 mt-2 border-t border-[#e3e2de]">
+              <div className="text-[11px] font-mono text-[#787774] uppercase mb-1.5">
+                Language
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {SUPPORTED_LANGUAGES.map((item) => {
+                  const isSelected = item.code === lang;
+                  return (
+                    <button
+                      key={item.code}
+                      onClick={() => {
+                        setLanguage(item.code);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`px-2 py-1.5 rounded text-xs flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#37352f] text-white border-[#37352f] font-semibold'
+                          : 'bg-[#f7f6f3] text-[#5a5854] border-[#e3e2de] hover:bg-[#efefed]'
+                      }`}
+                    >
+                      <span>{item.flag}</span>
+                      <span>{item.code.toUpperCase()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="pt-3 mt-2 border-t border-[#e3e2de] flex items-center justify-between text-xs text-[#787774]">
               <a

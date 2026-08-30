@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Check, Copy, Youtube, ExternalLink, Lock } from 'lucide-react';
+import { Mail, Check, Copy, Youtube, ExternalLink } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
 import { useLanguage } from '../context/ThemeContext';
 import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
@@ -9,7 +9,7 @@ interface FooterProps {
   isAdmin?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, isAdmin }) => {
+export const Footer: React.FC<FooterProps> = () => {
   const { lang } = useLanguage();
   const [copied, setCopied] = useState(false);
   const email = 'pompeii928@gmail.com';
@@ -40,20 +40,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, isAdmin }) => {
             </div>
           </div>
 
-          {/* Right Links, Admin & Email */}
+          {/* Right Links & Email */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Admin Portal Button */}
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#787774] hover:text-[#37352f] transition-colors cursor-pointer"
-                title="Admin Control"
-              >
-                <Lock className="w-3.5 h-3.5 text-[#787774]" />
-                <span>{isAdmin ? (lang === 'en' ? 'Admin Active' : '관리자 모드') : (lang === 'en' ? 'Admin Login' : '관리자 로그인')}</span>
-              </button>
-            )}
-
             {/* YouTube Link */}
             <a
               href={DEFAULT_CHANNEL_INFO.channelUrl}

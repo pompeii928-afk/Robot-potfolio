@@ -114,14 +114,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               {/* Image Frame */}
               <div
                 onClick={() => setImageZoomed(!imageZoomed)}
-                className="relative aspect-4/3 sm:aspect-4/3 w-full rounded-lg overflow-hidden bg-[#f7f6f3] border border-[#e3e2de] cursor-pointer group"
+                className="relative aspect-4/3 sm:aspect-4/3 w-full rounded-lg overflow-hidden bg-[#fbfbfa] border border-[#e3e2de] flex items-center justify-center p-2 cursor-pointer group"
                 title={lang === 'en' ? 'Click to inspect image' : '클릭하여 이미지 확대'}
               >
                 <img
                   src={aboutData.heroImage || '/src/assets/images/hero_robot_arm_1786764552106.jpg'}
                   alt="Robotic System"
-                  className={`w-full h-full object-cover object-center transition-transform duration-300 ${
-                    imageZoomed ? 'scale-105' : 'group-hover:scale-[1.01]'
+                  className={`max-w-full max-h-full w-auto h-auto object-contain object-center transition-transform duration-300 ${
+                    imageZoomed ? 'scale-105' : 'group-hover:scale-[1.02]'
                   }`}
                   referrerPolicy="no-referrer"
                 />

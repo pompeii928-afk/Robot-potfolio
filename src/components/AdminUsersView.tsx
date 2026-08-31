@@ -11,12 +11,16 @@ import {
   Loader2,
   Building,
   MessageSquare,
+  LogOut,
+  CheckCircle2,
+  Filter,
 } from 'lucide-react';
 import { VisitorCheckin, LoginLog } from '../types';
 import {
   subscribeVisitorCheckins,
   deleteVisitorCheckin,
   clearAllVisitorCheckins,
+  recordVisitorCheckout,
   subscribeLoginLogs,
   deleteLoginLog,
   clearAllLoginLogs,
@@ -48,8 +52,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'checkins' | 'logs'>('checkins');
   const [searchTerm, setSearchTerm] = useState('');
   const [relationFilter, setRelationFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'active' | 'checked_out'>('ALL');
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const [checkingOutIds, setCheckingOutIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setLoading(true);
@@ -93,7 +99,6 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
       });
     } catch {
       return isoString;
@@ -118,15 +123,51 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
     }
   };
 
+  const calculateDuration = (startTimeIso?: string, endTimeIso?: string) => {
+    if (!startTimeIso) return '-';
+    try {
+      const start = new Date(startTimeIso).getTime();
+      const end = endTimeIso ? new Date(endTimeIso).getTime() : Date.now();
+      const diffMs = Math.max(0, end - start);
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHr = Math.floor(diffMin / 60);
+      const remMin = diffMin % 60;
+
+      if (diffMin < 1) return lang === 'ko' ? '1분 미만' : '< 1m';
+      if (diffHr < 1) return lang === 'ko' ? `${diffMin}분` : `${diffMin}m`;
+      return lang === 'ko' ? `${diffHr}시간 ${remMin}분` : `${diffHr}h ${remMin}m`;
+    } catch {
+      return '-';
+    }
+  };
+
   // Delete Single Visitor Checkin
   const handleDeleteCheckin = async (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await deleteVisitorCheckin(id);
-      showToast(`[${name}] OK`, 'success');
+      showToast(`[${name}] 삭제되었습니다.`, 'success');
     } catch (err) {
       console.error(err);
-      showToast('Error deleting item', 'error');
+      showToast('삭제 중 오류가 발생했습니다.', 'error');
+    }
+  };
+
+  // Trigger Checkout for a visitor
+  const handleAdminCheckout = async (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCheckingOutIds((prev) => ({ ...prev, [id]: true }));
+    try {
+      await recordVisitorCheckout(id);
+      showToast(
+        `[${name}] ${t('checkin.statusCheckedOut', '체크아웃 완료')}`,
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('체크아웃 처리 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setCheckingOutIds((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -136,10 +177,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
     try {
       const count = await clearAllVisitorCheckins();
       setConfirmClearAll(false);
-      showToast(`(${count}) Deleted`, 'success');
+      showToast(`총 ${count}개의 기록이 삭제되었습니다.`, 'success');
     } catch (err) {
       console.error(err);
-      showToast('Error', 'error');
+      showToast('기록 삭제 중 오류가 발생했습니다.', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -150,10 +191,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
     e.stopPropagation();
     try {
       await deleteLoginLog(logId);
-      showToast('OK', 'success');
+      showToast('로그가 삭제되었습니다.', 'success');
     } catch (err) {
       console.error(err);
-      showToast('Error', 'error');
+      showToast('로그 삭제 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -163,10 +204,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
     try {
       const count = await clearAllLoginLogs();
       setConfirmClearAll(false);
-      showToast(`(${count}) Deleted`, 'success');
+      showToast(`총 ${count}개의 로그가 삭제되었습니다.`, 'success');
     } catch (err) {
       console.error(err);
-      showToast('Error', 'error');
+      showToast('로그 삭제 중 오류가 발생했습니다.', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -174,12 +215,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
 
   // Metrics
   const totalCheckinsCount = checkins.length;
+  const activeVisitorsCount = checkins.filter((c) => (c.status || 'active') === 'active').length;
+  const checkedOutVisitorsCount = checkins.filter((c) => c.status === 'checked_out').length;
   const recent24hCheckins = checkins.filter((c) => {
     const diff = Date.now() - new Date(c.timestamp).getTime();
     return diff <= 24 * 60 * 60 * 1000;
   }).length;
-  const checkinsWithOrg = checkins.filter((c) => !!c.organization).length;
-  const checkinsWithMessage = checkins.filter((c) => !!c.message).length;
 
   // Filtered Checkins
   const filteredCheckins = checkins.filter((c) => {
@@ -189,6 +230,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
       (c.organization && c.organization.toLowerCase().includes(term)) ||
       (c.roleOrRelation && c.roleOrRelation.toLowerCase().includes(term)) ||
       (c.message && c.message.toLowerCase().includes(term));
+
+    // Status filter
+    const itemStatus = c.status || 'active';
+    if (statusFilter !== 'ALL' && itemStatus !== statusFilter) {
+      return false;
+    }
 
     if (relationFilter === 'ALL') return matchSearch;
 
@@ -214,10 +261,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
   // Export CSV
   const handleExportCSV = () => {
     if (activeTab === 'checkins') {
-      const headers = ['ID,Name,Organization,RoleOrRelation,Message,Platform,Timestamp'];
+      const headers = ['ID,Name,Status,Organization,RoleOrRelation,Message,CheckinTime,CheckoutTime,Duration,Platform'];
       const rows = checkins.map(
         (c) =>
-          `"${c.id}","${c.name}","${c.organization || ''}","${c.roleOrRelation || ''}","${(c.message || '').replace(/"/g, '""')}","${c.platform || ''}","${c.timestamp}"`
+          `"${c.id}","${c.name}","${c.status || 'active'}","${c.organization || ''}","${c.roleOrRelation || ''}","${(c.message || '').replace(/"/g, '""')}","${c.timestamp}","${c.checkoutTimestamp || ''}","${calculateDuration(c.timestamp, c.checkoutTimestamp)}","${c.platform || ''}"`
       );
       const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n');
       const encodedUri = encodeURI(csvContent);
@@ -227,7 +274,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('CSV Downloaded', 'success');
+      showToast('CSV 다운로드가 완료되었습니다.', 'success');
     } else {
       const headers = ['LogID,UID,Email,DisplayName,Provider,Timestamp,Platform,UserAgent'];
       const rows = logs.map(
@@ -242,7 +289,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('CSV Downloaded', 'success');
+      showToast('CSV 다운로드가 완료되었습니다.', 'success');
     }
   };
 
@@ -256,7 +303,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
           </div>
           <div>
             <h2 className="text-sm sm:text-base font-sans font-bold text-[#37352f] flex items-center gap-2">
-              <span>{t('admin.usersTitle', '방문자 체크인 명단 & 접속 기록')}</span>
+              <span>{t('admin.usersTitle', '방문자 체크인 & 체크아웃 명단')}</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0]">
                 Live Realtime
               </span>
@@ -313,7 +360,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
               </h3>
             </div>
             <p className="text-xs font-sans text-[#787774] leading-relaxed">
-              {activeTab === 'checkins' ? checkins.length : logs.length} items. Permanent delete?
+              {activeTab === 'checkins' ? `${checkins.length}개의 방문자 기록` : `${logs.length}개의 로그인 로그`}이 영구적으로 삭제됩니다. 계속하시겠습니까?
             </p>
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e3e2de]">
               <button
@@ -329,7 +376,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                 className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-sans font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                <span>{isDeleting ? '...' : t('admin.clearAll', '전체 기록 삭제')}</span>
+                <span>{isDeleting ? '삭제 중...' : t('admin.clearAll', '전체 기록 삭제')}</span>
               </button>
             </div>
           </div>
@@ -350,39 +397,39 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Card 2: 24h Check-in */}
+        {/* Card 2: Currently Active Visitors */}
+        <div className="p-3.5 bg-white rounded-lg border border-[#e3e2de] shadow-2xs">
+          <div className="flex items-center justify-between text-[#787774] text-xs font-sans mb-1">
+            <span>{t('admin.activeVisitors', '현재 체류 중')}</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+          <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-700">
+            {activeVisitorsCount}
+            <span className="text-xs font-sans font-normal text-[#787774] ml-1">{t('admin.unitPeople', '명')}</span>
+          </div>
+        </div>
+
+        {/* Card 3: Checked Out Visitors */}
+        <div className="p-3.5 bg-white rounded-lg border border-[#e3e2de] shadow-2xs">
+          <div className="flex items-center justify-between text-[#787774] text-xs font-sans mb-1">
+            <span>{t('admin.checkedOutVisitors', '체크아웃 완료')}</span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-slate-500" />
+          </div>
+          <div className="text-xl sm:text-2xl font-mono font-bold text-slate-700">
+            {checkedOutVisitorsCount}
+            <span className="text-xs font-sans font-normal text-[#787774] ml-1">{t('admin.unitPeople', '명')}</span>
+          </div>
+        </div>
+
+        {/* Card 4: 24h Check-in */}
         <div className="p-3.5 bg-white rounded-lg border border-[#e3e2de] shadow-2xs">
           <div className="flex items-center justify-between text-[#787774] text-xs font-sans mb-1">
             <span>{t('admin.recent24h', '24시간 내 방문')}</span>
             <Clock className="w-3.5 h-3.5 text-amber-600" />
           </div>
-          <div className="text-xl sm:text-2xl font-mono font-bold text-emerald-700">
+          <div className="text-xl sm:text-2xl font-mono font-bold text-[#37352f]">
             {recent24hCheckins}
             <span className="text-xs font-sans font-normal text-[#787774] ml-1">{t('admin.unitPeople', '명')}</span>
-          </div>
-        </div>
-
-        {/* Card 3: With Organization */}
-        <div className="p-3.5 bg-white rounded-lg border border-[#e3e2de] shadow-2xs">
-          <div className="flex items-center justify-between text-[#787774] text-xs font-sans mb-1">
-            <span>{t('admin.withOrg', '소속/기관 기재')}</span>
-            <Building className="w-3.5 h-3.5 text-[#2383e2]" />
-          </div>
-          <div className="text-xl sm:text-2xl font-mono font-bold text-[#37352f]">
-            {checkinsWithOrg}
-            <span className="text-xs font-sans font-normal text-[#787774] ml-1">{t('admin.unitPeople', '명')}</span>
-          </div>
-        </div>
-
-        {/* Card 4: With Message */}
-        <div className="p-3.5 bg-white rounded-lg border border-[#e3e2de] shadow-2xs">
-          <div className="flex items-center justify-between text-[#787774] text-xs font-sans mb-1">
-            <span>{t('admin.withMsg', '응원 메시지 남김')}</span>
-            <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-mono font-bold text-[#37352f]">
-            {checkinsWithMessage}
-            <span className="text-xs font-sans font-normal text-[#787774] ml-1">{t('admin.unitCount', '건')}</span>
           </div>
         </div>
       </div>
@@ -401,7 +448,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
           >
             <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
             <span>
-              {t('admin.tabCheckins', '방문자 체크인 명단')} ({checkins.length})
+              {t('admin.tabCheckins', '방문자 명단')} ({checkins.length})
             </span>
           </button>
           <button
@@ -420,23 +467,64 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
         </div>
 
         {/* Right Search & Filters */}
-        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end flex-wrap">
           {activeTab === 'checkins' && (
-            <select
-              value={relationFilter}
-              onChange={(e) => setRelationFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-md bg-[#f7f6f3] border border-[#e3e2de] text-xs font-sans text-[#37352f] outline-none cursor-pointer"
-            >
-              {FILTER_CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {t(cat.value === 'ALL' ? cat.key : cat.value, cat.fallback)}
-                </option>
-              ))}
-            </select>
+            <>
+              {/* Status Filter */}
+              <div className="flex items-center gap-1 bg-[#f7f6f3] p-0.5 rounded-md border border-[#e3e2de] text-xs font-sans">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('ALL')}
+                  className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                    statusFilter === 'ALL'
+                      ? 'bg-white text-[#37352f] shadow-2xs font-semibold'
+                      : 'text-[#787774] hover:text-[#37352f]'
+                  }`}
+                >
+                  {t('admin.filterAllStatus', '전체')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('active')}
+                  className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                    statusFilter === 'active'
+                      ? 'bg-emerald-50 text-emerald-800 shadow-2xs font-semibold border border-[#d2ebd0]'
+                      : 'text-[#787774] hover:text-emerald-800'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {t('admin.filterActive', '체류 중')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('checked_out')}
+                  className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                    statusFilter === 'checked_out'
+                      ? 'bg-white text-slate-800 shadow-2xs font-semibold'
+                      : 'text-[#787774] hover:text-slate-800'
+                  }`}
+                >
+                  {t('admin.filterCheckedOut', '체크아웃')}
+                </button>
+              </div>
+
+              {/* Category Filter */}
+              <select
+                value={relationFilter}
+                onChange={(e) => setRelationFilter(e.target.value)}
+                className="px-2.5 py-1.5 rounded-md bg-[#f7f6f3] border border-[#e3e2de] text-xs font-sans text-[#37352f] outline-none cursor-pointer"
+              >
+                {FILTER_CATEGORIES.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {t(cat.value === 'ALL' ? cat.key : cat.value, cat.fallback)}
+                  </option>
+                ))}
+              </select>
+            </>
           )}
 
           {/* Search Box */}
-          <div className="relative w-48 sm:w-60">
+          <div className="relative w-40 sm:w-56">
             <Search className="w-3.5 h-3.5 text-[#787774] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -454,7 +542,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
         {loading ? (
           <div className="py-16 text-center text-[#787774] flex flex-col items-center justify-center gap-2">
             <RefreshCw className="w-6 h-6 animate-spin text-emerald-600" />
-            <span className="text-xs font-sans">Loading...</span>
+            <span className="text-xs font-sans">불러오는 중...</span>
           </div>
         ) : activeTab === 'checkins' ? (
           /* VISITOR CHECK-INS LIST */
@@ -469,71 +557,126 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-[#e3e2de] shadow-2xs overflow-hidden divide-y divide-[#e3e2de]">
-              {filteredCheckins.map((checkin) => (
-                <div
-                  key={checkin.id}
-                  className="p-4 hover:bg-[#fbfbfa] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3"
-                >
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-7 h-7 rounded-full bg-[#edf6ec] border border-[#d2ebd0] flex items-center justify-center font-bold text-emerald-800 text-xs">
-                        {(checkin.name || 'V')[0].toUpperCase()}
-                      </div>
-                      <span className="font-sans font-bold text-sm text-[#37352f]">
-                        {checkin.name}
-                      </span>
+              {filteredCheckins.map((checkin) => {
+                const isActive = (checkin.status || 'active') === 'active';
+                const isCheckingOut = checkingOutIds[checkin.id];
 
-                      {checkin.roleOrRelation && (
-                        <span className="text-[10px] font-sans px-2 py-0.5 rounded-md bg-[#f7f6f3] text-[#37352f] border border-[#e3e2de] font-medium">
-                          {checkin.roleOrRelation}
+                return (
+                  <div
+                    key={checkin.id}
+                    className="p-4 hover:bg-[#fbfbfa] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3"
+                  >
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div
+                          className={`w-7 h-7 rounded-full border flex items-center justify-center font-bold text-xs ${
+                            isActive
+                              ? 'bg-[#edf6ec] border-[#d2ebd0] text-emerald-800'
+                              : 'bg-slate-100 border-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {(checkin.name || 'V')[0].toUpperCase()}
+                        </div>
+                        <span className="font-sans font-bold text-sm text-[#37352f]">
+                          {checkin.name}
                         </span>
+
+                        {/* Status Badge */}
+                        {isActive ? (
+                          <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-[#edf6ec] text-emerald-800 border border-[#d2ebd0] font-semibold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>{t('checkin.statusActive', '체류 중')}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-medium flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-slate-500" />
+                            <span>{t('checkin.statusCheckedOut', '체크아웃 완료')}</span>
+                          </span>
+                        )}
+
+                        {checkin.roleOrRelation && (
+                          <span className="text-[10px] font-sans px-2 py-0.5 rounded-md bg-[#f7f6f3] text-[#37352f] border border-[#e3e2de] font-medium">
+                            {checkin.roleOrRelation}
+                          </span>
+                        )}
+
+                        {checkin.organization && (
+                          <span className="text-[11px] font-sans text-[#787774] flex items-center gap-1">
+                            <Building className="w-3 h-3 text-[#9b9a97]" />
+                            <span>{checkin.organization}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {checkin.message && (
+                        <div className="ml-9.5 p-2 rounded-lg bg-[#fbfbfa] border border-[#e3e2de] text-xs font-sans text-[#37352f] flex items-start gap-2">
+                          <MessageSquare className="w-3.5 h-3.5 text-purple-600 shrink-0 mt-0.5" />
+                          <span className="leading-relaxed">"{checkin.message}"</span>
+                        </div>
                       )}
 
-                      {checkin.organization && (
-                        <span className="text-[11px] font-sans text-[#787774] flex items-center gap-1">
-                          <Building className="w-3 h-3 text-[#9b9a97]" />
-                          <span>{checkin.organization}</span>
+                      <div className="ml-9.5 text-[11px] text-[#787774] flex items-center gap-3 flex-wrap">
+                        <span className="flex items-center gap-1 font-mono text-[10px]">
+                          <Laptop className="w-3 h-3 text-[#9b9a97]" />
+                          <span>{checkin.platform || 'Web Browser'}</span>
                         </span>
+
+                        {/* Duration badge */}
+                        <span className="font-mono text-[10px] text-[#787774] flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#9b9a97]" />
+                          <span>
+                            {t('checkin.stayDuration', '체류')}: {calculateDuration(checkin.timestamp, checkin.checkoutTimestamp)}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#e3e2de]/60">
+                      <div className="text-right space-y-0.5">
+                        <div className="text-xs font-mono font-semibold text-[#37352f] flex items-center gap-1 md:justify-end">
+                          <Clock className="w-3 h-3 text-emerald-600" />
+                          <span>{formatDate(checkin.timestamp)}</span>
+                        </div>
+                        {checkin.checkoutTimestamp && (
+                          <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1 md:justify-end">
+                            <LogOut className="w-2.5 h-2.5 text-slate-400" />
+                            <span>퇴장: {formatDate(checkin.checkoutTimestamp)}</span>
+                          </div>
+                        )}
+                        <div className="text-[11px] text-emerald-600 font-medium">
+                          {getRelativeTime(checkin.timestamp)}
+                        </div>
+                      </div>
+
+                      {/* Admin action: Check out if active */}
+                      {isActive && (
+                        <button
+                          onClick={(e) => handleAdminCheckout(checkin.id, checkin.name, e)}
+                          disabled={isCheckingOut}
+                          className="px-2.5 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-sans font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                          title="관리자 퇴장 처리 (Check Out)"
+                        >
+                          {isCheckingOut ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <LogOut className="w-3 h-3 text-amber-700" />
+                          )}
+                          <span className="hidden sm:inline">체크아웃</span>
+                        </button>
                       )}
-                    </div>
 
-                    {checkin.message && (
-                      <div className="ml-9.5 p-2 rounded-lg bg-[#fbfbfa] border border-[#e3e2de] text-xs font-sans text-[#37352f] flex items-start gap-2">
-                        <MessageSquare className="w-3.5 h-3.5 text-purple-600 shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">"{checkin.message}"</span>
-                      </div>
-                    )}
-
-                    <div className="ml-9.5 text-[11px] text-[#787774] flex items-center gap-2 flex-wrap">
-                      <span className="flex items-center gap-1 font-mono text-[10px]">
-                        <Laptop className="w-3 h-3 text-[#9b9a97]" />
-                        <span>{checkin.platform || 'Web Browser'}</span>
-                      </span>
+                      {/* Delete Single Checkin */}
+                      <button
+                        onClick={(e) => handleDeleteCheckin(checkin.id, checkin.name, e)}
+                        className="p-1.5 rounded-md text-[#787774] hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#e3e2de]/60">
-                    <div className="text-right">
-                      <div className="text-xs font-mono font-semibold text-[#37352f] flex items-center gap-1 md:justify-end">
-                        <Clock className="w-3 h-3 text-emerald-600" />
-                        <span>{formatDate(checkin.timestamp)}</span>
-                      </div>
-                      <div className="text-[11px] text-emerald-600 font-medium">
-                        {getRelativeTime(checkin.timestamp)}
-                      </div>
-                    </div>
-
-                    {/* Delete Single Checkin */}
-                    <button
-                      onClick={(e) => handleDeleteCheckin(checkin.id, checkin.name, e)}
-                      className="p-1.5 rounded-md text-[#787774] hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )
         ) : (

@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
   onSnapshot,
   writeBatch,
@@ -1061,6 +1062,7 @@ export async function recordVisitorCheckin(checkinData: {
     platform,
     userAgent,
     timestamp: new Date().toISOString(),
+    status: 'active',
   };
 
   try {
@@ -1069,6 +1071,23 @@ export async function recordVisitorCheckin(checkinData: {
     return newCheckin;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
+    throw error;
+  }
+}
+
+/**
+ * Record visitor check-out
+ */
+export async function recordVisitorCheckout(checkinId: string): Promise<void> {
+  const path = `${VISITOR_CHECKINS_COLLECTION}/${checkinId}`;
+  try {
+    const docRef = doc(db, VISITOR_CHECKINS_COLLECTION, checkinId);
+    await updateDoc(docRef, {
+      status: 'checked_out',
+      checkoutTimestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
     throw error;
   }
 }

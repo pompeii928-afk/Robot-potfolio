@@ -617,6 +617,7 @@ function PortfolioApp() {
         isOpen={isCheckinModalOpen}
         onClose={() => setIsCheckinModalOpen(false)}
         onCheckinSuccess={(name) => setVisitorName(name)}
+        onCheckoutSuccess={() => setVisitorName('')}
       />
     </div>
   );

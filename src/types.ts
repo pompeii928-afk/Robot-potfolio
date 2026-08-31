@@ -132,6 +132,8 @@ export interface VisitorCheckin {
   platform?: string;
   userAgent?: string;
   timestamp: string;
+  status?: 'active' | 'checked_out';
+  checkoutTimestamp?: string;
 }
 
 export interface LoginLog {

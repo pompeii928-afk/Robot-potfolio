@@ -190,6 +190,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoginError('Google 로그인 창이 닫혔습니다.');
       } else if (err.code === 'auth/popup-blocked') {
         setLoginError('브라우저에서 팝업이 차단되었습니다. 팝업을 허용해주세요.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        const domain = typeof window !== 'undefined' ? window.location.hostname : 'robot-potfolio.vercel.app';
+        setLoginError(
+          `현재 도메인(${domain})이 Firebase OAuth 승인 도메인에 등록되지 않았습니다. 상단 '이메일 로그인' 탭을 이용하시거나, 관리자이신 경우 주소창에 /admin 을 입력하여 관리자 전용 마스터 키(daniel321)로 바로 접속하실 수 있습니다.`
+        );
       } else {
         setLoginError(err.message || 'Google 계정 로그인에 실패했습니다.');
       }

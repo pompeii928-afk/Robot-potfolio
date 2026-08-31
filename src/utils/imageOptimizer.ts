@@ -1,6 +1,6 @@
 /**
  * Optimizes and compresses images to ensure they are small enough
- * for fast loading and within Firestore's 1MB document size limit.
+ * for fast loading and strictly within Firestore's 1MB document size limit.
  */
 export interface ImageOptimizationResult {
   dataUrl: string;
@@ -12,9 +12,9 @@ export interface ImageOptimizationResult {
 
 export async function optimizeImageFile(
   file: File,
-  maxWidth = 1200,
-  maxHeight = 1200,
-  quality = 0.82
+  maxWidth = 1000,
+  maxHeight = 1000,
+  quality = 0.75
 ): Promise<ImageOptimizationResult> {
   return new Promise((resolve, reject) => {
     const originalSize = file.size;
@@ -61,22 +61,29 @@ export async function optimizeImageFile(
         let format = 'image/webp';
         let compressedDataUrl = canvas.toDataURL(format, quality);
 
-        // If browser doesn't support webp export or result is somehow larger than jpeg
+        // Fallback to jpeg if webp unsupported
         if (!compressedDataUrl.startsWith('data:image/webp')) {
           format = 'image/jpeg';
           compressedDataUrl = canvas.toDataURL(format, quality);
         }
 
-        // If the resulting dataURL is still unexpectedly large (> 600KB), compress further
+        // Strictly enforce that the resulting base64 string is < 250KB (~340,000 chars)
+        // so it NEVER exceeds Firestore's 1MB per-document limit even when combined with other fields!
+        const MAX_BASE64_LENGTH = 320 * 1024; // ~240KB
         let currentQuality = quality;
-        let currentMaxDim = maxWidth;
-        while (compressedDataUrl.length > 500 * 1024 && currentQuality > 0.4) {
-          currentQuality -= 0.15;
-          currentMaxDim = Math.round(currentMaxDim * 0.85);
+        let currentMaxDim = Math.max(width, height);
+
+        let attempts = 0;
+        while (compressedDataUrl.length > MAX_BASE64_LENGTH && attempts < 8) {
+          attempts++;
+          currentQuality = Math.max(0.3, currentQuality - 0.12);
+          currentMaxDim = Math.round(currentMaxDim * 0.75);
+
+          const scaleRatio = currentMaxDim / Math.max(img.width, img.height);
+          const sw = Math.max(100, Math.round(img.width * scaleRatio));
+          const sh = Math.max(100, Math.round(img.height * scaleRatio));
 
           const smallCanvas = document.createElement('canvas');
-          const sw = Math.round((width * currentMaxDim) / maxWidth);
-          const sh = Math.round((height * currentMaxDim) / maxWidth);
           smallCanvas.width = sw;
           smallCanvas.height = sh;
           const sCtx = smallCanvas.getContext('2d');
@@ -85,6 +92,8 @@ export async function optimizeImageFile(
             sCtx.fillRect(0, 0, sw, sh);
             sCtx.drawImage(img, 0, 0, sw, sh);
             compressedDataUrl = smallCanvas.toDataURL(format, currentQuality);
+            width = sw;
+            height = sh;
           }
         }
 

@@ -5,20 +5,23 @@ import {
   ShieldCheck,
   Search,
   RefreshCw,
-  Globe,
   LogIn,
   Laptop,
-  CheckCircle2,
-  Calendar,
-  Sparkles,
   Download,
   Mail,
-  UserCheck,
-  ExternalLink,
-  ShieldAlert,
+  Trash2,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { UserProfile, LoginLog } from '../types';
-import { subscribeAllUsers, subscribeLoginLogs } from '../firebase/firestoreService';
+import {
+  subscribeAllUsers,
+  subscribeLoginLogs,
+  deleteLoginLog,
+  clearAllLoginLogs,
+  deleteUserProfile,
+} from '../firebase/firestoreService';
 import { useLanguage } from '../context/ThemeContext';
 import { useToast } from './Toast';
 
@@ -33,9 +36,11 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [logs, setLogs] = useState<LoginLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'logs'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'logs'>('logs'); // Default to logs for quick management
   const [searchTerm, setSearchTerm] = useState('');
   const [providerFilter, setProviderFilter] = useState<'ALL' | 'google.com' | 'password'>('ALL');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -100,6 +105,48 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
       return lang === 'ko' ? `${diffDay}일 전` : `${diffDay}d ago`;
     } catch {
       return '';
+    }
+  };
+
+  // Delete Single Login Log
+  const handleDeleteLog = async (logId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteLoginLog(logId);
+      showToast('접속 기록이 삭제되었습니다.', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('접속 기록 삭제 중 오류가 발생했습니다.', 'error');
+    }
+  };
+
+  // Clear All Login Logs
+  const handleClearAllLogs = async () => {
+    setIsDeleting(true);
+    try {
+      const count = await clearAllLoginLogs();
+      setConfirmClearAll(false);
+      showToast(`총 ${count}개의 접속 기록이 모두 삭제되었습니다.`, 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('전체 기록 삭제 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Delete Single User
+  const handleDeleteUser = async (uid: string, email: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`정말로 사용자 [${email}] 기록을 삭제하시겠습니까?`)) {
+      return;
+    }
+    try {
+      await deleteUserProfile(uid);
+      showToast('사용자 기록이 삭제되었습니다.', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('사용자 삭제 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -181,19 +228,30 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
               </span>
             </h2>
             <p className="text-xs font-sans text-[#787774]">
-              {t('admin.usersDesc', '실제 Google(Gmail) 및 이메일로 로그인한 사용자 현황과 접속 이력을 관리합니다.')}
+              {t('admin.usersDesc', '실시간 접속자 이력 조회 및 로그 데이터 삭제/관리가 가능합니다.')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {activeTab === 'logs' && logs.length > 0 && (
+            <button
+              onClick={() => setConfirmClearAll(true)}
+              className="px-3 py-1.5 rounded-md bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-sans font-medium text-rose-700 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Clear All Logs"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+              <span>전체 기록 삭제</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportCSV}
             className="px-3 py-1.5 rounded-md bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] text-xs font-sans font-medium text-[#37352f] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
             title="Export CSV"
           >
             <Download className="w-3.5 h-3.5 text-[#787774]" />
-            <span className="hidden sm:inline">CSV 내보내기</span>
+            <span className="hidden sm:inline">CSV 다운로드</span>
           </button>
           {onClose && (
             <button
@@ -205,6 +263,40 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal for Clearing All Logs */}
+      {confirmClearAll && (
+        <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e3e2de] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
+              </div>
+              <h3 className="font-sans font-bold text-sm text-[#37352f]">전체 접속 기록 삭제</h3>
+            </div>
+            <p className="text-xs font-sans text-[#787774] leading-relaxed">
+              지금까지 누적된 총 <strong>{logs.length}개</strong>의 모든 로그인 접속 로그를 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e3e2de]">
+              <button
+                onClick={() => setConfirmClearAll(false)}
+                disabled={isDeleting}
+                className="px-3 py-1.5 rounded-lg border border-[#e3e2de] bg-[#f7f6f3] text-xs font-sans text-[#37352f] hover:bg-[#efefed] cursor-pointer"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleClearAllLogs}
+                disabled={isDeleting}
+                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-sans font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              >
+                {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                <span>{isDeleting ? '삭제 중...' : '모두 삭제하기'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Summary KPI Cards */}
       <div className="p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#f7f6f3] border-b border-[#e3e2de]">
@@ -262,17 +354,6 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
         {/* Left Tabs */}
         <div className="flex items-center gap-1 bg-[#f7f6f3] p-1 rounded-lg border border-[#e3e2de]">
           <button
-            onClick={() => setActiveTab('users')}
-            className={`px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'users'
-                ? 'bg-white text-[#37352f] font-semibold shadow-2xs border border-[#e3e2de]'
-                : 'text-[#787774] hover:text-[#37352f]'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>가입 사용자 목록 ({users.length})</span>
-          </button>
-          <button
             onClick={() => setActiveTab('logs')}
             className={`px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'logs'
@@ -280,8 +361,19 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                 : 'text-[#787774] hover:text-[#37352f]'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 text-emerald-600" />
             <span>로그인 접속 이력 ({logs.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'users'
+                ? 'bg-white text-[#37352f] font-semibold shadow-2xs border border-[#e3e2de]'
+                : 'text-[#787774] hover:text-[#37352f]'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5 text-[#2383e2]" />
+            <span>가입 사용자 목록 ({users.length})</span>
           </button>
         </div>
 
@@ -327,9 +419,6 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
               <p className="text-xs font-sans font-medium text-[#37352f]">
                 {searchTerm ? '검색 조건과 일치하는 사용자가 없습니다.' : '아직 등록된 로그인 사용자가 없습니다.'}
               </p>
-              <p className="text-[11px] text-[#787774] mt-1">
-                방문자가 Google 또는 이메일로 로그인하면 실시간으로 여기에 기록됩니다.
-              </p>
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-[#e3e2de] shadow-2xs overflow-x-auto">
@@ -343,6 +432,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                     <th className="py-3 px-4 text-center">로그인 횟수</th>
                     <th className="py-3 px-4">최근 접속 시간</th>
                     <th className="py-3 px-4">최초 가입일</th>
+                    <th className="py-3 px-4 text-center">관리</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e3e2de]">
@@ -432,6 +522,19 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                         <td className="py-3 px-4 text-[#787774] font-mono">
                           {formatDate(user.createdAt)}
                         </td>
+
+                        {/* Delete User Action */}
+                        <td className="py-3 px-4 text-center">
+                          {!isAdmin && (
+                            <button
+                              onClick={(e) => handleDeleteUser(user.uid, user.email, e)}
+                              className="p-1 rounded-md text-[#787774] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                              title="사용자 기록 삭제"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
@@ -445,7 +548,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
             <div className="py-16 text-center bg-white rounded-lg border border-[#e3e2de] p-8">
               <Clock className="w-8 h-8 text-[#9b9a97] mx-auto mb-2 opacity-60" />
               <p className="text-xs font-sans font-medium text-[#37352f]">
-                {searchTerm ? '검색 조건과 일치하는 접속 기록이 없습니다.' : '아직 기록된 로그인 접속 이력이 없습니다.'}
+                {searchTerm ? '검색 조건과 일치하는 접속 기록이 없습니다.' : '기록된 로그인 접속 이력이 없습니다.'}
               </p>
             </div>
           ) : (
@@ -497,14 +600,25 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <div className="text-xs font-mono font-semibold text-[#37352f] flex items-center gap-1 sm:justify-end">
-                        <Clock className="w-3 h-3 text-emerald-600" />
-                        <span>{formatDate(log.timestamp)}</span>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                      <div className="text-right">
+                        <div className="text-xs font-mono font-semibold text-[#37352f] flex items-center gap-1 sm:justify-end">
+                          <Clock className="w-3 h-3 text-emerald-600" />
+                          <span>{formatDate(log.timestamp)}</span>
+                        </div>
+                        <div className="text-[11px] text-emerald-600 font-medium">
+                          {getRelativeTime(log.timestamp)}
+                        </div>
                       </div>
-                      <div className="text-[11px] text-emerald-600 font-medium">
-                        {getRelativeTime(log.timestamp)}
-                      </div>
+
+                      {/* Delete Log Button */}
+                      <button
+                        onClick={(e) => handleDeleteLog(log.id, e)}
+                        className="p-1.5 rounded-md text-[#787774] hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        title="이 접속 기록 삭제"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 );

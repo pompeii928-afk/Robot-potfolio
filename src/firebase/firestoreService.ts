@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { handleFirestoreError, OperationType } from './errorHandling';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog, VisitorCheckin } from '../types';
 import {
   DEFAULT_ABOUT_CONFIG,
   JOURNEY_DATA,
@@ -32,6 +32,7 @@ const PROJECTS_COLLECTION = 'projects';
 const YOUTUBE_COLLECTION = 'youtube_videos';
 const USERS_COLLECTION = 'users';
 const LOGIN_LOGS_COLLECTION = 'login_logs';
+const VISITOR_CHECKINS_COLLECTION = 'visitor_checkins';
 const SYSTEM_COLLECTION = 'system';
 
 
@@ -1022,6 +1023,115 @@ export async function deleteUserProfile(uid: string): Promise<void> {
     await deleteDoc(docRef);
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
+/**
+ * Record a new visitor check-in
+ */
+export async function recordVisitorCheckin(checkinData: {
+  name: string;
+  organization?: string;
+  roleOrRelation?: string;
+  message?: string;
+}): Promise<VisitorCheckin> {
+  const checkinId = `checkin_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const path = `${VISITOR_CHECKINS_COLLECTION}/${checkinId}`;
+
+  // Detect platform & user agent
+  let platform = 'Web Browser';
+  let userAgent = '';
+  if (typeof window !== 'undefined') {
+    userAgent = navigator.userAgent;
+    const ua = userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) platform = 'Apple iOS';
+    else if (/android/.test(ua)) platform = 'Android Mobile';
+    else if (/macintosh|mac os x/.test(ua)) platform = 'Mac OS';
+    else if (/windows/.test(ua)) platform = 'Windows PC';
+    else if (/linux/.test(ua)) platform = 'Linux';
+  }
+
+  const newCheckin: VisitorCheckin = {
+    id: checkinId,
+    name: checkinData.name.trim(),
+    organization: (checkinData.organization || '').trim(),
+    roleOrRelation: (checkinData.roleOrRelation || '').trim(),
+    message: (checkinData.message || '').trim(),
+    platform,
+    userAgent,
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+    const docRef = doc(db, VISITOR_CHECKINS_COLLECTION, checkinId);
+    await setDoc(docRef, newCheckin);
+    return newCheckin;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+    throw error;
+  }
+}
+
+/**
+ * Real-time subscription to visitor check-ins
+ */
+export function subscribeVisitorCheckins(
+  onUpdate: (checkins: VisitorCheckin[]) => void,
+  onError?: (error: Error) => void
+): () => void {
+  const colRef = collection(db, VISITOR_CHECKINS_COLLECTION);
+
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const items: VisitorCheckin[] = [];
+      snapshot.forEach((docSnap) => {
+        items.push(docSnap.data() as VisitorCheckin);
+      });
+      // Sort newest first
+      items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      onUpdate(items);
+    },
+    (error) => {
+      console.error('Error listening to visitor checkins collection:', error);
+      if (onError) onError(error);
+      handleFirestoreError(error, OperationType.GET, VISITOR_CHECKINS_COLLECTION);
+    }
+  );
+}
+
+/**
+ * Delete a single visitor check-in
+ */
+export async function deleteVisitorCheckin(checkinId: string): Promise<void> {
+  const path = `${VISITOR_CHECKINS_COLLECTION}/${checkinId}`;
+  try {
+    const docRef = doc(db, VISITOR_CHECKINS_COLLECTION, checkinId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
+/**
+ * Clear all visitor check-ins
+ */
+export async function clearAllVisitorCheckins(): Promise<number> {
+  try {
+    const colRef = collection(db, VISITOR_CHECKINS_COLLECTION);
+    const snap = await getDocs(colRef);
+    if (snap.empty) return 0;
+
+    const batch = writeBatch(db);
+    snap.docs.forEach((docSnap) => {
+      batch.delete(docSnap.ref);
+    });
+    await batch.commit();
+    return snap.size;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, VISITOR_CHECKINS_COLLECTION);
     throw error;
   }
 }

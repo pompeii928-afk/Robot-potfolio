@@ -20,6 +20,7 @@ import {
   LogOut,
   ShieldCheck,
   Users,
+  UserCheck,
 } from 'lucide-react';
 import { useLanguage, SUPPORTED_LANGUAGES, Language } from '../context/ThemeContext';
 import { useAuth } from '../firebase/AuthContext';
@@ -37,7 +38,8 @@ interface NavbarProps {
   onNavigate: (sectionId: string) => void;
   counts?: CategoryCounts;
   isAdmin?: boolean;
-  onOpenLogin?: () => void;
+  visitorName?: string;
+  onOpenCheckin?: () => void;
   onOpenAdmin?: () => void;
   onOpenUsersView?: () => void;
 }
@@ -47,7 +49,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   counts = {} as CategoryCounts,
   isAdmin = false,
-  onOpenLogin,
+  visitorName,
+  onOpenCheckin,
   onOpenAdmin,
   onOpenUsersView,
 }) => {
@@ -314,74 +317,49 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* User Profile or Login Button */}
-            {currentUser || adminUser ? (
+            {/* Admin Profile or Visitor Checkin Button */}
+            {isAdmin ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   id="user-profile-btn"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className={`px-2 py-1 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 transition-colors cursor-pointer border shadow-2xs ${
-                    isAdmin
-                      ? 'bg-[#edf6ec] hover:bg-[#d2ebd0] text-emerald-800 border-[#d2ebd0]'
-                      : 'bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border-[#e3e2de]'
-                  }`}
-                  title="My Account"
+                  className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 transition-colors cursor-pointer border shadow-2xs bg-[#edf6ec] hover:bg-[#d2ebd0] text-emerald-800 border-[#d2ebd0]"
+                  title="Admin Account"
                 >
-                  {currentUser?.photoURL ? (
-                    <img
-                      src={currentUser.photoURL}
-                      alt={currentUser.displayName || 'User'}
-                      className="w-4 h-4 rounded-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className={`w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold ${
-                      isAdmin ? 'bg-emerald-700' : 'bg-zinc-700'
-                    }`}>
-                      {((currentUser?.displayName || userProfile?.displayName || adminUser?.username || 'U')[0]).toUpperCase()}
-                    </div>
-                  )}
-                  <span className="hidden md:inline max-w-[90px] truncate">
-                    {currentUser?.displayName || userProfile?.displayName || adminUser?.username || '사용자'}
-                  </span>
-                  {isAdmin && <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />}
-                  <ChevronDown className="w-3 h-3 text-[#787774]" />
+                  <div className="w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold bg-emerald-700">
+                    A
+                  </div>
+                  <span className="font-semibold text-xs">관리자</span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <ChevronDown className="w-3 h-3 text-emerald-700" />
                 </button>
 
-                {/* User Dropdown Menu */}
+                {/* Admin Dropdown Menu */}
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-1.5 w-60 rounded-lg bg-white border border-[#e3e2de] shadow-lg py-1.5 z-50 animate-in fade-in-50 zoom-in-95 duration-100">
-                    {/* User Info Header */}
                     <div className="px-3 py-2 border-b border-[#e3e2de] bg-[#fbfbfa]">
                       <div className="font-semibold text-xs text-[#37352f] flex items-center gap-1.5">
-                        <span>{currentUser?.displayName || userProfile?.displayName || adminUser?.username || 'User'}</span>
-                        {isAdmin ? (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0] font-bold">
-                            ADMIN
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#f7f6f3] text-[#787774] border border-[#e3e2de]">
-                            MEMBER
-                          </span>
-                        )}
+                        <span>{adminUser?.username || '관리자 마스터'}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0] font-bold">
+                          ADMIN
+                        </span>
                       </div>
                       <div className="text-[11px] font-mono text-[#787774] truncate mt-0.5">
-                        {currentUser?.email || userProfile?.email || 'Authenticated User'}
+                        포트폴리오 실시간 관리자
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="py-1">
-                      {isAdmin && onOpenUsersView && (
+                      {onOpenUsersView && (
                         <button
                           onClick={() => {
                             setUserMenuOpen(false);
                             onOpenUsersView();
                           }}
-                          className="w-full px-3 py-1.5 text-xs text-left text-emerald-800 hover:bg-[#edf6ec] flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                          className="w-full px-3 py-2 text-xs text-left text-emerald-800 hover:bg-[#edf6ec] flex items-center gap-2 transition-colors cursor-pointer font-medium"
                         >
-                          <Users className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>👥 접속자 로그 확인 (User Logs)</span>
+                          <UserCheck className="w-4 h-4 text-emerald-600" />
+                          <span>👥 {t('admin.visitorList', '방문자 체크인 명단 확인')}</span>
                         </button>
                       )}
 
@@ -393,21 +371,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full px-3 py-1.5 text-xs text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer border-t border-[#e3e2de] mt-1"
                       >
                         <LogOut className="w-3.5 h-3.5 text-rose-500" />
-                        <span>로그아웃 (Sign Out)</span>
+                        <span>{t('admin.logout', '로그아웃')}</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
+            ) : visitorName ? (
+              <button
+                id="nav-visitor-checkin-btn"
+                onClick={onOpenCheckin}
+                className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-emerald-900 bg-[#edf6ec] hover:bg-[#d2ebd0] border border-[#d2ebd0] flex items-center gap-1.5 transition-colors cursor-pointer select-none shadow-2xs"
+                title={t('checkin.reenter', '수정/다시 입력')}
+              >
+                <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span className="max-w-[100px] truncate font-semibold">{visitorName}</span>
+                <span className="text-[10px] text-emerald-700 hidden sm:inline font-normal">
+                  {t('nav.checkedInBadge', '님 (체크인됨)')}
+                </span>
+              </button>
             ) : (
               <button
-                id="nav-user-login-btn"
-                onClick={onOpenLogin}
+                id="nav-visitor-checkin-btn"
+                onClick={onOpenCheckin}
                 className="px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1.5 transition-colors cursor-pointer select-none shadow-2xs"
-                title="Sign In"
+                title={t('nav.checkin', '방문자 체크인')}
               >
-                <LogIn className="w-3.5 h-3.5 text-[#787774]" />
-                <span className="hidden sm:inline">로그인</span>
+                <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{t('nav.checkin', '방문자 체크인')}</span>
               </button>
             )}
 

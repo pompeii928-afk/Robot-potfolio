@@ -123,6 +123,17 @@ export interface UserProfile {
   createdAt: string;
 }
 
+export interface VisitorCheckin {
+  id: string;
+  name: string;
+  organization?: string;
+  roleOrRelation?: string;
+  message?: string;
+  platform?: string;
+  userAgent?: string;
+  timestamp: string;
+}
+
 export interface LoginLog {
   id: string;
   uid: string;

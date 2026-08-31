@@ -47,7 +47,7 @@ export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic, onOpenUsersVie
           )}
 
           <span className="hidden md:inline text-[#787774] text-xs">
-            • {t('admin.desc', '포트폴리오 내용 실시간 편집 및 사용자 접속 기록 조회가 가능합니다.')}
+            • 포트폴리오 내용 실시간 편집 및 방문자 체크인 명단 확인이 가능합니다.
           </span>
         </div>
 
@@ -59,10 +59,10 @@ export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic, onOpenUsersVie
               onClick={onOpenUsersView}
               id="admin-open-users-btn"
               className="px-3 py-1.5 rounded-md bg-white hover:bg-[#edf6ec] border border-[#e3e2de] hover:border-[#d2ebd0] text-[#37352f] hover:text-emerald-800 font-sans font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-              title="View all registered users and real-time login logs"
+              title={t('admin.usersSubtitle', '방문자 체크인 명단 및 실시간 접속 기록')}
             >
-              <Users className="w-3.5 h-3.5 text-emerald-600" />
-              <span>👥 로그인 사용자 & 접속 기록</span>
+              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>👥 {t('admin.visitorList', '방문자 체크인 명단 확인')}</span>
             </button>
           )}
 

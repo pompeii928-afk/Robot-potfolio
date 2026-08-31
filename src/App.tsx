@@ -59,7 +59,7 @@ import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
 import { EditYouTubeModal } from './components/modals/EditYouTubeModal';
 import { AdminUsersView } from './components/AdminUsersView';
-import { UserLoginModal } from './components/UserLoginModal';
+import { VisitorCheckinModal } from './components/VisitorCheckinModal';
 
 function PortfolioApp() {
   const { isAdmin, loading: authLoading } = useAuth();
@@ -67,6 +67,12 @@ function PortfolioApp() {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>('all');
+  const [visitorName, setVisitorName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('kfc_visitor_name') || '';
+    }
+    return '';
+  });
 
   // Helper to determine if current URL targets admin
   const checkIsAdminPath = () => {
@@ -163,7 +169,7 @@ function PortfolioApp() {
   }>({ isOpen: false, item: null });
 
   const [isUsersViewOpen, setIsUsersViewOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isCheckinModalOpen, setIsCheckinModalOpen] = useState(false);
 
   // Real-time Firestore Subscriptions
   useEffect(() => {
@@ -449,7 +455,8 @@ function PortfolioApp() {
           activeSection={activeSection}
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
+          visitorName={visitorName}
+          onOpenCheckin={() => setIsCheckinModalOpen(true)}
           onOpenUsersView={() => setIsUsersViewOpen(true)}
           counts={{
             journeys: journeys.length,
@@ -605,10 +612,11 @@ function PortfolioApp() {
         </div>
       )}
 
-      {/* Regular User Login Modal (Clean, No Admin Clues) */}
-      <UserLoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+      {/* Visitor Check-in Modal (Instant Name/Message Entry) */}
+      <VisitorCheckinModal
+        isOpen={isCheckinModalOpen}
+        onClose={() => setIsCheckinModalOpen(false)}
+        onCheckinSuccess={(name) => setVisitorName(name)}
       />
     </div>
   );

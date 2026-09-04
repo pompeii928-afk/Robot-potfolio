@@ -3,6 +3,7 @@ import { Mail, Check, Copy, Youtube, ExternalLink } from 'lucide-react';
 import { RobotLogo } from './RobotLogo';
 import { useLanguage } from '../context/ThemeContext';
 import { DEFAULT_CHANNEL_INFO } from '../data/portfolioData';
+import { openGmailCompose, OWNER_EMAIL } from '../utils/contactHelper';
 
 interface FooterProps {
   onOpenAdmin?: () => void;
@@ -54,22 +55,30 @@ export const Footer: React.FC<FooterProps> = () => {
               <ExternalLink className="w-3 h-3 text-[#787774]" />
             </a>
 
-            {/* Email pill */}
-            <button
-              onClick={copyEmail}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] transition-colors cursor-pointer"
-              title="Click to copy email address"
-            >
-              <Mail className="w-3.5 h-3.5 text-[#787774]" />
-              <span>{email}</span>
-              {copied ? (
-                <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-0.5 ml-1">
-                  <Check className="w-3 h-3" /> {t('youtube.copied', '복사됨')}
-                </span>
-              ) : (
-                <Copy className="w-3 h-3 text-[#9b9a97] ml-1" />
-              )}
-            </button>
+            {/* Email pill with direct Gmail compose & copy */}
+            <div className="flex items-center rounded-md bg-white border border-[#e3e2de] text-xs font-sans shadow-2xs overflow-hidden">
+              <button
+                onClick={() => openGmailCompose(lang)}
+                className="flex items-center gap-1.5 px-3 py-1 hover:bg-[#efefed] text-[#37352f] transition-colors cursor-pointer border-r border-[#e3e2de]"
+                title={t('nav.contact', 'Contact via Gmail')}
+              >
+                <Mail className="w-3.5 h-3.5 text-red-500" />
+                <span>{OWNER_EMAIL}</span>
+              </button>
+              <button
+                onClick={copyEmail}
+                className="p-1 px-2 hover:bg-[#efefed] text-[#787774] hover:text-[#37352f] transition-colors cursor-pointer"
+                title="이메일 주소 복사하기"
+              >
+                {copied ? (
+                  <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-0.5">
+                    <Check className="w-3 h-3" /> {t('youtube.copied', '복사됨')}
+                  </span>
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

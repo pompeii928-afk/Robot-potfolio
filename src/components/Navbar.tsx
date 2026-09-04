@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useLanguage, SUPPORTED_LANGUAGES, Language } from '../context/ThemeContext';
 import { useAuth } from '../firebase/AuthContext';
+import { openGmailCompose } from '../utils/contactHelper';
 
 export interface CategoryCounts {
   journeys?: number;
@@ -93,28 +94,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Open direct Gmail web compose for contacting the portfolio owner
+  // Open direct Gmail web compose for contacting the portfolio owner in the user's selected language
   const handleOpenGmail = () => {
-    const email = 'pompeii928@gmail.com';
-    const subject = encodeURIComponent(
-      lang === 'ko'
-        ? 'K.F.C. Code Chaser 로봇공학 포트폴리오 문의'
-        : '[K.F.C. Code Chaser] Robotics Portfolio Inquiry'
-    );
-    const body = encodeURIComponent(
-      lang === 'ko'
-        ? '안녕하세요 배지훈(Jihoon Bae) 님!\nK.F.C. Code Chaser 로봇공학 포트폴리오를 보고 연락드립니다.\n\n- 성함 / 소속:\n- 연락처:\n- 문의 내용:\n'
-        : 'Hello Jihoon Bae!\nI am reaching out regarding your K.F.C. Code Chaser Robotics Portfolio.\n\n- Name / Organization:\n- Contact Information:\n- Inquiry Details:\n'
-    );
-
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
-
-    // Open Gmail web compose in a new window/tab
-    const newWin = window.open(gmailComposeUrl, '_blank', 'noopener,noreferrer');
-    // Fallback to mailto link if popup is restricted
-    if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-    }
+    openGmailCompose(lang);
   };
 
   // Auto-scroll the category bar so the active category button follows and stays visible in view

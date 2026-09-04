@@ -93,6 +93,30 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Open direct Gmail web compose for contacting the portfolio owner
+  const handleOpenGmail = () => {
+    const email = 'pompeii928@gmail.com';
+    const subject = encodeURIComponent(
+      lang === 'ko'
+        ? 'K.F.C. Code Chaser 로봇공학 포트폴리오 문의'
+        : '[K.F.C. Code Chaser] Robotics Portfolio Inquiry'
+    );
+    const body = encodeURIComponent(
+      lang === 'ko'
+        ? '안녕하세요 배지훈(Jihoon Bae) 님!\nK.F.C. Code Chaser 로봇공학 포트폴리오를 보고 연락드립니다.\n\n- 성함 / 소속:\n- 연락처:\n- 문의 내용:\n'
+        : 'Hello Jihoon Bae!\nI am reaching out regarding your K.F.C. Code Chaser Robotics Portfolio.\n\n- Name / Organization:\n- Contact Information:\n- Inquiry Details:\n'
+    );
+
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+
+    // Open Gmail web compose in a new window/tab
+    const newWin = window.open(gmailComposeUrl, '_blank', 'noopener,noreferrer');
+    // Fallback to mailto link if popup is restricted
+    if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+  };
+
   // Auto-scroll the category bar so the active category button follows and stays visible in view
   useEffect(() => {
     const scrollCategoryIntoView = () => {
@@ -402,17 +426,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Contact Button (Notion style action) */}
+            {/* Contact Button (Direct Gmail Integration) */}
             <button
               id="nav-contact-btn"
-              onClick={() => {
-                const el = document.getElementById('contact-footer');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] transition-colors cursor-pointer"
-              title="Contact"
+              onClick={handleOpenGmail}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] hover:border-red-300 transition-colors cursor-pointer group shadow-2xs"
+              title="Gmail로 바로 문의하기 (pompeii928@gmail.com)"
             >
-              <Mail className="w-3.5 h-3.5 text-[#787774]" />
+              <Mail className="w-3.5 h-3.5 text-red-500 group-hover:scale-110 transition-transform" />
               <span>{t('nav.contact', 'CONTACT')}</span>
             </button>
 
@@ -541,13 +562,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div className="pt-3 mt-2 border-t border-[#e3e2de] flex items-center justify-between text-xs text-[#787774]">
-              <a
-                href="mailto:pompeii928@gmail.com"
-                className="flex items-center gap-1.5 hover:text-[#37352f]"
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleOpenGmail();
+                }}
+                className="flex items-center gap-1.5 hover:text-[#37352f] cursor-pointer"
+                title="Gmail로 바로 연락하기 (pompeii928@gmail.com)"
               >
-                <Mail className="w-3.5 h-3.5" />
+                <Mail className="w-3.5 h-3.5 text-red-500" />
                 <span>pompeii928@gmail.com</span>
-              </a>
+              </button>
               <a
                 href="https://www.youtube.com/@Wrocospace"
                 target="_blank"

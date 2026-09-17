@@ -254,9 +254,21 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   )}
 
                   {/* Roles */}
-                  <div>
-                    <div className="text-xs font-mono uppercase tracking-wider text-[#787774] font-bold mb-1.5">
-                      {t('journey.roles', '담당 역할')}
+                  <div id="journey-roles-box">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="text-xs font-mono uppercase tracking-wider text-[#787774] font-bold">
+                        {t('journey.roles', '담당 역할')}
+                      </div>
+                      {isAdmin && onEditJourney && rawSelectedItem && (
+                        <button
+                          type="button"
+                          onClick={() => onEditJourney(rawSelectedItem)}
+                          className="text-[11px] font-mono text-[#787774] hover:text-[#37352f] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                          <span>{t('journey.edit', '수정')}</span>
+                        </button>
+                      )}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedItem.roles?.map((role, idx) => (
@@ -271,10 +283,25 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   </div>
 
                   {/* Notion Strengths Callout (Green) */}
-                  <div className="p-4 rounded-lg bg-[#edf3ec] border border-[#d3e5d0] text-xs sm:text-sm text-[#2b593f]">
-                    <div className="flex items-center gap-1.5 font-semibold mb-1">
-                      <span>💡</span>
-                      <span>{t('journey.strengths', '잘한 점 & 강점')}</span>
+                  <div
+                    id="journey-strengths-box"
+                    className="p-4 rounded-lg bg-[#edf3ec] border border-[#d3e5d0] text-xs sm:text-sm text-[#2b593f] relative group"
+                  >
+                    <div className="flex items-center justify-between font-semibold mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span>💡</span>
+                        <span>{t('journey.strengths', '잘한 점 & 강점')}</span>
+                      </div>
+                      {isAdmin && onEditJourney && rawSelectedItem && (
+                        <button
+                          type="button"
+                          onClick={() => onEditJourney(rawSelectedItem)}
+                          className="text-[11px] font-mono opacity-80 hover:opacity-100 hover:underline flex items-center gap-1 cursor-pointer text-[#2b593f]"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                          <span>{t('journey.edit', '수정')}</span>
+                        </button>
+                      )}
                     </div>
                     <p className="pl-5 leading-relaxed whitespace-pre-line text-[#2b593f]">
                       {selectedItem.strengths}
@@ -282,10 +309,25 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   </div>
 
                   {/* Notion Improvements Callout (Orange) */}
-                  <div className="p-4 rounded-lg bg-[#faece6] border border-[#f1d5ca] text-xs sm:text-sm text-[#733e2b]">
-                    <div className="flex items-center gap-1.5 font-semibold mb-1">
-                      <span>⚠️</span>
-                      <span>{t('journey.improvements', '보완할 점 & 개선 사항')}</span>
+                  <div
+                    id="journey-improvements-box"
+                    className="p-4 rounded-lg bg-[#faece6] border border-[#f1d5ca] text-xs sm:text-sm text-[#733e2b] relative group"
+                  >
+                    <div className="flex items-center justify-between font-semibold mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <span>⚠️</span>
+                        <span>{t('journey.improvements', '보완할 점 & 개선 사항')}</span>
+                      </div>
+                      {isAdmin && onEditJourney && rawSelectedItem && (
+                        <button
+                          type="button"
+                          onClick={() => onEditJourney(rawSelectedItem)}
+                          className="text-[11px] font-mono opacity-80 hover:opacity-100 hover:underline flex items-center gap-1 cursor-pointer text-[#733e2b]"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                          <span>{t('journey.edit', '수정')}</span>
+                        </button>
+                      )}
                     </div>
                     <p className="pl-5 leading-relaxed whitespace-pre-line text-[#733e2b]">
                       {selectedItem.improvements}

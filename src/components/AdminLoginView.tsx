@@ -496,7 +496,7 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }
                       setMasterUsername(e.target.value);
                       cyberAudio.playKeyTick();
                     }}
-                    className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-xs font-mono text-white placeholder-slate-500 outline-none transition-all shadow-inner focus:shadow-[0_0_15px_rgba(6,182,212,0.25)]"
+                    className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-base sm:text-xs font-mono text-white placeholder-slate-500 outline-none transition-all shadow-inner focus:shadow-[0_0_15px_rgba(6,182,212,0.25)]"
                   />
                 </div>
               </div>
@@ -520,7 +520,7 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({ onBackToPublic }
                       cyberAudio.playKeyTick();
                     }}
                     placeholder="••••••••••••"
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-xs font-mono text-white placeholder-slate-500 outline-none transition-all shadow-inner focus:shadow-[0_0_15px_rgba(6,182,212,0.25)] tracking-wider"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-base sm:text-xs font-mono text-white placeholder-slate-500 outline-none transition-all shadow-inner focus:shadow-[0_0_15px_rgba(6,182,212,0.25)] tracking-wider"
                   />
                   <button
                     type="button"

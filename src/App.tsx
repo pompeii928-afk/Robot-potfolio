@@ -171,6 +171,22 @@ function PortfolioApp() {
   const [isUsersViewOpen, setIsUsersViewOpen] = useState(false);
   const [isCheckinModalOpen, setIsCheckinModalOpen] = useState(false);
 
+  // Prompt Visitor Check-in first when entering the site if not already checked in
+  useEffect(() => {
+    if (checkIsAdminPath()) return;
+    const existingName =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('kfc_visitor_name')
+        : null;
+
+    if (!existingName) {
+      const timer = setTimeout(() => {
+        setIsCheckinModalOpen(true);
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // Real-time Firestore Subscriptions
   useEffect(() => {
     const unsubAbout = subscribeAboutConfig(
@@ -244,15 +260,28 @@ function PortfolioApp() {
   const handleSaveJourney = async (data: JourneyItem) => {
     try {
       const exists = journeys.some((j) => j.id === data.id);
+      const itemWithUpdate = {
+        ...data,
+        updatedAt: data.updatedAt || new Date().toISOString(),
+      };
+
+      // Optimistic local state update for instant UI feedback
+      setJourneys((prev) => {
+        if (exists) {
+          return prev.map((j) => (j.id === data.id ? { ...j, ...itemWithUpdate } : j));
+        }
+        return [...prev, itemWithUpdate];
+      });
+
       if (exists) {
-        await updateJourney(data.id, data);
+        await updateJourney(data.id, itemWithUpdate);
         showToast(
           lang === 'en' ? 'Competition journey updated.' : '대회 여정이 수정되었습니다.',
           'success',
           lang === 'en' ? 'Updated' : '수정 완료'
         );
       } else {
-        await createJourney(data);
+        await createJourney(itemWithUpdate);
         showToast(
           lang === 'en' ? 'New competition journey added.' : '새 대회 여정이 추가되었습니다.',
           'success',
@@ -268,6 +297,7 @@ function PortfolioApp() {
 
   const handleDeleteJourney = async (id: string) => {
     try {
+      setJourneys((prev) => prev.filter((j) => j.id !== id));
       await deleteJourney(id);
       showToast(
         lang === 'en' ? 'Competition journey deleted.' : '대회 여정이 삭제되었습니다.',

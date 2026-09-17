@@ -1951,47 +1951,100 @@ export function getLocalizedAbout(about: AboutConfig, lang: Language): AboutConf
  * Resolves localized Journey item
  */
 export function getLocalizedJourney(journey: JourneyItem, lang: Language): JourneyItem {
+  const defaultKo = JOURNEY_MAP.ko?.[journey.id];
   const langMap = JOURNEY_MAP[lang] || {};
-  const enFallback = JOURNEY_MAP.en?.[journey.id] || {};
-  const koFallback = JOURNEY_MAP.ko?.[journey.id] || {};
-  const override = langMap[journey.id] || (lang === 'ko' ? koFallback : enFallback);
+  const override = langMap[journey.id];
   const dict = PORTFOLIO_TRANSLATIONS[lang] || PORTFOLIO_TRANSLATIONS.en;
 
+  // In Korean (admin / base language), journey data in state/DB is the absolute source of truth.
+  if (lang === 'ko') {
+    return {
+      ...journey,
+      title: journey.competition || journey.title || defaultKo?.title || '',
+      competition: journey.competition || journey.title || defaultKo?.competition || '',
+      team: journey.teamName || journey.team || defaultKo?.team || '',
+      teamName: journey.teamName || journey.team || defaultKo?.teamName || '',
+      award: journey.award || defaultKo?.award || '',
+      roles: journey.roles && journey.roles.length > 0 ? journey.roles : (defaultKo?.roles || []),
+      summary: journey.summary || journey.description || defaultKo?.summary || '',
+      description: journey.description || journey.summary || defaultKo?.description || '',
+      strengths: journey.strengths ?? defaultKo?.strengths ?? '',
+      improvements: journey.improvements ?? defaultKo?.improvements ?? '',
+      quote: journey.quote ?? defaultKo?.quote ?? '',
+      detailedPoints: journey.detailedPoints && journey.detailedPoints.length > 0 ? journey.detailedPoints : (defaultKo?.detailedPoints || []),
+      metrics: journey.metrics && journey.metrics.length > 0 ? journey.metrics : (defaultKo?.metrics || []),
+    };
+  }
+
+  // Check if item has been customized by admin or is a custom journey
+  const isCustom = !defaultKo;
+  const strengthsEdited = isCustom || (journey.strengths !== undefined && journey.strengths !== defaultKo?.strengths);
+  const improvementsEdited = isCustom || (journey.improvements !== undefined && journey.improvements !== defaultKo?.improvements);
+  const quoteEdited = isCustom || (journey.quote !== undefined && journey.quote !== defaultKo?.quote);
+  const summaryEdited = isCustom || (journey.summary !== undefined && journey.summary !== defaultKo?.summary && journey.summary !== defaultKo?.description);
+  const titleEdited = isCustom || ((journey.competition || journey.title) !== defaultKo?.competition && (journey.competition || journey.title) !== defaultKo?.title);
+  const rolesEdited = isCustom || (journey.roles && defaultKo?.roles && JSON.stringify(journey.roles) !== JSON.stringify(defaultKo.roles));
+  const pointsEdited = isCustom || (journey.detailedPoints && defaultKo?.detailedPoints && JSON.stringify(journey.detailedPoints) !== JSON.stringify(defaultKo.detailedPoints));
+  const metricsEdited = isCustom || (journey.metrics && defaultKo?.metrics && JSON.stringify(journey.metrics) !== JSON.stringify(defaultKo.metrics));
+
   // Localize roles
-  const roles =
-    override?.roles ||
-    journey.roles?.map((r) => dict[r] || PORTFOLIO_TRANSLATIONS.en[r] || r) ||
-    [];
+  const roles = rolesEdited || !override?.roles
+    ? (journey.roles?.map((r) => dict[r] || PORTFOLIO_TRANSLATIONS.en[r] || r) || [])
+    : override.roles;
 
   // Localize metrics
-  const metrics =
-    override?.metrics ||
-    journey.metrics?.map((m) => ({
-      label: dict[m.label] || PORTFOLIO_TRANSLATIONS.en[m.label] || m.label,
-      value: dict[m.value] || PORTFOLIO_TRANSLATIONS.en[m.value] || m.value,
-    })) ||
-    [];
+  const metrics = metricsEdited || !override?.metrics
+    ? (journey.metrics?.map((m) => ({
+        label: dict[m.label] || PORTFOLIO_TRANSLATIONS.en[m.label] || m.label,
+        value: dict[m.value] || PORTFOLIO_TRANSLATIONS.en[m.value] || m.value,
+      })) || [])
+    : override.metrics;
 
   // Localize detailed points
-  const detailedPoints = override?.detailedPoints || journey.detailedPoints;
+  const detailedPoints = pointsEdited || !override?.detailedPoints
+    ? (journey.detailedPoints || [])
+    : override.detailedPoints;
 
   // Localize strings
-  const title = override?.title || dict[journey.title || ''] || journey.title;
-  const competition =
-    override?.competition ||
-    dict[journey.competition || ''] ||
-    journey.competition;
-  const team = override?.team || dict[journey.team || ''] || journey.team;
-  const teamName =
-    override?.teamName ||
-    dict[journey.teamName || ''] ||
-    journey.teamName;
-  const award = override?.award || dict[journey.award || ''] || journey.award;
-  const summary = override?.summary || journey.summary;
-  const description = override?.description || journey.description;
-  const strengths = override?.strengths || journey.strengths;
-  const improvements = override?.improvements || journey.improvements;
-  const quote = override?.quote || journey.quote;
+  const title = titleEdited || !override?.title
+    ? (dict[journey.title || ''] || journey.title || journey.competition || '')
+    : override.title;
+
+  const competition = titleEdited || !override?.competition
+    ? (dict[journey.competition || ''] || journey.competition || journey.title || '')
+    : override.competition;
+
+  const team = !override?.team
+    ? (dict[journey.team || ''] || journey.team || journey.teamName || '')
+    : override.team;
+
+  const teamName = !override?.teamName
+    ? (dict[journey.teamName || ''] || journey.teamName || journey.team || '')
+    : override.teamName;
+
+  const award = !override?.award
+    ? (dict[journey.award || ''] || journey.award || '')
+    : override.award;
+
+  const summary = summaryEdited || !override?.summary
+    ? (journey.summary || journey.description || '')
+    : override.summary;
+
+  const description = summaryEdited || !override?.description
+    ? (journey.description || journey.summary || '')
+    : override.description;
+
+  const strengths = strengthsEdited || !override?.strengths
+    ? (journey.strengths || '')
+    : override.strengths;
+
+  const improvements = improvementsEdited || !override?.improvements
+    ? (journey.improvements || '')
+    : override.improvements;
+
+  const quote = quoteEdited || !override?.quote
+    ? (journey.quote || '')
+    : override.quote;
 
   return {
     ...journey,
@@ -2016,13 +2069,29 @@ export function getLocalizedJourney(journey: JourneyItem, lang: Language): Journ
  */
 export function getLocalizedAward(award: AwardItem, lang: Language): AwardItem {
   const dict = PORTFOLIO_TRANSLATIONS[lang] || PORTFOLIO_TRANSLATIONS.en;
-  const awardOverride = AWARDS_MAP[award.id]?.[lang] || AWARDS_MAP[award.id]?.en || (lang === 'ko' ? AWARDS_MAP[award.id]?.ko : undefined);
+  const defaultKo = AWARDS_MAP[award.id]?.ko;
+  const awardOverride = AWARDS_MAP[award.id]?.[lang] || AWARDS_MAP[award.id]?.en;
+
+  if (lang === 'ko') {
+    return {
+      ...award,
+      title: award.title || defaultKo?.title || '',
+      competition: award.competition || defaultKo?.competition || '',
+      description: award.description || defaultKo?.description || '',
+      rank: award.rank || defaultKo?.rank || '',
+      category: award.category || (defaultKo as unknown as { category?: string })?.category || '',
+    };
+  }
+
+  const isCustom = !defaultKo;
+  const descEdited = isCustom || (award.description && award.description !== defaultKo?.description);
+  const titleEdited = isCustom || (award.title && award.title !== defaultKo?.title);
 
   return {
     ...award,
-    title: awardOverride?.title || dict[award.title] || award.title,
-    competition: awardOverride?.competition || dict[award.competition] || award.competition,
-    description: awardOverride?.description || award.description,
+    title: titleEdited || !awardOverride?.title ? (dict[award.title] || award.title) : awardOverride.title,
+    competition: !awardOverride?.competition ? (dict[award.competition] || award.competition) : awardOverride.competition,
+    description: descEdited || !awardOverride?.description ? award.description : awardOverride.description,
     rank: awardOverride?.rank || dict[award.rank || ''] || award.rank,
     category: dict[award.category || ''] || award.category,
     score: award.score,
@@ -2034,9 +2103,23 @@ export function getLocalizedAward(award: AwardItem, lang: Language): AwardItem {
  */
 export function getLocalizedSkill(skill: SkillItem, lang: Language): SkillItem {
   const dict = PORTFOLIO_TRANSLATIONS[lang] || PORTFOLIO_TRANSLATIONS.en;
-  const skillOverride = SKILLS_MAP[skill.id]?.[lang] || SKILLS_MAP[skill.id]?.en || (lang === 'ko' ? SKILLS_MAP[skill.id]?.ko : undefined);
+  const defaultKo = SKILLS_MAP[skill.id]?.ko;
+  const skillOverride = SKILLS_MAP[skill.id]?.[lang] || SKILLS_MAP[skill.id]?.en;
 
-  if (skillOverride) {
+  if (lang === 'ko') {
+    return {
+      ...skill,
+      name: skill.name || defaultKo?.name || '',
+      category: (skill.category || (defaultKo as unknown as { category?: SkillItem['category'] })?.category || 'FRAMEWORK') as SkillItem['category'],
+      description: skill.description || defaultKo?.description || '',
+    };
+  }
+
+  const isCustom = !defaultKo;
+  const descEdited = isCustom || (skill.description && skill.description !== defaultKo?.description);
+  const nameEdited = isCustom || (skill.name && skill.name !== defaultKo?.name);
+
+  if (skillOverride && !descEdited && !nameEdited) {
     return {
       ...skill,
       name: skillOverride.name,
@@ -2045,7 +2128,6 @@ export function getLocalizedSkill(skill: SkillItem, lang: Language): SkillItem {
     };
   }
 
-  // Fallback lookup
   return {
     ...skill,
     name: dict[skill.name] || skill.name,
@@ -2058,15 +2140,31 @@ export function getLocalizedSkill(skill: SkillItem, lang: Language): SkillItem {
  * Resolves localized Project item
  */
 export function getLocalizedProject(project: ProjectItem, lang: Language): ProjectItem {
-  const projectOverride = PROJECTS_MAP[project.id]?.[lang] || PROJECTS_MAP[project.id]?.en || (lang === 'ko' ? PROJECTS_MAP[project.id]?.ko : undefined);
+  const defaultKo = PROJECTS_MAP[project.id]?.ko;
+  const projectOverride = PROJECTS_MAP[project.id]?.[lang] || PROJECTS_MAP[project.id]?.en;
+
+  if (lang === 'ko') {
+    return {
+      ...project,
+      title: project.title || defaultKo?.title || '',
+      summary: project.summary || defaultKo?.summary || '',
+      detailedDescription: project.detailedDescription || defaultKo?.detailedDescription || '',
+      highlights: project.highlights && project.highlights.length > 0 ? project.highlights : (defaultKo?.highlights || []),
+      blueprintAnnotations: project.blueprintAnnotations && project.blueprintAnnotations.length > 0 ? project.blueprintAnnotations : (defaultKo?.blueprintAnnotations || []),
+    };
+  }
+
+  const isCustom = !defaultKo;
+  const summaryEdited = isCustom || (project.summary && project.summary !== defaultKo?.summary);
+  const descEdited = isCustom || (project.detailedDescription && project.detailedDescription !== defaultKo?.detailedDescription);
 
   return {
     ...project,
-    title: projectOverride?.title || project.title,
-    summary: projectOverride?.summary || project.summary,
-    detailedDescription: projectOverride?.detailedDescription || project.detailedDescription,
-    highlights: projectOverride?.highlights || project.highlights,
-    blueprintAnnotations: projectOverride?.blueprintAnnotations || project.blueprintAnnotations,
+    title: (!summaryEdited && projectOverride?.title) || project.title,
+    summary: summaryEdited || !projectOverride?.summary ? project.summary : projectOverride.summary,
+    detailedDescription: descEdited || !projectOverride?.detailedDescription ? project.detailedDescription : projectOverride.detailedDescription,
+    highlights: (!isCustom && projectOverride?.highlights) || project.highlights,
+    blueprintAnnotations: (!isCustom && projectOverride?.blueprintAnnotations) || project.blueprintAnnotations,
   };
 }
 

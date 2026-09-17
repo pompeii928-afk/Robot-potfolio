@@ -66,6 +66,132 @@ service cloud.firestore {
       allow write: if isValidId(docId);
     }
 
+    // K.F.C. Robot Coding Club - Practice Hub Collections (Code Board, Rulebooks, Ideas, Practice Logs, Checklists, etc.)
+    match /code_posts/{postId} {
+      allow read: if true;
+      allow write: if isValidId(postId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /rulebooks/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /ideas/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /discussions/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /practice_logs/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /checklists/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /schedules/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /teams/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /members/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    match /comments/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /announcements/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /docs/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /documents/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /files/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /uploads/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // General collection fallback for club collaboration (excluding private admin collections)
+    match /{collectionName}/{docId} {
+      allow read, write: if collectionName != 'admin_credentials' && collectionName != 'admins' && isValidId(docId);
+
+      match /{subcollection=**} {
+        allow read, write: if collectionName != 'admin_credentials' && collectionName != 'admins';
+      }
+    }
+
     // Test connection doc
     match /test/{docId} {
       allow read, write: if true;

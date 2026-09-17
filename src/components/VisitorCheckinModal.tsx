@@ -226,40 +226,44 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
   return (
     <div
       id="visitor-checkin-modal-overlay"
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md bg-white border border-[#e3e2de] rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-150 relative">
+      <div className="w-full max-w-md bg-white border-t sm:border border-[#e3e2de] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 relative max-h-[92vh] flex flex-col">
+        {/* Mobile Drag/Touch Indicator */}
+        <div className="sm:hidden w-10 h-1 rounded-full bg-[#d0cfcb] mx-auto mt-2.5 mb-1 shrink-0" />
+
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#e3e2de] bg-[#fbfbfa] flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-4 sm:py-5 border-b border-[#e3e2de] bg-[#fbfbfa] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#edf6ec] border border-[#d2ebd0] flex items-center justify-center text-emerald-700 shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-[#edf6ec] border border-[#d2ebd0] flex items-center justify-center text-emerald-700 shadow-2xs shrink-0">
               <UserCheck className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-sm font-sans font-bold text-[#37352f] tracking-tight flex items-center gap-1.5">
-                <span>{t('checkin.title', '방문자 체크인 & 체크아웃')}</span>
+                <span>{t('checkin.title', '방문자 체크인')}</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0] font-semibold">
                   {t('checkin.tag', 'Visitor Check-in')}
                 </span>
               </h2>
-              <p className="text-[11px] font-sans text-[#787774]">
+              <p className="text-[11px] font-sans text-[#787774] line-clamp-1">
                 {t('checkin.subtitle', '복잡한 로그인 없이 이름만 남기고 자유롭게 관람하세요')}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] transition-colors cursor-pointer shrink-0"
+            title={t('modal.close', '닫기')}
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div className="p-6 space-y-4">
+        {/* Content Body - smoothly scrollable on mobile */}
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto overscroll-contain">
           {/* Active Checked-in Card */}
           {checkedInInfo && !isEditing ? (
             <div className="space-y-4">
@@ -312,7 +316,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="py-2 px-3 rounded-lg bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="py-2.5 px-3 rounded-lg bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-h-[42px]"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-[#787774]" />
                   <span>{t('checkin.reenter', '수정 / 다시 입력')}</span>
@@ -322,7 +326,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                   type="button"
                   onClick={handleCheckout}
                   disabled={isCheckingOut}
-                  className="py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-sans font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                  className="py-2.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-sans font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50 min-h-[42px]"
                 >
                   {isCheckingOut ? (
                     <>
@@ -341,7 +345,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-2.5 px-4 rounded-lg bg-[#37352f] hover:bg-[#22211e] text-white font-sans font-semibold text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+                className="w-full py-3 px-4 rounded-xl bg-[#37352f] hover:bg-[#22211e] text-white font-sans font-semibold text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer min-h-[44px]"
               >
                 <span>{t('checkin.continueExplore', '포트폴리오 계속 둘러보기')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -351,7 +355,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
             /* Check-in Form */
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* 1. Name / Nickname */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-sans font-semibold text-[#37352f] flex items-center justify-between">
                   <span className="flex items-center gap-1">
                     <User className="w-3.5 h-3.5 text-[#787774]" />
@@ -368,12 +372,12 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('checkin.namePlaceholder', '예: 홍길동, WRO 심사위원, 로봇동아리')}
-                  className="w-full px-3 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] rounded-lg text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs"
+                  className="w-full px-3.5 py-2.5 sm:py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/15 rounded-xl text-base sm:text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs transition-all"
                 />
               </div>
 
               {/* 2. Organization / Affiliation */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-sans font-semibold text-[#37352f] flex items-center justify-between">
                   <span className="flex items-center gap-1">
                     <Building className="w-3.5 h-3.5 text-[#787774]" />
@@ -389,7 +393,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
                   placeholder={t('checkin.orgPlaceholder', '예: WRO Korea, 한국디지털미디어고, KAIST, 지인')}
-                  className="w-full px-3 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] rounded-lg text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs"
+                  className="w-full px-3.5 py-2.5 sm:py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/15 rounded-xl text-base sm:text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs transition-all"
                 />
               </div>
 
@@ -408,7 +412,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                         key={preset.key}
                         type="button"
                         onClick={() => setSelectedPresetKey(preset.key)}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-sans transition-all cursor-pointer border ${
+                        className={`px-3 py-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs sm:text-[11px] font-sans transition-all cursor-pointer border select-none ${
                           isSelected
                             ? 'bg-[#37352f] text-white border-[#37352f] font-medium shadow-2xs'
                             : 'bg-[#f7f6f3] text-[#787774] hover:text-[#37352f] hover:bg-[#efefed] border-[#e3e2de]'
@@ -422,7 +426,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
               </div>
 
               {/* 4. Message / Cheering word */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="block text-xs font-sans font-semibold text-[#37352f] flex items-center justify-between">
                   <span className="flex items-center gap-1">
                     <MessageSquare className="w-3.5 h-3.5 text-[#787774]" />
@@ -441,16 +445,16 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                     'checkin.msgPlaceholder',
                     '예: 포트폴리오 잘 둘러보고 갑니다! WRO 2026 대회 응원해요!'
                   )}
-                  className="w-full px-3 py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] rounded-lg text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs resize-none"
+                  className="w-full px-3.5 py-2.5 sm:py-2 bg-white border border-[#e3e2de] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/15 rounded-xl text-base sm:text-xs font-sans text-[#37352f] placeholder-[#9b9a97] outline-none shadow-2xs resize-none transition-all"
                 />
               </div>
 
-              {/* Submit Button */}
-              <div className="space-y-2 pt-1">
+              {/* Submit & Explore Buttons */}
+              <div className="space-y-2 pt-2">
                 <button
                   type="submit"
                   disabled={isSubmitting || !name.trim()}
-                  className="w-full py-2.5 px-4 rounded-lg bg-[#37352f] hover:bg-[#22211e] text-white font-sans font-semibold text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 sm:py-2.5 px-4 rounded-xl bg-[#37352f] hover:bg-[#22211e] text-white font-sans font-semibold text-sm sm:text-xs tracking-tight flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer disabled:opacity-50 min-h-[44px]"
                 >
                   {isSubmitting ? (
                     <>
@@ -465,13 +469,22 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
                   )}
                 </button>
 
-                {checkedInInfo && (
+                {/* Secondary Option: Skip or Cancel */}
+                {checkedInInfo ? (
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="w-full py-1.5 text-xs text-[#787774] hover:text-[#37352f] font-sans transition-colors cursor-pointer text-center"
+                    className="w-full py-2 text-xs text-[#787774] hover:text-[#37352f] font-sans transition-colors cursor-pointer text-center"
                   >
                     {t('common.cancel', '취소')}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="w-full py-2.5 px-3 rounded-lg text-xs font-sans text-[#787774] hover:text-[#37352f] hover:bg-[#f7f6f3] transition-colors cursor-pointer text-center"
+                  >
+                    {t('checkin.skipAndExplore', '체크인 없이 포트폴리오 바로 둘러보기')}
                   </button>
                 )}
               </div>
@@ -480,7 +493,7 @@ export const VisitorCheckinModal: React.FC<VisitorCheckinModalProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className="px-6 py-3 bg-[#fbfbfa] border-t border-[#e3e2de] text-center flex items-center justify-center gap-1.5 text-[11px] font-sans text-[#787774]">
+        <div className="px-5 sm:px-6 py-2.5 sm:py-3 bg-[#fbfbfa] border-t border-[#e3e2de] text-center flex items-center justify-center gap-1.5 text-[11px] font-sans text-[#787774] shrink-0">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           <span>
             {t('checkin.footer', '체크인 시 관리자 대시보드에 실시간 방문자로 기록됩니다')}

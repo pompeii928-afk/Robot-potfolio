@@ -57,8 +57,26 @@ export const EditJourneyModal: React.FC<EditJourneyModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       const data = initialData || getDefaultJourney();
+      const comp = data.competition || data.title || '';
+      const yr = data.year || data.season || `${new Date().getFullYear()} Season`;
+      const sum = data.summary || data.description || '';
+      const tm = data.teamName || data.team || 'Team K.F.C.Code Chaser';
+
       setFormData({
         ...data,
+        competition: comp,
+        title: comp,
+        year: yr,
+        season: yr,
+        summary: sum,
+        description: sum,
+        teamName: tm,
+        team: tm,
+        strengths: data.strengths || '',
+        improvements: data.improvements || '',
+        quote: data.quote || '',
+        roles: data.roles && data.roles.length > 0 ? data.roles : ['로봇 설계/제작', '알고리즘 제어'],
+        detailedPoints: data.detailedPoints || [],
         metrics: data.metrics && data.metrics.length > 0 ? data.metrics : [
           { label: '완주 성공률', value: '96.4%' },
           { label: '평균 미션 타임', value: '1m 24s' },
@@ -175,13 +193,28 @@ export const EditJourneyModal: React.FC<EditJourneyModalProps> = ({
     setIsSaving(true);
     setErrorMessage(null);
     try {
+      const comp = (formData.competition || formData.title || '').trim();
+      const yr = (formData.year || formData.season || '').trim();
+      const sum = (formData.summary || formData.description || '').trim();
+      const tm = (formData.teamName || formData.team || '').trim();
+      const str = (formData.strengths || '').trim();
+      const imp = (formData.improvements || '').trim();
+      const q = (formData.quote || '').trim();
+
       await onSave({
         ...formData,
-        // Keep title and season in sync for backwards compatibility
-        title: formData.competition || formData.title,
-        season: formData.year || formData.season,
-        description: formData.summary || formData.description,
-        team: formData.teamName || formData.team,
+        competition: comp,
+        title: comp,
+        year: yr,
+        season: yr,
+        summary: sum,
+        description: sum,
+        teamName: tm,
+        team: tm,
+        strengths: str,
+        improvements: imp,
+        quote: q,
+        updatedAt: new Date().toISOString(),
       });
       onClose();
     } catch (err) {

@@ -153,6 +153,22 @@
         "timestamp": { "type": "string" }
       },
       "required": ["uid", "email", "timestamp"]
+    },
+    "CodePost": {
+      "title": "CodePost",
+      "description": "Uploaded code snippet, robot script, or autonomous algorithm file",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "author": { "type": "string", "maxLength": 100 },
+        "team": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string" },
+        "fileName": { "type": "string", "maxLength": 200 },
+        "fileData": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -187,6 +203,10 @@
     "/login_logs/{logId}": {
       "schema": "LoginLog",
       "description": "Audit log for every user login session"
+    },
+    "/code_posts/{postId}": {
+      "schema": "CodePost",
+      "description": "Uploaded code and project files for the K.F.C. club code board"
     }
   }
 }

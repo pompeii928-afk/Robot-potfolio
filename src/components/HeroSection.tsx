@@ -37,8 +37,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Left Column: Notion Page Content */}
           <div className="lg:col-span-7 space-y-6">
             {/* Title Block with Admin Edit Button */}
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-[#37352f] tracking-tight leading-tight">
+            <div className="flex items-start justify-between gap-3 sm:gap-4">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-sans font-bold text-[#37352f] tracking-tight leading-tight">
                 {aboutData.title || 'MY ROBOT'} {aboutData.subtitle || 'PORTFOLIO'}
               </h1>
 

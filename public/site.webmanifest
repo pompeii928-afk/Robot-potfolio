@@ -4,14 +4,18 @@
   "description": "배지훈의 WRO 로봇 공학 및 소프트웨어 포트폴리오 - K.F.C. Code Chaser",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#121212",
+  "theme_color": "#121212",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/apple-touch-icon.png",
@@ -19,10 +23,9 @@
       "type": "image/png"
     },
     {
-      "src": "/kfc_codechaser_logo.png",
+      "src": "/favicon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

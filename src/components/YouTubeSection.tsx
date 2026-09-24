@@ -139,8 +139,13 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         {/* Notion Channel Callout Card */}
         <div className="mb-6 p-4 sm:p-5 rounded-xl bg-[#f7f6f3] border border-[#e3e2de] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white border border-[#e3e2de] flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
-              <Youtube className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center shrink-0 shadow-xs">
+              <img
+                src="/favicon.svg?v=4"
+                alt={channelInfo.channelName || 'YouTube Channel'}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
               <div className="text-sm font-sans font-bold text-[#37352f] flex items-center gap-2">

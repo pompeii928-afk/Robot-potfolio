@@ -15,15 +15,15 @@ export const RobotLogo: React.FC<RobotLogoProps> = ({
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <div
-        className="relative flex items-center justify-center rounded-lg bg-[#18181b] border border-zinc-900 p-1 shadow-xs overflow-hidden group transition-all duration-300 hover:scale-105 hover:bg-black"
+        className="relative flex items-center justify-center rounded-lg bg-black border border-zinc-800 p-0.5 shadow-xs overflow-hidden group transition-all duration-300 hover:scale-105"
         style={{ width: size + 6, height: size + 6 }}
       >
-        {/* KFC Code Chaser Crest Logo - Pure White Vector */}
+        {/* KFC Code Chaser YouTube Channel Logo */}
         <img
-          src="/favicon.svg?v=3"
-          alt="K.F.C. Code Chaser Crest Logo"
+          src="/favicon.svg?v=4"
+          alt="K.F.C. Code Chaser Logo"
           referrerPolicy="no-referrer"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover rounded-md"
         />
       </div>
 

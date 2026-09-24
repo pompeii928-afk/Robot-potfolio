@@ -210,11 +210,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleSelectTab('all')}
             className="flex items-center gap-2 sm:gap-2.5 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0"
           >
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#18181b] flex items-center justify-center p-1 shrink-0 shadow-xs border border-zinc-900 group-hover:scale-105 group-hover:bg-black transition-all duration-200">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 transition-all duration-200">
               <img
-                src="/favicon.svg?v=3"
+                src="/favicon.svg?v=4"
                 alt="K.F.C. Code Chaser Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
             </div>

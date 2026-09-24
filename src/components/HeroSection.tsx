@@ -108,12 +108,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   }`}
                   referrerPolicy="no-referrer"
                 />
-
-                {/* Subtle Floating Badge */}
-                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-sans font-medium flex items-center gap-1.5 shadow-sm opacity-80 group-hover:opacity-100 transition-opacity">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  <span className="truncate max-w-[140px]">{aboutData.teamRole || 'K.F.C. Code Chaser'}</span>
-                </div>
               </div>
             </div>
           </div>

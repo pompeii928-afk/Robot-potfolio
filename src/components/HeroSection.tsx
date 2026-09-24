@@ -91,23 +91,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Clean Media Frame */}
+          {/* Right Column: Clean Media Frame with Soft Rounded Corners */}
           <div className="lg:col-span-5">
-            <div className="rounded-xl border border-[#e3e2de] bg-white p-2 shadow-xs">
-              {/* Image Frame */}
+            <div className="rounded-3xl border border-[#e3e2de] bg-white p-2.5 sm:p-3 shadow-md shadow-zinc-200/50 hover:shadow-lg transition-shadow duration-300">
+              {/* Image Frame with Rounded Borders */}
               <div
                 onClick={() => setImageZoomed(!imageZoomed)}
-                className="relative aspect-4/3 sm:aspect-4/3 w-full rounded-lg overflow-hidden bg-[#fbfbfa] border border-[#e3e2de] flex items-center justify-center p-2 cursor-pointer group"
-                title={lang === 'ko' ? '클릭하여 이미지 확대' : 'Click to inspect image'}
+                className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-[#f7f6f3] border border-[#e3e2de]/70 flex items-center justify-center cursor-pointer group"
+                title={lang === 'ko' ? '클릭하여 이미지 확대/축소' : 'Click to toggle zoom'}
               >
                 <img
                   src={aboutData.heroImage || '/src/assets/images/hero_robot_arm_1786764552106.jpg'}
                   alt="Robotic System"
-                  className={`max-w-full max-h-full w-auto h-auto object-contain object-center transition-transform duration-300 ${
-                    imageZoomed ? 'scale-105' : 'group-hover:scale-[1.02]'
+                  className={`w-full h-full object-cover object-center rounded-2xl transition-all duration-500 ease-out ${
+                    imageZoomed ? 'scale-105' : 'group-hover:scale-103'
                   }`}
                   referrerPolicy="no-referrer"
                 />
+
+                {/* Subtle Floating Badge */}
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-sans font-medium flex items-center gap-1.5 shadow-sm opacity-80 group-hover:opacity-100 transition-opacity">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span className="truncate max-w-[140px]">{aboutData.teamRole || 'K.F.C. Code Chaser'}</span>
+                </div>
               </div>
             </div>
           </div>

@@ -84,7 +84,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       onAddProject();
                     }
                   }}
-                  className="rounded-xl border border-dashed border-[#e3e2de] bg-[#f7f6f3] p-8 flex flex-col items-center justify-center text-center space-y-3 transition-colors hover:bg-[#efefed] cursor-pointer min-h-[300px]"
+                  className="rounded-2xl border border-dashed border-[#e3e2de] bg-[#f7f6f3] p-8 flex flex-col items-center justify-center text-center space-y-3 transition-colors hover:bg-[#efefed] cursor-pointer min-h-[300px]"
                 >
                   <div className="w-10 h-10 rounded-full bg-white border border-[#e3e2de] flex items-center justify-center text-[#787774]">
                     <Plus className="w-5 h-5" />
@@ -107,7 +107,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             return (
               <div
                 key={project.id}
-                className="group relative rounded-xl border border-[#e3e2de] bg-white hover:bg-[#fbfbfa] transition-colors overflow-hidden flex flex-col justify-between shadow-2xs"
+                className="group relative rounded-2xl border border-[#e3e2de] bg-white hover:bg-[#fbfbfa] transition-all overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-md"
               >
                 {/* Admin Item Controls */}
                 {isAdmin && (

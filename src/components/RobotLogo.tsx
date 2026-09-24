@@ -15,7 +15,7 @@ export const RobotLogo: React.FC<RobotLogoProps> = ({
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <div
-        className="relative flex items-center justify-center rounded-lg bg-white border border-[#e3e2de] p-0.5 shadow-2xs overflow-hidden group transition-all duration-300 hover:border-[#37352f]/40 hover:shadow-xs"
+        className="relative flex items-center justify-center rounded-lg bg-black border border-black/30 p-0.5 shadow-2xs overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xs"
         style={{ width: size + 6, height: size + 6 }}
       >
         {/* KFC Code Chaser Crest Logo */}
@@ -23,7 +23,7 @@ export const RobotLogo: React.FC<RobotLogoProps> = ({
           src={kfcLogoImg}
           alt="K.F.C. Code Chaser Crest Logo"
           referrerPolicy="no-referrer"
-          className="w-full h-full object-contain rounded-md transform transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover rounded-md transform transition-transform duration-300"
         />
       </div>
 

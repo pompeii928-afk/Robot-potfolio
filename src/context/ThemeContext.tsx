@@ -70,6 +70,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': '전체 보기',
     'nav.about': '소개 & 비전',
+    'nav.reviews': '대회 후기',
     'nav.journey': '대회 여정',
     'nav.awards': '수상 내역',
     'nav.skills': '핵심 역량',
@@ -271,6 +272,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': 'Overview',
     'nav.about': 'About & Robot',
+    'nav.reviews': 'Competition Reviews',
     'nav.journey': 'Journey',
     'nav.awards': 'Awards',
     'nav.skills': 'Skills',
@@ -472,6 +474,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': '概要',
     'nav.about': '紹介・ビジョン',
+    'nav.reviews': '大会レビュー',
     'nav.journey': '大会の軌跡',
     'nav.awards': '受賞歴',
     'nav.skills': 'コアスキル',
@@ -672,6 +675,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': '总览',
     'nav.about': '关于与愿景',
+    'nav.reviews': '比赛复盘',
     'nav.journey': '竞赛历程',
     'nav.awards': '荣誉奖项',
     'nav.skills': '核心技能',
@@ -872,6 +876,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': 'Resumen',
     'nav.about': 'Sobre mí',
+    'nav.reviews': 'Crónicas de Torneo',
     'nav.journey': 'Trayectoria',
     'nav.awards': 'Premios',
     'nav.skills': 'Habilidades',
@@ -1072,6 +1077,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': 'Übersicht',
     'nav.about': 'Über mich',
+    'nav.reviews': 'Wettbewerbsberichte',
     'nav.journey': 'Werdegang',
     'nav.awards': 'Auszeichnungen',
     'nav.skills': 'Kompetenzen',
@@ -1272,6 +1278,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.overview': 'Aperçu',
     'nav.about': 'À propos & Vision',
+    'nav.reviews': 'Retours de Compétition',
     'nav.journey': 'Parcours',
     'nav.awards': 'Prix & Titres',
     'nav.skills': 'Compétences',

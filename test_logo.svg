@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <!-- Rounded black squircle -->
+  <rect width="1000" height="1000" rx="230" ry="230" fill="#000000" />
+
+  <!-- Orange diamond (rotated square with slightly rounded corners) -->
+  <g transform="translate(712, 324) rotate(45)">
+    <rect x="-40" y="-40" width="80" height="80" rx="8" ry="8" fill="#DE5226" />
+  </g>
+
+  <!-- Lower small feather barb -->
+  <path d="M 285 665
+           C 315 645, 365 605, 418 548
+           C 390 580, 345 630, 285 665
+           Z"
+        fill="#ffffff" />
+
+  <!-- Main aerodynamic wing / feather -->
+  <path d="M 285 665
+           C 350 560, 480 435, 670 348
+           C 725 323, 765 305, 786 295
+           C 772 335, 735 385, 672 442
+           C 570 534, 465 602, 340 648
+           C 315 658, 298 662, 285 665
+           Z"
+        fill="#ffffff" />
+</svg>

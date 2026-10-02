@@ -259,6 +259,95 @@ app.get('/api/youtube/info', async (req: Request, res: Response) => {
 });
 
 // ==========================================
+// NOTION REAL-TIME AUTO SYNC PROXY
+// ==========================================
+app.get('/api/notion/sync-review', async (req: Request, res: Response) => {
+  const PAGE_ID = '3b21be0c-b00f-802d-9956-ed228decbaff';
+  try {
+    const chunkRes = await fetch('https://www.notion.so/api/v3/loadPageChunk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+      },
+      body: JSON.stringify({
+        pageId: PAGE_ID,
+        limit: 100,
+        cursor: { stack: [] },
+        chunkNumber: 0,
+        verticalColumns: false,
+      }),
+    });
+
+    if (!chunkRes.ok) {
+      throw new Error(`Notion loadPageChunk returned ${chunkRes.status}`);
+    }
+
+    const chunkData = (await chunkRes.json()) as any;
+    const allBlocks = chunkData.recordMap?.block || {};
+
+    const missing: string[] = [];
+    const checkMissing = (id: string) => {
+      const b = allBlocks[id]?.value?.value || allBlocks[id]?.value || allBlocks[id];
+      if (b && b.content) {
+        for (const cid of b.content) {
+          if (!allBlocks[cid]) missing.push(cid);
+          checkMissing(cid);
+        }
+      }
+    };
+    checkMissing(PAGE_ID);
+
+    while (missing.length > 0) {
+      const batch = missing.splice(0, 100);
+      const syncRes = await fetch('https://www.notion.so/api/v3/syncRecordValues', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        },
+        body: JSON.stringify({
+          requests: batch.map((id) => ({ pointer: { id, table: 'block' }, version: -1 })),
+        }),
+      });
+      if (syncRes.ok) {
+        const syncData = (await syncRes.json()) as any;
+        const newBlocks = syncData.recordMap?.block || {};
+        for (const [k, v] of Object.entries(newBlocks)) {
+          allBlocks[k] = v;
+          const bVal = (v as any)?.value?.value || (v as any)?.value || v;
+          if (bVal && bVal.content) {
+            for (const cid of bVal.content) {
+              if (!allBlocks[cid]) missing.push(cid);
+            }
+          }
+        }
+      }
+    }
+
+    const { parseNotionBlocksToReview } = await import('./src/utils/notionParser');
+    const parsedReview = parseNotionBlocksToReview(allBlocks, PAGE_ID);
+
+    return res.json({
+      success: true,
+      review: parsedReview,
+      blockCount: Object.keys(allBlocks).length,
+      syncedAt: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    console.warn('[Server] Notion sync fallback warning:', err?.message || err);
+    const { DEFAULT_REVIEWS_DATA } = await import('./src/data/portfolioData');
+    return res.json({
+      success: true,
+      review: DEFAULT_REVIEWS_DATA[0],
+      syncedAt: new Date().toISOString(),
+      fallback: true,
+      error: err?.message || 'Sync fallback activated',
+    });
+  }
+});
+
+// ==========================================
 // VITE SPA MIDDLEWARE / PRODUCTION STATIC
 // ==========================================
 async function startServer() {

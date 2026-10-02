@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <!-- Clip path for squircle if needed, or direct rect -->
+  </defs>
+  <!-- Background: squircle (rounded rectangle) -->
+  <rect x="0" y="0" width="1000" height="1000" rx="230" ry="230" fill="#000000" />
+
+  <!-- Orange Diamond (Tilted square) -->
+  <g transform="translate(712, 324) rotate(45)">
+    <rect x="-39" y="-39" width="78" height="78" rx="10" ry="10" fill="#DE5326" />
+  </g>
+
+  <!-- Wing Graphic with Slit / Dual Barb -->
+  <!-- We can represent the entire white shape either as two paths or a compound path with the notch slit -->
+  <!-- Lower Barb -->
+  <path d="M 284 664
+           C 318 642, 356 610, 396 564
+           C 400 560, 401 563, 397 568
+           C 362 612, 324 646, 284 664
+           Z" fill="#ffffff" />
+
+  <!-- Main Body -->
+  <path d="M 292 654
+           C 345 572, 455 464, 620 380
+           C 690 345, 745 315, 784 296
+           C 768 344, 726 404, 654 466
+           C 544 560, 428 624, 305 656
+           C 298 658, 294 656, 292 654
+           Z" fill="#ffffff" />
+</svg>

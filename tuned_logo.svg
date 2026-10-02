@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <rect width="1000" height="1000" rx="240" ry="240" fill="#000000" />
+  
+  <!-- Orange Diamond -->
+  <g transform="translate(710, 325) rotate(45)">
+    <rect x="-38" y="-38" 
+          width="76" height="76" 
+          rx="10" ry="10" 
+          fill="#DE5226" />
+  </g>
+
+  <!-- Lower barb -->
+  <path d="M 285 665 C 320 648, 365 615, 415 558 C 385 585, 340 625, 285 665 Z" fill="#ffffff" />
+
+  <!-- Main wing -->
+  <path d="M 315 645 C 360 560, 480 440, 680 348 C 730 325, 765 305, 785 295 C 770 340, 730 395, 665 450 C 565 535, 455 605, 335 648 C 325 648, 318 647, 315 645 Z" fill="#ffffff" />
+</svg>

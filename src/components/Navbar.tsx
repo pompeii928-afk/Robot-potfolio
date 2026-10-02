@@ -7,6 +7,7 @@ import {
   Globe,
   LayoutGrid,
   Bot,
+  BookOpen,
   TrendingUp,
   Trophy,
   Cpu,
@@ -27,6 +28,7 @@ import { useAuth } from '../firebase/AuthContext';
 import { openGmailCompose } from '../utils/contactHelper';
 
 export interface CategoryCounts {
+  reviews?: number;
   journeys?: number;
   awards?: number;
   skills?: number;
@@ -149,6 +151,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       count: undefined,
     },
     {
+      id: 'reviews',
+      key: 'nav.reviews',
+      fallback: '대회 후기',
+      icon: BookOpen,
+      count: counts.reviews,
+    },
+    {
       id: 'journey',
       key: 'nav.journey',
       fallback: '대회 여정',
@@ -212,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 transition-all duration-200">
               <img
-                src="/favicon.svg?v=4"
+                src="/favicon.svg?v=6"
                 alt="K.F.C. Code Chaser Logo"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

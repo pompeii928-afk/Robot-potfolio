@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { handleFirestoreError, OperationType } from './errorHandling';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog, VisitorCheckin } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog, VisitorCheckin, CompetitionReviewItem } from '../types';
 import {
   DEFAULT_ABOUT_CONFIG,
   JOURNEY_DATA,
@@ -22,6 +22,7 @@ import {
   SKILLS_DATA,
   PROJECTS_DATA,
   DEFAULT_YOUTUBE_VIDEOS,
+  DEFAULT_REVIEWS_DATA,
 } from '../data/portfolioData';
 import { CACHE_KEYS, setCachedData, getCachedData } from '../utils/localCache';
 
@@ -31,6 +32,7 @@ const AWARDS_COLLECTION = 'awards';
 const SKILLS_COLLECTION = 'skills';
 const PROJECTS_COLLECTION = 'projects';
 const YOUTUBE_COLLECTION = 'youtube_videos';
+const REVIEWS_COLLECTION = 'competition_reviews';
 const USERS_COLLECTION = 'users';
 const LOGIN_LOGS_COLLECTION = 'login_logs';
 const VISITOR_CHECKINS_COLLECTION = 'visitor_checkins';
@@ -739,6 +741,108 @@ export async function deleteYouTubeVideo(id: string): Promise<void> {
     const docRef = doc(db, YOUTUBE_COLLECTION, id);
     await deleteDoc(docRef);
     await markInitialized(YOUTUBE_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
+// ========================
+// COMPETITION REVIEWS CRUD (대회 후기)
+// ========================
+
+export function subscribeReviews(
+  onUpdate: (items: CompetitionReviewItem[]) => void,
+  onError?: (error: unknown) => void
+) {
+  const colRef = collection(db, REVIEWS_COLLECTION);
+  return onSnapshot(
+    colRef,
+    async (snapshot) => {
+      if (snapshot.empty) {
+        const initialized = await isCollectionInitialized(REVIEWS_COLLECTION);
+        if (initialized) {
+          setCachedData(CACHE_KEYS.REVIEWS, []);
+          onUpdate([]);
+        } else {
+          setCachedData(CACHE_KEYS.REVIEWS, DEFAULT_REVIEWS_DATA);
+          onUpdate(DEFAULT_REVIEWS_DATA);
+        }
+      } else {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        })) as CompetitionReviewItem[];
+        items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.REVIEWS, items);
+        onUpdate(items);
+        if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${REVIEWS_COLLECTION}`, 'true');
+      }
+    },
+    (error) => {
+      console.error('Error listening to reviews:', error);
+      if (onError) onError(error);
+      const fallback = getCachedData<CompetitionReviewItem[]>(CACHE_KEYS.REVIEWS, DEFAULT_REVIEWS_DATA);
+      onUpdate(fallback);
+    }
+  );
+}
+
+export async function createReview(review: Omit<CompetitionReviewItem, 'id'> & { id?: string }): Promise<string> {
+  const id = review.id || `review-${Date.now()}`;
+  const path = `${REVIEWS_COLLECTION}/${id}`;
+  try {
+    const colRef = collection(db, REVIEWS_COLLECTION);
+    const snap = await getDocs(colRef);
+
+    if (snap.empty) {
+      const initialized = await isCollectionInitialized(REVIEWS_COLLECTION);
+      if (!initialized) {
+        const batch = writeBatch(db);
+        DEFAULT_REVIEWS_DATA.forEach((r, idx) => {
+          const rRef = doc(db, REVIEWS_COLLECTION, r.id);
+          batch.set(rRef, { ...r, order: idx, updatedAt: new Date().toISOString() });
+        });
+        await batch.commit();
+      }
+    }
+
+    const docRef = doc(db, REVIEWS_COLLECTION, id);
+    const reviewData = {
+      ...review,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(docRef, reviewData);
+    await markInitialized(REVIEWS_COLLECTION);
+    return id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+    throw error;
+  }
+}
+
+export async function updateReview(id: string, updates: Partial<CompetitionReviewItem>): Promise<void> {
+  const path = `${REVIEWS_COLLECTION}/${id}`;
+  try {
+    const docRef = doc(db, REVIEWS_COLLECTION, id);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
+    await markInitialized(REVIEWS_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+    throw error;
+  }
+}
+
+export async function deleteReview(id: string): Promise<void> {
+  const path = `${REVIEWS_COLLECTION}/${id}`;
+  try {
+    const docRef = doc(db, REVIEWS_COLLECTION, id);
+    await deleteDoc(docRef);
+    await markInitialized(REVIEWS_COLLECTION);
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
     throw error;

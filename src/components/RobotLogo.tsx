@@ -20,7 +20,7 @@ export const RobotLogo: React.FC<RobotLogoProps> = ({
       >
         {/* KFC Code Chaser YouTube Channel Logo */}
         <img
-          src="/favicon.svg?v=4"
+          src="/favicon.svg?v=6"
           alt="K.F.C. Code Chaser Logo"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover rounded-md"

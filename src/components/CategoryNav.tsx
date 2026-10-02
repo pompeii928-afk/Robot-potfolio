@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import { LayoutGrid, Bot, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
+import { LayoutGrid, Bot, BookOpen, TrendingUp, Trophy, Cpu, FolderGit2, Youtube } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme, useLanguage } from '../context/ThemeContext';
 
 interface CategoryCounts {
+  reviews?: number;
   journeys?: number;
   awards?: number;
   skills?: number;
@@ -43,6 +44,13 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
       fallback: 'About & Robot',
       icon: Bot,
       badge: 'PROT V4',
+    },
+    {
+      id: 'reviews',
+      key: 'nav.reviews',
+      fallback: '대회 후기',
+      icon: BookOpen,
+      badge: 'WRO 2026',
     },
     {
       id: 'journey',

@@ -111,6 +111,86 @@ export interface YouTubeVideoItem {
   updatedAt?: string;
 }
 
+export interface CompetitionReviewItem {
+  id: string;
+  title: string;
+  competition: string;
+  period: string;
+  location: string;
+  teamName: string;
+  members: string[];
+  officialUrl?: string;
+  scoringUrl?: string;
+  notionUrl?: string;
+  coverImage?: string;
+  icon?: string;
+  rankBadge?: string;
+  finalScore?: string;
+  overviewSummary?: string;
+  day1: {
+    title: string;
+    subtitle: string;
+    fixes: string[];
+    fixesDetailed?: { problem: string; solution?: string }[];
+    strategy: string;
+    strategyReason?: string;
+    codeSummary?: string;
+    codeFile?: { name: string; path: string };
+    result: string;
+  };
+  day2: {
+    title: string;
+    subtitle: string;
+    rank: string;
+    scores: { round: string; score: number | string }[];
+    scoresDetailed?: { round: string; score: number | string; cause?: string; lesson?: string }[];
+    surpriseMission?: {
+      title: string;
+      rules: string;
+      scoring: string[];
+      images?: { name: string; src: string }[];
+    };
+    strategy: string;
+    codeSummary?: string;
+    codeFile?: { name: string; path: string };
+    problemAndFix?: { problem: string; solution: string };
+    mustFix?: string;
+  };
+  day3: {
+    title: string;
+    subtitle: string;
+    rank: string;
+    scores: { round: string; score: number | string }[];
+    scoresDetailed?: { round: string; score: number | string; cause?: string; lesson?: string }[];
+    challengeMission?: {
+      title: string;
+      tasks: { taskNumber: number; name: string; description: string; score: string }[];
+      images?: { name: string; src: string }[];
+    };
+    strategy: string;
+    codeSummary?: string;
+    codeFile?: { name: string; path: string };
+    problemAndFix?: { problem: string; solution: string };
+    mustFix?: string;
+  };
+  libraryFile?: { name: string; path: string };
+  reflections: {
+    strengths: string;
+    regrets: string;
+    improvements: string;
+    mistakesList?: string[];
+  };
+  competitionDetails: {
+    venueAndDate: string;
+    criticalRules: string;
+    ruleLessonLearned: string;
+    differencesFromPrevious: string;
+  };
+  order?: number;
+  updatedAt?: string;
+  lastSyncedAt?: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;

@@ -11,6 +11,7 @@ import { AwardsSection } from './components/AwardsSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
 import { YouTubeSection } from './components/YouTubeSection';
+import { CompetitionReviewsSection } from './components/CompetitionReviewsSection';
 import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
@@ -41,6 +42,10 @@ import {
   subscribeYouTubeVideos,
   saveYouTubeVideo,
   deleteYouTubeVideo,
+  subscribeReviews,
+  createReview,
+  updateReview,
+  deleteReview,
 } from './firebase/firestoreService';
 import {
   DEFAULT_ABOUT_CONFIG,
@@ -49,15 +54,17 @@ import {
   SKILLS_DATA,
   PROJECTS_DATA,
   DEFAULT_YOUTUBE_VIDEOS,
+  DEFAULT_REVIEWS_DATA,
 } from './data/portfolioData';
-import { CACHE_KEYS, getCachedData } from './utils/localCache';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem } from './types';
+import { CACHE_KEYS, getCachedData, setCachedData } from './utils/localCache';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, CompetitionReviewItem } from './types';
 import { EditAboutModal } from './components/modals/EditAboutModal';
 import { EditJourneyModal } from './components/modals/EditJourneyModal';
 import { EditAwardModal } from './components/modals/EditAwardModal';
 import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
 import { EditYouTubeModal } from './components/modals/EditYouTubeModal';
+import { EditReviewModal } from './components/modals/EditReviewModal';
 import { AdminUsersView } from './components/AdminUsersView';
 import { VisitorCheckinModal } from './components/VisitorCheckinModal';
 
@@ -139,9 +146,17 @@ function PortfolioApp() {
   const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideoItem[]>(() =>
     getCachedData('cached_youtube_videos', DEFAULT_YOUTUBE_VIDEOS)
   );
+  const [reviews, setReviews] = useState<CompetitionReviewItem[]>(() =>
+    getCachedData(CACHE_KEYS.REVIEWS, DEFAULT_REVIEWS_DATA)
+  );
 
   // Modal States
   const [isEditAboutOpen, setIsEditAboutOpen] = useState(false);
+
+  const [reviewModalData, setReviewModalData] = useState<{
+    isOpen: boolean;
+    item: CompetitionReviewItem | null;
+  }>({ isOpen: false, item: null });
 
   const [journeyModalData, setJourneyModalData] = useState<{
     isOpen: boolean;
@@ -216,6 +231,11 @@ function PortfolioApp() {
 
     const unsubYouTube = subscribeYouTubeVideos((items) => setYoutubeVideos(items));
 
+    const unsubReviews = subscribeReviews(
+      (items) => setReviews(items),
+      (err) => console.log('Reviews stream:', err)
+    );
+
     return () => {
       unsubAbout();
       unsubJourneys();
@@ -223,6 +243,7 @@ function PortfolioApp() {
       unsubSkills();
       unsubProjects();
       unsubYouTube();
+      unsubReviews();
     };
   }, []);
 
@@ -461,6 +482,78 @@ function PortfolioApp() {
     }
   };
 
+  const handleSaveReview = async (data: CompetitionReviewItem) => {
+    try {
+      const exists = reviews.some((r) => r.id === data.id);
+      const itemWithUpdate = {
+        ...data,
+        updatedAt: data.updatedAt || new Date().toISOString(),
+      };
+
+      setReviews((prev) => {
+        if (exists) {
+          return prev.map((r) => (r.id === data.id ? { ...r, ...itemWithUpdate } : r));
+        }
+        return [itemWithUpdate, ...prev];
+      });
+
+      if (exists) {
+        await updateReview(data.id, itemWithUpdate);
+        showToast(
+          lang === 'en' ? 'Competition review updated.' : '대회 후기가 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
+      } else {
+        await createReview(itemWithUpdate);
+        showToast(
+          lang === 'en' ? 'New competition review added.' : '새 대회 후기가 추가되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '추가 완료'
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('대회 후기 저장에 실패했습니다.', 'error', '오류 발생');
+      throw err;
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    try {
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+      await deleteReview(id);
+      showToast(
+        lang === 'en' ? 'Competition review deleted.' : '대회 후기가 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('대회 후기 삭제에 실패했습니다.', 'error', '삭제 실패');
+      throw err;
+    }
+  };
+
+  const handleReviewSynced = async (updatedReview: CompetitionReviewItem) => {
+    setReviews((prev) => {
+      const idx = prev.findIndex((r) => r.id === updatedReview.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = updatedReview;
+        return copy;
+      }
+      return [updatedReview, ...prev];
+    });
+    try {
+      const updatedList = [updatedReview];
+      setCachedData(CACHE_KEYS.REVIEWS, updatedList);
+      await updateReview(updatedReview.id, updatedReview);
+    } catch (err) {
+      console.warn('[App] Review sync persistence note:', err);
+    }
+  };
+
   // If user navigates to `/admin` and is not logged in, render the sleek login screen
   if (currentPath === '/admin' && !authLoading && !isAdmin) {
     return <AdminLoginView onBackToPublic={() => navigateTo('/')} />;
@@ -489,6 +582,7 @@ function PortfolioApp() {
           onOpenCheckin={() => setIsCheckinModalOpen(true)}
           onOpenUsersView={() => setIsUsersViewOpen(true)}
           counts={{
+            reviews: reviews.length,
             journeys: journeys.length,
             awards: awards.length,
             skills: skills.length,
@@ -516,6 +610,17 @@ function PortfolioApp() {
                 onEditAbout={() => setIsEditAboutOpen(true)}
                 onExploreProjects={() => handleNavigate('experience')}
                 onNavigate={handleNavigate}
+              />
+            )}
+
+            {(activeSection === 'all' || activeSection === 'reviews') && (
+              <CompetitionReviewsSection
+                reviews={reviews}
+                isAdmin={isEditingEnabled}
+                onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
+                onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
+                onDeleteReview={handleDeleteReview}
+                onReviewSynced={handleReviewSynced}
               />
             )}
 
@@ -623,6 +728,14 @@ function PortfolioApp() {
             onClose={() => setYoutubeModalData({ isOpen: false, item: null })}
             onSave={handleSaveYouTubeVideo}
             onDelete={handleDeleteYouTubeVideo}
+          />
+
+          <EditReviewModal
+            isOpen={reviewModalData.isOpen}
+            initialData={reviewModalData.item}
+            onClose={() => setReviewModalData({ isOpen: false, item: null })}
+            onSave={handleSaveReview}
+            onDelete={handleDeleteReview}
           />
         </>
       )}

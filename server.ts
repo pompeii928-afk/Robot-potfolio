@@ -259,6 +259,96 @@ app.get('/api/youtube/info', async (req: Request, res: Response) => {
 });
 
 // ==========================================
+// SECURE FILE DOWNLOAD (ADMIN PASSWORD PROTECTED)
+// ==========================================
+// Verify admin password helper
+function isAuthorizedAdminRequest(req: Request, password?: string): boolean {
+  // Check Bearer header or cookie token
+  let token: string | undefined;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else if (req.cookies && req.cookies.admin_token) {
+    token = req.cookies.admin_token;
+  }
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { username: string; role: string };
+      if (decoded.role === 'admin' && decoded.username === DEFAULT_ADMIN_USERNAME) {
+        return true;
+      }
+    } catch {
+      // invalid token
+    }
+  }
+
+  // Check direct password input
+  if (password && typeof password === 'string') {
+    const adminRecord = getAdminRecord();
+    const isMatchPlain = password === DEFAULT_ADMIN_PLAINTEXT_PW;
+    const isMatchHash = bcrypt.compareSync(password, adminRecord.passwordHash);
+    if (isMatchPlain || isMatchHash) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Protected file download endpoint via POST
+app.post('/api/files/download', (req: Request, res: Response) => {
+  const { password, filePath } = req.body;
+
+  if (!filePath || typeof filePath !== 'string') {
+    return res.status(400).json({ error: '다운로드할 파일 경로가 필요합니다.', success: false });
+  }
+
+  const isAuthorized = isAuthorizedAdminRequest(req, password);
+  if (!isAuthorized) {
+    return res.status(401).json({
+      error: '관리자 비밀번호가 올바르지 않습니다. 관리자 권한이 있어야 다운로드할 수 있습니다.',
+      success: false,
+    });
+  }
+
+  // Prevent directory traversal
+  const safeFilename = path.basename(filePath);
+  const targetPath = path.join(process.cwd(), 'public', 'reviews', 'wro2026', safeFilename);
+
+  if (!fs.existsSync(targetPath)) {
+    return res.status(404).json({
+      error: '요청한 파일을 서버에서 찾을 수 없습니다.',
+      success: false,
+    });
+  }
+
+  // Set attachment header and stream file
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeFilename)}"`);
+  return res.download(targetPath, safeFilename, (err) => {
+    if (err && !res.headersSent) {
+      res.status(500).json({ error: '파일 전송 중 오류가 발생했습니다.' });
+    }
+  });
+});
+
+// Protect direct static access to code files in public/reviews/wro2026/
+app.get('/reviews/wro2026/:filename', (req: Request, res: Response, next: NextFunction) => {
+  const filename = req.params.filename;
+  // If it's a code or script file
+  if (filename.endsWith('.py') || filename.endsWith('.zip') || filename.endsWith('.sb3')) {
+    const isAuthorized = isAuthorizedAdminRequest(req);
+    if (!isAuthorized) {
+      return res.status(403).json({
+        error: '관리자 비밀번호 인증이 필요한 파일입니다. 웹사이트 다운로드 버튼을 통해 비밀번호를 입력해주세요.',
+        protected: true,
+      });
+    }
+  }
+  return next();
+});
+
+// ==========================================
 // NOTION REAL-TIME AUTO SYNC PROXY
 // ==========================================
 app.get('/api/notion/sync-review', async (req: Request, res: Response) => {

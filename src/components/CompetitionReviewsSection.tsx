@@ -23,11 +23,13 @@ import {
   Download,
   Image as ImageIcon,
   Check,
+  Lock,
 } from 'lucide-react';
 import { CompetitionReviewItem } from '../types';
 import { useLanguage } from '../context/ThemeContext';
 import { syncNotionReviewFromServer } from '../utils/notionSyncHelper';
 import { useToast } from './Toast';
+import { AdminDownloadModal } from './AdminDownloadModal';
 
 interface CompetitionReviewsSectionProps {
   reviews: CompetitionReviewItem[];
@@ -79,6 +81,44 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
     'rules-damage': true,
     'rules-diff': true,
   });
+
+  const [downloadTarget, setDownloadTarget] = useState<{ fileName: string; filePath: string } | null>(null);
+
+  const handleRequestDownload = (fileName: string, filePath: string) => {
+    // If logged in as admin, trigger download immediately using admin token
+    if (isAdmin) {
+      const storedToken = localStorage.getItem('admin_token');
+      fetch('/api/files/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(storedToken ? { Authorization: `Bearer ${storedToken}` } : {}),
+        },
+        body: JSON.stringify({ filePath }),
+      })
+        .then(async (res) => {
+          if (!res.ok) throw new Error('Download failed');
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+          showToast(`${fileName} 다운로드가 완료되었습니다.`, 'success');
+        })
+        .catch(() => {
+          // Open modal if direct token call failed
+          setDownloadTarget({ fileName, filePath });
+        });
+      return;
+    }
+
+    // Require admin password modal
+    setDownloadTarget({ fileName, filePath });
+  };
 
   const toggleItem = (key: string) => {
     setOpenToggles((prev) => ({
@@ -326,7 +366,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-black/80 border border-white/20 p-1 flex items-center justify-center">
                     <img
-                      src="/favicon.svg?v=6"
+                      src="/favicon.svg?v=7"
                       alt="KFC logo"
                       className="w-full h-full object-contain"
                     />
@@ -350,7 +390,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               <div className="space-y-3 pb-4 border-b border-[#f1f0ee]">
                 <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center shadow-xs border border-zinc-700">
                   <img
-                    src="/favicon.svg?v=6"
+                    src="/favicon.svg?v=7"
                     alt="K.F.C. Code Chaser Original Logo"
                     className="w-full h-full object-cover rounded-xl"
                   />
@@ -731,6 +771,28 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                               <li>유물이 완전히 seasonal logo 안에 있음 : 25점 (넘어지면 안 됨)</li>
                             </ul>
                           </div>
+
+                          {/* Notion Additional Analysis */}
+                          {rev.day2.surpriseMission?.reason && (
+                            <div className="p-2.5 bg-[#f7f6f3] border border-[#e3e2de] rounded-lg space-y-1.5 text-xs text-zinc-800">
+                              <p className="flex items-start gap-1.5">
+                                <span className="font-bold text-amber-800 shrink-0">• 이유 :</span>
+                                <span>{rev.day2.surpriseMission.reason}</span>
+                              </p>
+                              {rev.day2.surpriseMission.disadvantage && (
+                                <p className="flex items-start gap-1.5">
+                                  <span className="font-bold text-rose-700 shrink-0">• 불이익 :</span>
+                                  <span>{rev.day2.surpriseMission.disadvantage}</span>
+                                </p>
+                              )}
+                              {rev.day2.surpriseMission.lesson && (
+                                <p className="flex items-start gap-1.5">
+                                  <span className="font-bold text-emerald-700 shrink-0">• 교훈/개선 :</span>
+                                  <span>{rev.day2.surpriseMission.lesson}</span>
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         {/* Image Thumbnails */}
@@ -808,17 +870,20 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                     </button>
                     {openToggles['day2-code'] && (
                       <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f]">
-                        <a
-                          href="/reviews/wro2026/WRO_FINAL_2026_MAIN_2.py"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download="WRO_FINAL_2026_MAIN_2.py"
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-colors"
+                        <button
+                          type="button"
+                          onClick={() => handleRequestDownload('WRO_FINAL_2026_MAIN_2.py', '/reviews/wro2026/WRO_FINAL_2026_MAIN_2.py')}
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-all cursor-pointer group hover:border-[#2383e2]/40"
+                          title="관리자 비밀번호 인증 후 다운로드"
                         >
-                          <FileCode className="w-4 h-4 text-emerald-600" />
+                          <FileCode className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
                           <span className="font-semibold">WRO_FINAL_2026_MAIN_2.py</span>
-                          <Download className="w-3.5 h-3.5 text-[#787774]" />
-                        </a>
+                          <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-sans flex items-center gap-1">
+                            <Lock className="w-2.5 h-2.5" />
+                            관리자 인증
+                          </span>
+                          <Download className="w-3.5 h-3.5 text-[#787774] group-hover:text-[#37352f]" />
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1038,13 +1103,23 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                       </span>
                     </button>
                     {openToggles['day3-strategy'] && (
-                      <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f]">
+                      <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f] space-y-2">
                         <div className="flex items-start gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
                           <span className="text-zinc-800 font-medium">
                             {rev.day3.strategy}
                           </span>
                         </div>
+                        {rev.day3.strategyTasks && rev.day3.strategyTasks.length > 0 && (
+                          <div className="mt-2 p-2.5 bg-blue-50/50 border border-blue-200/60 rounded-xl space-y-1.5 text-xs">
+                            <span className="font-bold text-blue-900 block">선택 집중 미션:</span>
+                            <ol className="list-decimal list-inside space-y-1 text-zinc-800 font-medium pl-1">
+                              {rev.day3.strategyTasks.map((task, tidx) => (
+                                <li key={tidx}>{task}</li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1068,17 +1143,20 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                     </button>
                     {openToggles['day3-code'] && (
                       <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f]">
-                        <a
-                          href="/reviews/wro2026/WRO_Challenge_MAIN.py"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download="WRO_Challenge_MAIN.py"
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-colors"
+                        <button
+                          type="button"
+                          onClick={() => handleRequestDownload('WRO_Challenge_MAIN.py', '/reviews/wro2026/WRO_Challenge_MAIN.py')}
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-all cursor-pointer group hover:border-[#2383e2]/40"
+                          title="관리자 비밀번호 인증 후 다운로드"
                         >
-                          <FileCode className="w-4 h-4 text-emerald-600" />
+                          <FileCode className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
                           <span className="font-semibold">WRO_Challenge_MAIN.py</span>
-                          <Download className="w-3.5 h-3.5 text-[#787774]" />
-                        </a>
+                          <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-sans flex items-center gap-1">
+                            <Lock className="w-2.5 h-2.5" />
+                            관리자 인증
+                          </span>
+                          <Download className="w-3.5 h-3.5 text-[#787774] group-hover:text-[#37352f]" />
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1166,17 +1244,20 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                 </button>
                 {openToggles['lib-code'] && (
                   <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f]">
-                    <a
-                      href="/reviews/wro2026/WRO_FINAL_2026_LIB.py"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download="WRO_FINAL_2026_LIB.py"
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-colors"
+                    <button
+                      type="button"
+                      onClick={() => handleRequestDownload('WRO_FINAL_2026_LIB.py', '/reviews/wro2026/WRO_FINAL_2026_LIB.py')}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-all cursor-pointer group hover:border-[#2383e2]/40"
+                      title="관리자 비밀번호 인증 후 다운로드"
                     >
-                      <FileCode className="w-4 h-4 text-emerald-600" />
+                      <FileCode className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
                       <span className="font-semibold">WRO_FINAL_2026_LIB.py</span>
-                      <Download className="w-3.5 h-3.5 text-[#787774]" />
-                    </a>
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-sans flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" />
+                        관리자 인증
+                      </span>
+                      <Download className="w-3.5 h-3.5 text-[#787774] group-hover:text-[#37352f]" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -1452,6 +1533,17 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
           </article>
         ))}
       </div>
+
+      {/* Admin Protected File Download Modal */}
+      {downloadTarget && (
+        <AdminDownloadModal
+          isOpen={!!downloadTarget}
+          fileName={downloadTarget.fileName}
+          filePath={downloadTarget.filePath}
+          onClose={() => setDownloadTarget(null)}
+          isAdmin={isAdmin}
+        />
+      )}
     </section>
   );
 };

@@ -148,6 +148,9 @@ export interface CompetitionReviewItem {
       title: string;
       rules: string;
       scoring: string[];
+      reason?: string;
+      disadvantage?: string;
+      lesson?: string;
       images?: { name: string; src: string }[];
     };
     strategy: string;
@@ -168,6 +171,7 @@ export interface CompetitionReviewItem {
       images?: { name: string; src: string }[];
     };
     strategy: string;
+    strategyTasks?: string[];
     codeSummary?: string;
     codeFile?: { name: string; path: string };
     problemAndFix?: { problem: string; solution: string };

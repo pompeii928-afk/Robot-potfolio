@@ -116,6 +116,12 @@ export function parseNotionBlocksToReview(
           '부분적으로 유물이 seasonal logo에 걸쳐져 있음 : 15점',
           '유물이 완전히 seasonal logo 안에 있음 : 25점 (넘어지면 안 됨)',
         ],
+        reason:
+          '우리 상황에서 새로운 유물을 추가하면 오류가 더욱 날 것 같기도 하였고 흰색 유물은 프로그램에서 무작위 색상으로 판단해서 유물을 갔다놓는 것으로 되어있었기 때문에 기존에 있던 로직을 수정해야 하는데 스스로 고치기가 어려웠기 때문이다.',
+        disadvantage:
+          '유물 하나를 흰색 유물로 바꾸었기 때문에 흰색 유물을 포기한 팀 상황으로써는 25점을 손해 보았다.',
+        lesson:
+          '시도를 하기 위해 색상감지 프로그램은 미리 이해해야겠다.',
         images: [
           { name: '서프라이즈 미션 1', src: '/reviews/wro2026/surprise_mission_1.jpg' },
           { name: '서프라이즈 미션 2', src: '/reviews/wro2026/surprise_mission_2.jpg' },
@@ -219,6 +225,11 @@ export function parseNotionBlocksToReview(
         ],
       },
       strategy: '안되는것은 과감히 포기하고 할수 있는것 부터 함',
+      strategyTasks: [
+        '관객 3명 유물 픽업 위치에 갔다 놓는 미션',
+        '빨간탑을 넘어 뜨리는 미션',
+        '로봇이 멈췄을 때 시작지점에 있게 하는 미션 (1라운드, 멀리건에서 작동 x : 라인을 타지 못함)',
+      ],
       codeSummary:
         '멀리건 기회 활용 및 불안정한 미션을 과감히 제외하고 확정 점수 위주로 안정화',
       codeFile: {

@@ -221,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 transition-all duration-200">
               <img
-                src="/favicon.svg?v=6"
+                src="/favicon.svg?v=7"
                 alt="K.F.C. Code Chaser Logo"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

@@ -141,7 +141,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center shrink-0 shadow-xs">
               <img
-                src="/favicon.svg?v=6"
+                src="/favicon.svg?v=7"
                 alt={channelInfo.channelName || 'YouTube Channel'}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

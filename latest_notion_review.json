@@ -1,0 +1,244 @@
+{
+  "id": "wro-oc-2026-india",
+  "title": "WRO Open Championship 2026 India- ASIA PACIFIC",
+  "competition": "WRO Open Championship 2026 India (ASIA PACIFIC)",
+  "period": "2026년 9월 25일 ~ 27일",
+  "location": "GMR Arena, Aerocity, Hyderabad, India",
+  "teamName": "K.F.C.",
+  "members": [
+    "배지훈",
+    "송민규"
+  ],
+  "officialUrl": "https://oc26.wroindia.org/schedule/",
+  "scoringUrl": "https://scoring.wro-association.org/en/event/scoring/420",
+  "notionUrl": "https://app.notion.com/p/WRO-Open-Championship-2026-India-ASIA-PACIFIC-3b21be0cb00f802d9956ed228decbaff?source=copy_link",
+  "coverImage": "/wro-oc-regular-apac-india-2026.webp",
+  "icon": "/favicon.svg",
+  "rankBadge": "11등 (총 249점)",
+  "finalScore": "249점",
+  "overviewSummary": "인도 하이데라바드에서 개최된 WRO Open Championship 2026 ASIA PACIFIC 실전 참가 후기 및 라운드별 분석 기록입니다.",
+  "day1": {
+    "title": "첫째 날",
+    "subtitle": "연습",
+    "fixes": [
+      "먼지 미션을 할 때 빨간 베리어를 침",
+      "유물을 잡을 때 직진 속도가 너무 빨라 유물을 쳐서 잘 못 잡음"
+    ],
+    "fixesDetailed": [
+      {
+        "problem": "먼지 미션을 할 때 빨간 베리어를 침",
+        "solution": "빨간 베리어를 치는 문제의 요인이 팔 때문이라는 것을 인지하고 팔의 각도를 높여 베리어의 높이보다 높이 들어 베리어를 안 치게 하였다."
+      },
+      {
+        "problem": "유물을 잡을 때 직진 속도가 너무 빨라 유물을 쳐서 잘 못 잡음",
+        "solution": "유물을 집을 때 속도가 너무 빨라 유물을 놓치는 경우는 라이브러리 파일에서 유물을 잡는 함수를 찾은 뒤 속도를 낮추었다."
+      }
+    ],
+    "strategy": "속도는 둘째 치고 무조건 점수에 유리한 쪽으로 선택한다.",
+    "strategyReason": "점수가 높아야지 속도가 빠른게 의미가 있기 때문이다.",
+    "codeSummary": "연습 주행 및 경기장 조명·마찰력 적응형 제어 코드 튜닝",
+    "result": "11등 (249점)"
+  },
+  "day2": {
+    "title": "둘째 날",
+    "subtitle": "1, 2, 3, 4라운드 (240점 만점)",
+    "rank": "11등",
+    "scores": [
+      {
+        "round": "1라운드",
+        "score": 30
+      },
+      {
+        "round": "2라운드",
+        "score": 107
+      },
+      {
+        "round": "3라운드",
+        "score": 109
+      },
+      {
+        "round": "4라운드",
+        "score": 179
+      }
+    ],
+    "scoresDetailed": [
+      {
+        "round": "1라운드",
+        "score": 30,
+        "cause": "시작 지점을 잘못 잡아서 로봇이 미션을 수행하지 못함",
+        "lesson": "시작 지점을 잘 잡도록 다음번에는 틀을 만들어 시작 지점을 잡아야겠다."
+      },
+      {
+        "round": "2라운드",
+        "score": 107,
+        "cause": "마지막에 코드를 작성할 때 콤마를 마침표로 찍었다.",
+        "lesson": "콤마와 마침표를 구분을 잘 해야겠다."
+      },
+      {
+        "round": "3라운드",
+        "score": 109,
+        "cause": "함수 이름을 착각해 다른 곳에 있는 코드를 고쳐 로봇이 미션을 수행하지 못하였다.",
+        "lesson": "함수 이름을 명확하게 구분해야 하고 다시 한번 고쳐야 될 함수가 맞는지 확인해야겠다."
+      },
+      {
+        "round": "4라운드",
+        "score": 179,
+        "cause": "유물 색깔 감지를 잘 하지 못하였다.",
+        "lesson": "다음에는 색깔 감지를 하는 객체의 높이에 맞춰 컬러센서 높이를 조정해야겠다."
+      }
+    ],
+    "surpriseMission": {
+      "title": "서프라이즈 미션",
+      "rules": "새로운 유물인 하얀색 유물이 추가되어 하얀색 유물을 WRO 2026 seasonal logo가 있는 곳에 갖다 놓는 미션",
+      "scoring": [
+        "부분적으로 유물이 seasonal logo에 걸쳐져 있음 : 15점",
+        "유물이 완전히 seasonal logo 안에 있음 : 25점 (넘어지면 안 됨)"
+      ],
+      "images": [
+        {
+          "name": "서프라이즈 미션 1",
+          "src": "/reviews/wro2026/surprise_mission_1.jpg"
+        },
+        {
+          "name": "서프라이즈 미션 2",
+          "src": "/reviews/wro2026/surprise_mission_2.jpg"
+        }
+      ]
+    },
+    "strategy": "시간보다는 점수를 높이기로 함",
+    "codeSummary": "1, 2, 3라운드 실수를 딛고 4라운드에서 끝까지 포기하지 않고 179점 고득점 달성",
+    "codeFile": {
+      "name": "WRO_FINAL_2026_MAIN_2.py",
+      "path": "/reviews/wro2026/WRO_FINAL_2026_MAIN_2.py"
+    },
+    "problemAndFix": {
+      "problem": "로봇에 업로드된 프로그램이 실행이 안되었다.",
+      "solution": "로봇을 계속 껐다 켰다를 로봇이 실행될 때까지 반복하였다."
+    },
+    "mustFix": "아무리 상황이 급박해도 당황하지 않고 차근차근 코드를 쓰고 로봇이 잘 작동이 안되어도 시작 지점은 꼭 잘 지켜야 한다."
+  },
+  "day3": {
+    "title": "셋째 날",
+    "subtitle": "1, 2라운드 (240점 만점)",
+    "rank": "11등",
+    "scores": [
+      {
+        "round": "1라운드",
+        "score": 55
+      },
+      {
+        "round": "2라운드",
+        "score": 60
+      },
+      {
+        "round": "3라운드 (멀리건)",
+        "score": 70
+      }
+    ],
+    "scoresDetailed": [
+      {
+        "round": "1라운드",
+        "score": 55,
+        "cause": "뒤에 팔이 관객을 잘 잡지 못하는 구조여서 사람을 놓쳤다.",
+        "lesson": "팀의 모형의 단점이 있으면 바로바로 고치고 문제점을 확인해야겠다."
+      },
+      {
+        "round": "2라운드",
+        "score": 60,
+        "cause": "빨간탑이 부서지면 점수가 없는데 부서져 점수를 못 얻었다.",
+        "lesson": "탑 공략 시 물리적 충돌 및 감속 루틴 정밀 제어"
+      },
+      {
+        "round": "3라운드 (멀리건)",
+        "score": 70,
+        "cause": "마지막에 라인을 타는 프로그램에서 직진이 부족해 라인을 타는 과정이 잘못되어 점수를 못 얻었다.",
+        "lesson": "라인을 잘 타는지 안타는지 검토를 제대로 해야겠다."
+      }
+    ],
+    "challengeMission": {
+      "title": "챌린지 미션",
+      "tasks": [
+        {
+          "taskNumber": 1,
+          "name": "앵무새 구출 (Free the parrot)",
+          "description": "앵무새가 스폰서 로고 구역 안에 울타리로 갇혀 있습니다. 앵무새가 로고 구역 안에서 세워진 상태를 유지하는 동안, 울타리를 로고(흰색) 구역 밖으로 완전히 치워야 합니다.",
+          "score": "울타리가 흰색 구역 밖으로 완전히 벗어남 (20점 / 최대 20점)"
+        },
+        {
+          "taskNumber": 2,
+          "name": "빨간 탑 쓰러뜨리기 (Knock down the tower)",
+          "description": "매 라운드마다 지정된 빨간색 위치 중 한 곳에 큰 빨간 탑이 무작위로 배치됩니다. 이 탑을 쓰러뜨려야 합니다.",
+          "score": "빨간 탑이 쓰러짐 (25점 / 최대 25점)"
+        },
+        {
+          "taskNumber": 3,
+          "name": "관람객 이동 (Move the visitors)",
+          "description": "4개의 빈 사각형 구역에 위치한 관람객들을 발굴 현장(excavation site)으로 완전히 옮겨야 합니다.",
+          "score": "발굴 현장에 완전히 이동하고 똑바로 세워진 관람객 1명당 15점 (개당 15점 / 최대 60점)"
+        },
+        {
+          "taskNumber": 4,
+          "name": "유물 재배치 (Rearrange the artefacts)",
+          "description": "파란색, 초록색, 빨간색, 노란색 유물이 초기에는 제자리가 아닌 곳에 무작위 배치되어 있습니다. 이를 박물관 내 알맞은 색상의 전시 위치로 옮겨야 합니다.",
+          "score": "박물관의 해당 색상 전시 구역에 완전히 또는 일부 들어간 유물 1개당 20점 (개당 20점 / 최대 80점)"
+        },
+        {
+          "taskNumber": 5,
+          "name": "탑 쌓기 (Build the tower)",
+          "description": "노란색 탑의 기둥(base)과 상단(top) 초기 위치가 시즌 챌린지와 반대로 바뀌어 있습니다. 탑 상단을 기둥 위에 똑바로 세워 놓아야 합니다.",
+          "score": "탑 상단이 기둥 위에 올바르게 놓이고 기둥이 노란색 목표 구역 안에 완전히 위치 시 20점(최대 40점), 일부만 위치 시 15점"
+        },
+        {
+          "taskNumber": 6,
+          "name": "로봇 주차 (Park the robot)",
+          "description": "주행 중 로봇이 시작 구역을 완전히 한 번 이상 벗어난 후, 최종적으로 시작 구역(Start area)에 완전히 또는 일부 주차해야 합니다.",
+          "score": "시작 구역에 완전히 또는 일부 주차 (15점 / 최대 15점)"
+        }
+      ],
+      "images": [
+        {
+          "name": "챌린지 미션 1",
+          "src": "/reviews/wro2026/challenge_mission.png"
+        },
+        {
+          "name": "챌린지 미션 2",
+          "src": "/reviews/wro2026/challenge_mission_2.jpg"
+        }
+      ]
+    },
+    "strategy": "안되는것은 과감히 포기하고 할수 있는것 부터 함",
+    "codeSummary": "멀리건 기회 활용 및 불안정한 미션을 과감히 제외하고 확정 점수 위주로 안정화",
+    "codeFile": {
+      "name": "WRO_Challenge_MAIN.py",
+      "path": "/reviews/wro2026/WRO_Challenge_MAIN.py"
+    },
+    "problemAndFix": {
+      "problem": "뒤에 있는 팔이 관객을 잘 잡지 못하는 구조였다.",
+      "solution": "뒤에 있는 팔의 길이를 늘려 관객을 잘 잡도록 하였다."
+    },
+    "mustFix": "한번에 많은 미션을 동시에 병행하지 않고 차근차근 자신이 할 수 있는 미션을 먼저 코드를 써야 한다"
+  },
+  "libraryFile": {
+    "name": "WRO_FINAL_2026_LIB.py",
+    "path": "/reviews/wro2026/WRO_FINAL_2026_LIB.py"
+  },
+  "reflections": {
+    "strengths": "둘쨋날, 1,2,3라운드 모두 점수가 실수로 인해 망했는데 4라운드 때 끝까지 포기하지 않아서 좋은 점수를 얻음",
+    "regrets": "둘쨋날, 셋쨋날 모두 실수 때문에 점수를 잘내지 못하였고 셋쨋날에는 특히 못 하는 미션을 오래 붙잡아 두고 있어 시간을 낭비하였다.",
+    "improvements": "코드에서 콤마를 점으로 잘못 고쳐 실수를 범하였다.",
+    "mistakesList": [
+      "시작 지점을 잘못 잡아서 로봇이 미션을 수행하지 못함",
+      "마지막에 코드를 작성할 때 콤마를 마침표로 찍었다.",
+      "함수 이름을 착각해 다른 곳에 있는 코드를 고쳐 로봇이 미션을 수행하지 못하였다."
+    ]
+  },
+  "competitionDetails": {
+    "venueAndDate": "GMR Arena, Aerocity, Hyderabad, India / 2026년 9월 25일 ~ 27일",
+    "criticalRules": "유물 중 쓰러져도 그 색상에만 갔다 놓기만 하면 5점으로 처리됨 (우리나라의 룰과 다랐음)",
+    "ruleLessonLearned": "챌린지 미션 1라운드 때 룰 중 스타팅 지점에 마지막에 부분적으로 로봇이 포함되어 있으면 점수가 15점이 적립되는데 우리가 번역을 자세히 하지 못하여서 스타팅 지점에 나와 있어야지 15점을 얻는 줄 알아서 15점을 잃었다.",
+    "differencesFromPrevious": "미션 난이도가 쉽고 동선과 전략을 짜기가 훨씬 쉬웠다. (민규형 피셜)"
+  },
+  "order": 1,
+  "updatedAt": "2026-10-06T15:16:00.512Z",
+  "lastSyncedAt": "2026-10-06T15:16:00.512Z"
+}

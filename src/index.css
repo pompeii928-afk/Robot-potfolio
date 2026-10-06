@@ -25,9 +25,13 @@
     --border-subtle: rgba(228, 228, 231, 0.9);
   }
 
+  html, body, #root {
+    min-height: 100%;
+    width: 100%;
+  }
+
   html, body {
     overflow-x: hidden;
-    width: 100%;
     -webkit-text-size-adjust: 100%;
   }
 

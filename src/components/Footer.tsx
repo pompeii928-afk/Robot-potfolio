@@ -24,7 +24,7 @@ export const Footer: React.FC<FooterProps> = () => {
   return (
     <footer
       id="contact-footer"
-      className="relative border-t border-[#e3e2de] py-8 bg-[#f7f6f3] text-[#37352f]"
+      className="relative mt-auto shrink-0 w-full border-t border-[#e3e2de] py-8 bg-[#f7f6f3] text-[#37352f]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

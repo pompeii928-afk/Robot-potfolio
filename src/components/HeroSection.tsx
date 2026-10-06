@@ -30,8 +30,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const displayGoal = localizedAbout.goal;
 
   return (
-    <section id="about" className="relative pt-6 pb-12 sm:pt-8 sm:pb-14 scroll-mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="relative pt-6 pb-12 sm:pt-8 sm:pb-14 scroll-mt-20 flex-1 flex flex-col justify-start">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 flex flex-col justify-start">
         {/* Main Grid: Document & Image */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* Left Column: Notion Page Content */}

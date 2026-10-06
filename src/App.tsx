@@ -562,12 +562,12 @@ function PortfolioApp() {
   const isEditingEnabled = currentPath === '/admin' && isAdmin;
 
   return (
-    <div className="min-h-screen relative bg-white text-[#37352f] selection:bg-[#efefed] selection:text-[#37352f] antialiased">
+    <div className="min-h-screen flex flex-col relative bg-white text-[#37352f] selection:bg-[#efefed] selection:text-[#37352f] antialiased">
       {/* Subtle Notion page top border/gradient */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-[#ffffff]" />
 
       {/* Sticky Header with Integrated Category Bar */}
-      <div className="sticky top-0 z-50 w-full">
+      <div className="sticky top-0 z-50 w-full shrink-0">
         {isEditingEnabled && (
           <AdminBar
             onViewPublic={() => navigateTo('/')}
@@ -593,7 +593,7 @@ function PortfolioApp() {
       </div>
 
       {/* Main Content Sections with AnimatePresence */}
-      <main className="relative z-10 min-h-[60vh]">
+      <main className="relative z-10 flex-1 flex flex-col w-full">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSection}
@@ -601,7 +601,7 @@ function PortfolioApp() {
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: -16, filter: 'blur(6px)' }}
             transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full space-y-6"
+            className="w-full space-y-6 flex-1 flex flex-col"
           >
             {(activeSection === 'all' || activeSection === 'about') && (
               <HeroSection

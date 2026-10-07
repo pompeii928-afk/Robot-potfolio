@@ -580,6 +580,7 @@ function PortfolioApp() {
           isAdmin={isAdmin}
           visitorName={visitorName}
           onOpenCheckin={() => setIsCheckinModalOpen(true)}
+          onOpenAdmin={() => navigateTo('/admin')}
           onOpenUsersView={() => setIsUsersViewOpen(true)}
           counts={{
             reviews: reviews.length,

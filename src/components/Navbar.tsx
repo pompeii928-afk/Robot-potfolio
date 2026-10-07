@@ -201,6 +201,37 @@ export const Navbar: React.FC<NavbarProps> = ({
     onNavigate(id);
   };
 
+  // Consecutive 6-click trigger for Admin Login Portal
+  const logoClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const logoClickCountRef = useRef<number>(0);
+
+  const handleLogoClick = () => {
+    handleSelectTab('all');
+
+    logoClickCountRef.current += 1;
+
+    if (logoClickTimeoutRef.current) {
+      clearTimeout(logoClickTimeoutRef.current);
+    }
+
+    logoClickTimeoutRef.current = setTimeout(() => {
+      logoClickCountRef.current = 0;
+    }, 2500);
+
+    if (logoClickCountRef.current >= 6) {
+      logoClickCountRef.current = 0;
+      if (logoClickTimeoutRef.current) {
+        clearTimeout(logoClickTimeoutRef.current);
+      }
+      if (onOpenAdmin) {
+        onOpenAdmin();
+      } else {
+        window.history.pushState({}, '', '/admin');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
+    }
+  };
+
   const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
   return (
@@ -216,14 +247,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Left: Notion Page Identity */}
           <button
             id="nav-logo-btn"
-            onClick={() => handleSelectTab('all')}
-            className="flex items-center gap-2 sm:gap-2.5 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0"
+            onClick={handleLogoClick}
+            className="flex items-center gap-2 sm:gap-2.5 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0 select-none"
           >
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 transition-all duration-200">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 active:scale-95 transition-all duration-200">
               <img
                 src="/favicon.svg?v=7"
                 alt="K.F.C. Code Chaser Logo"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover select-none cursor-pointer"
                 referrerPolicy="no-referrer"
               />
             </div>

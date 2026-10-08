@@ -1,4 +1,4 @@
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, CompetitionReviewItem } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, CompetitionReviewItem, ExternalSiteItem } from '../types';
 
 export const DEFAULT_ABOUT_CONFIG: AboutConfig = {
   title: 'MY ROBOT',
@@ -601,5 +601,19 @@ export const DEFAULT_REVIEWS_DATA: CompetitionReviewItem[] = [
     lastSyncedAt: new Date().toISOString(),
   },
 ];
+
+export const DEFAULT_EXTERNAL_SITES: ExternalSiteItem[] = [
+  {
+    id: 'site-wro-store',
+    title: 'ROBO STORE',
+    url: 'https://wro-2026-selling-site.vercel.app/',
+    description: 'WRO & CoSpace Robotics 공식 스토어 및 리소스 사이트',
+    category: 'STORE',
+    isDefault: true,
+    order: 0,
+    updatedAt: new Date().toISOString(),
+  },
+];
+
 
 

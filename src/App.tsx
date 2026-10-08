@@ -12,6 +12,7 @@ import { SkillsSection } from './components/SkillsSection';
 import { ProjectsSection } from './components/ProjectsSection';
 import { YouTubeSection } from './components/YouTubeSection';
 import { CompetitionReviewsSection } from './components/CompetitionReviewsSection';
+import { ExternalSiteSection } from './components/ExternalSiteSection';
 import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
@@ -46,6 +47,10 @@ import {
   createReview,
   updateReview,
   deleteReview,
+  subscribeWebsites,
+  createWebsite,
+  updateWebsite,
+  deleteWebsite,
 } from './firebase/firestoreService';
 import {
   DEFAULT_ABOUT_CONFIG,
@@ -55,9 +60,10 @@ import {
   PROJECTS_DATA,
   DEFAULT_YOUTUBE_VIDEOS,
   DEFAULT_REVIEWS_DATA,
+  DEFAULT_EXTERNAL_SITES,
 } from './data/portfolioData';
 import { CACHE_KEYS, getCachedData, setCachedData } from './utils/localCache';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, CompetitionReviewItem } from './types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, CompetitionReviewItem, ExternalSiteItem } from './types';
 import { EditAboutModal } from './components/modals/EditAboutModal';
 import { EditJourneyModal } from './components/modals/EditJourneyModal';
 import { EditAwardModal } from './components/modals/EditAwardModal';
@@ -65,6 +71,7 @@ import { EditSkillModal } from './components/modals/EditSkillModal';
 import { EditProjectModal } from './components/modals/EditProjectModal';
 import { EditYouTubeModal } from './components/modals/EditYouTubeModal';
 import { EditReviewModal } from './components/modals/EditReviewModal';
+import { EditWebsiteModal } from './components/EditWebsiteModal';
 import { AdminUsersView } from './components/AdminUsersView';
 import { VisitorCheckinModal } from './components/VisitorCheckinModal';
 
@@ -149,9 +156,17 @@ function PortfolioApp() {
   const [reviews, setReviews] = useState<CompetitionReviewItem[]>(() =>
     getCachedData(CACHE_KEYS.REVIEWS, DEFAULT_REVIEWS_DATA)
   );
+  const [websites, setWebsites] = useState<ExternalSiteItem[]>(() =>
+    getCachedData(CACHE_KEYS.WEBSITES, DEFAULT_EXTERNAL_SITES)
+  );
 
   // Modal States
   const [isEditAboutOpen, setIsEditAboutOpen] = useState(false);
+
+  const [websiteModalData, setWebsiteModalData] = useState<{
+    isOpen: boolean;
+    item: ExternalSiteItem | null;
+  }>({ isOpen: false, item: null });
 
   const [reviewModalData, setReviewModalData] = useState<{
     isOpen: boolean;
@@ -236,6 +251,11 @@ function PortfolioApp() {
       (err) => console.log('Reviews stream:', err)
     );
 
+    const unsubWebsites = subscribeWebsites(
+      (items) => setWebsites(items),
+      (err) => console.log('Websites stream:', err)
+    );
+
     return () => {
       unsubAbout();
       unsubJourneys();
@@ -244,6 +264,7 @@ function PortfolioApp() {
       unsubProjects();
       unsubYouTube();
       unsubReviews();
+      unsubWebsites();
     };
   }, []);
 
@@ -554,6 +575,61 @@ function PortfolioApp() {
     }
   };
 
+  const handleSaveWebsite = async (data: Partial<ExternalSiteItem> & { title: string; url: string }) => {
+    try {
+      const isExisting = Boolean(data.id && websites.some((w) => w.id === data.id));
+      if (isExisting && data.id) {
+        await updateWebsite(data.id, data);
+        setWebsites((prev) => prev.map((w) => (w.id === data.id ? { ...w, ...data } : w)));
+        showToast(
+          lang === 'en' ? 'Website updated.' : '웹사이트가 수정되었습니다.',
+          'success',
+          lang === 'en' ? 'Updated' : '수정 완료'
+        );
+      } else {
+        const newId = await createWebsite({
+          title: data.title,
+          url: data.url,
+          description: data.description || '',
+          category: data.category || 'STORE',
+        });
+        const newItem: ExternalSiteItem = {
+          id: newId,
+          title: data.title,
+          url: data.url,
+          description: data.description || '',
+          category: data.category || 'STORE',
+        };
+        setWebsites((prev) => [...prev, newItem]);
+        showToast(
+          lang === 'en' ? 'New website added.' : '새 웹사이트가 추가되었습니다.',
+          'success',
+          lang === 'en' ? 'Added' : '추가 완료'
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('웹사이트 저장에 실패했습니다.', 'error', '오류 발생');
+      throw err;
+    }
+  };
+
+  const handleDeleteWebsite = async (id: string) => {
+    try {
+      setWebsites((prev) => prev.filter((w) => w.id !== id));
+      await deleteWebsite(id);
+      showToast(
+        lang === 'en' ? 'Website deleted.' : '웹사이트가 삭제되었습니다.',
+        'info',
+        lang === 'en' ? 'Deleted' : '삭제 완료'
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('웹사이트 삭제에 실패했습니다.', 'error', '삭제 실패');
+      throw err;
+    }
+  };
+
   // If user navigates to `/admin` and is not logged in, render the sleek login screen
   if (currentPath === '/admin' && !authLoading && !isAdmin) {
     return <AdminLoginView onBackToPublic={() => navigateTo('/')} />;
@@ -572,6 +648,8 @@ function PortfolioApp() {
           <AdminBar
             onViewPublic={() => navigateTo('/')}
             onOpenUsersView={() => setIsUsersViewOpen(true)}
+            onAddWebsite={() => setWebsiteModalData({ isOpen: true, item: null })}
+            onOpenWebsites={() => handleNavigate('external-site')}
           />
         )}
         <Navbar
@@ -589,6 +667,7 @@ function PortfolioApp() {
             skills: skills.length,
             projects: projects.length,
             videos: youtubeVideos.length,
+            websites: websites.length,
           }}
         />
       </div>
@@ -674,6 +753,16 @@ function PortfolioApp() {
                 onDeleteVideo={handleDeleteYouTubeVideo}
               />
             )}
+
+            {(activeSection === 'all' || activeSection === 'external-site') && (
+              <ExternalSiteSection
+                sites={websites}
+                isAdmin={isEditingEnabled}
+                onAddSite={() => setWebsiteModalData({ isOpen: true, item: null })}
+                onEditSite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
+                onDeleteSite={handleDeleteWebsite}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -738,6 +827,14 @@ function PortfolioApp() {
             onSave={handleSaveReview}
             onDelete={handleDeleteReview}
           />
+
+          <EditWebsiteModal
+            isOpen={websiteModalData.isOpen}
+            initialData={websiteModalData.item}
+            onClose={() => setWebsiteModalData({ isOpen: false, item: null })}
+            onSave={handleSaveWebsite}
+            onDelete={handleDeleteWebsite}
+          />
         </>
       )}
 
@@ -751,7 +848,13 @@ function PortfolioApp() {
           }}
         >
           <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl animate-in zoom-in-95 duration-150">
-            <AdminUsersView onClose={() => setIsUsersViewOpen(false)} />
+            <AdminUsersView
+              onClose={() => setIsUsersViewOpen(false)}
+              websites={websites}
+              onAddWebsite={() => setWebsiteModalData({ isOpen: true, item: null })}
+              onEditWebsite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
+              onDeleteWebsite={handleDeleteWebsite}
+            />
           </div>
         </div>
       )}

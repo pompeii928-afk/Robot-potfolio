@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { handleFirestoreError, OperationType } from './errorHandling';
-import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog, VisitorCheckin, CompetitionReviewItem } from '../types';
+import { AboutConfig, AwardItem, JourneyItem, ProjectItem, SkillItem, YouTubeVideoItem, UserProfile, LoginLog, VisitorCheckin, CompetitionReviewItem, ExternalSiteItem } from '../types';
 import {
   DEFAULT_ABOUT_CONFIG,
   JOURNEY_DATA,
@@ -23,6 +23,7 @@ import {
   PROJECTS_DATA,
   DEFAULT_YOUTUBE_VIDEOS,
   DEFAULT_REVIEWS_DATA,
+  DEFAULT_EXTERNAL_SITES,
 } from '../data/portfolioData';
 import { CACHE_KEYS, setCachedData, getCachedData } from '../utils/localCache';
 
@@ -33,6 +34,7 @@ const SKILLS_COLLECTION = 'skills';
 const PROJECTS_COLLECTION = 'projects';
 const YOUTUBE_COLLECTION = 'youtube_videos';
 const REVIEWS_COLLECTION = 'competition_reviews';
+const WEBSITES_COLLECTION = 'websites';
 const USERS_COLLECTION = 'users';
 const LOGIN_LOGS_COLLECTION = 'login_logs';
 const VISITOR_CHECKINS_COLLECTION = 'visitor_checkins';
@@ -1258,4 +1260,135 @@ export async function clearAllVisitorCheckins(): Promise<number> {
     throw error;
   }
 }
+
+// ========================
+// EXTERNAL WEBSITES CRUD
+// ========================
+
+export function subscribeWebsites(
+  onUpdate: (items: ExternalSiteItem[]) => void,
+  onError?: (error: unknown) => void
+) {
+  const colRef = collection(db, WEBSITES_COLLECTION);
+  return onSnapshot(
+    colRef,
+    async (snapshot) => {
+      if (snapshot.empty) {
+        const initialized = await isCollectionInitialized(WEBSITES_COLLECTION);
+        if (initialized) {
+          setCachedData(CACHE_KEYS.WEBSITES, []);
+          onUpdate([]);
+        } else {
+          setCachedData(CACHE_KEYS.WEBSITES, DEFAULT_EXTERNAL_SITES);
+          onUpdate(DEFAULT_EXTERNAL_SITES);
+        }
+      } else {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        })) as ExternalSiteItem[];
+        items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setCachedData(CACHE_KEYS.WEBSITES, items);
+        onUpdate(items);
+        if (typeof window !== 'undefined') localStorage.setItem(`kfc_init_${WEBSITES_COLLECTION}`, 'true');
+      }
+    },
+    (error) => {
+      console.error('Error listening to websites collection:', error);
+      if (onError) onError(error);
+      handleFirestoreError(error, OperationType.LIST, WEBSITES_COLLECTION);
+    }
+  );
+}
+
+export async function createWebsite(site: Omit<ExternalSiteItem, 'id'> & { id?: string }): Promise<string> {
+  const id = site.id || `site-${Date.now()}`;
+  const path = `${WEBSITES_COLLECTION}/${id}`;
+  try {
+    const colRef = collection(db, WEBSITES_COLLECTION);
+    const snap = await getDocs(colRef);
+
+    if (snap.empty) {
+      const initialized = await isCollectionInitialized(WEBSITES_COLLECTION);
+      if (!initialized) {
+        const batch = writeBatch(db);
+        DEFAULT_EXTERNAL_SITES.forEach((s, idx) => {
+          const sRef = doc(db, WEBSITES_COLLECTION, s.id);
+          batch.set(sRef, { ...s, order: idx, updatedAt: new Date().toISOString() });
+        });
+        const newRef = doc(db, WEBSITES_COLLECTION, id);
+        batch.set(newRef, { ...site, id, order: DEFAULT_EXTERNAL_SITES.length, updatedAt: new Date().toISOString() });
+        await batch.commit();
+        await markInitialized(WEBSITES_COLLECTION);
+        return id;
+      }
+    }
+
+    const docRef = doc(db, WEBSITES_COLLECTION, id);
+    const item: ExternalSiteItem = {
+      ...site,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(docRef, item);
+    await markInitialized(WEBSITES_COLLECTION);
+    return id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+    throw error;
+  }
+}
+
+export async function updateWebsite(id: string, updates: Partial<ExternalSiteItem>): Promise<void> {
+  const path = `${WEBSITES_COLLECTION}/${id}`;
+  try {
+    const docRef = doc(db, WEBSITES_COLLECTION, id);
+    const snap = await getDoc(docRef);
+
+    if (!snap.exists()) {
+      // If collection wasn't seeded yet, seed defaults plus this update
+      const batch = writeBatch(db);
+      DEFAULT_EXTERNAL_SITES.forEach((s, idx) => {
+        const sRef = doc(db, WEBSITES_COLLECTION, s.id);
+        const data = s.id === id ? { ...s, ...updates, updatedAt: new Date().toISOString() } : { ...s, order: idx };
+        batch.set(sRef, data);
+      });
+      await batch.commit();
+    } else {
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    await markInitialized(WEBSITES_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+    throw error;
+  }
+}
+
+export async function deleteWebsite(id: string): Promise<void> {
+  const path = `${WEBSITES_COLLECTION}/${id}`;
+  try {
+    const colRef = collection(db, WEBSITES_COLLECTION);
+    const snap = await getDocs(colRef);
+
+    if (snap.empty) {
+      const batch = writeBatch(db);
+      DEFAULT_EXTERNAL_SITES.filter((s) => s.id !== id).forEach((s, idx) => {
+        const sRef = doc(db, WEBSITES_COLLECTION, s.id);
+        batch.set(sRef, { ...s, order: idx, updatedAt: new Date().toISOString() });
+      });
+      await batch.commit();
+    } else {
+      const docRef = doc(db, WEBSITES_COLLECTION, id);
+      await deleteDoc(docRef);
+    }
+    await markInitialized(WEBSITES_COLLECTION);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+    throw error;
+  }
+}
+
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, LogOut, Lock, Users, Sparkles, Eye, UserCheck, Mail } from 'lucide-react';
+import { ShieldCheck, LogOut, Lock, Users, Sparkles, Eye, UserCheck, Mail, Plus, Globe } from 'lucide-react';
 import { useAuth, ADMIN_USERNAME } from '../firebase/AuthContext';
 import { useToast } from './Toast';
 import { useLanguage } from '../context/ThemeContext';
@@ -7,9 +7,16 @@ import { useLanguage } from '../context/ThemeContext';
 interface AdminBarProps {
   onViewPublic?: () => void;
   onOpenUsersView?: () => void;
+  onAddWebsite?: () => void;
+  onOpenWebsites?: () => void;
 }
 
-export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic, onOpenUsersView }) => {
+export const AdminBar: React.FC<AdminBarProps> = ({
+  onViewPublic,
+  onOpenUsersView,
+  onAddWebsite,
+  onOpenWebsites,
+}) => {
   const { adminUser, currentUser, userProfile, logout } = useAuth();
   const { showToast } = useToast();
   const { lang, t } = useLanguage();
@@ -51,8 +58,33 @@ export const AdminBar: React.FC<AdminBarProps> = ({ onViewPublic, onOpenUsersVie
           </span>
         </div>
 
-        {/* Right: Controls (Users Log View + Public View + Logout) */}
+        {/* Right: Controls (Website Add + Users Log View + Public View + Logout) */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Add Website Quick Action */}
+          {onAddWebsite && (
+            <button
+              onClick={onAddWebsite}
+              id="admin-add-website-quick-btn"
+              className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-sans font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              title="새 웹사이트 추가"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>새 웹사이트 추가</span>
+            </button>
+          )}
+
+          {/* Navigate to Websites Section */}
+          {onOpenWebsites && (
+            <button
+              onClick={onOpenWebsites}
+              className="px-2.5 py-1.5 rounded-md bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] font-sans font-medium text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              title="다른 왭사이트 섹션으로 이동"
+            >
+              <Globe className="w-3.5 h-3.5 text-blue-600" />
+              <span>다른 왭사이트</span>
+            </button>
+          )}
+
           {/* User Logins & Audit Trail Button */}
           {onOpenUsersView && (
             <button

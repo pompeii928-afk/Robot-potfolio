@@ -14,8 +14,13 @@ import {
   LogOut,
   CheckCircle2,
   Filter,
+  Globe,
+  Plus,
+  ExternalLink,
+  Edit2,
+  Store,
 } from 'lucide-react';
-import { VisitorCheckin, LoginLog } from '../types';
+import { VisitorCheckin, LoginLog, ExternalSiteItem } from '../types';
 import {
   subscribeVisitorCheckins,
   deleteVisitorCheckin,
@@ -30,6 +35,10 @@ import { useToast } from './Toast';
 
 interface AdminUsersViewProps {
   onClose?: () => void;
+  websites?: ExternalSiteItem[];
+  onAddWebsite?: () => void;
+  onEditWebsite?: (site: ExternalSiteItem) => void;
+  onDeleteWebsite?: (id: string) => void;
 }
 
 const FILTER_CATEGORIES = [
@@ -42,14 +51,20 @@ const FILTER_CATEGORIES = [
   { value: 'rel.general', fallback: '일반 방문자' },
 ];
 
-export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
+export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
+  onClose,
+  websites = [],
+  onAddWebsite,
+  onEditWebsite,
+  onDeleteWebsite,
+}) => {
   const { lang, t } = useLanguage();
   const { showToast } = useToast();
 
   const [checkins, setCheckins] = useState<VisitorCheckin[]>([]);
   const [logs, setLogs] = useState<LoginLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'checkins' | 'logs'>('checkins');
+  const [activeTab, setActiveTab] = useState<'checkins' | 'logs' | 'websites'>('checkins');
   const [searchTerm, setSearchTerm] = useState('');
   const [relationFilter, setRelationFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'active' | 'checked_out'>('ALL');
@@ -258,6 +273,17 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
     );
   });
 
+  // Filtered Websites
+  const filteredWebsites = websites.filter((w) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      w.title.toLowerCase().includes(term) ||
+      w.url.toLowerCase().includes(term) ||
+      (w.description && w.description.toLowerCase().includes(term)) ||
+      (w.category && w.category.toLowerCase().includes(term))
+    );
+  });
+
   // Export CSV
   const handleExportCSV = () => {
     if (activeTab === 'checkins') {
@@ -275,6 +301,21 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
       link.click();
       document.body.removeChild(link);
       showToast('CSV 다운로드가 완료되었습니다.', 'success');
+    } else if (activeTab === 'websites') {
+      const headers = ['ID,Title,URL,Category,Description,Order'];
+      const rows = websites.map(
+        (w) =>
+          `"${w.id}","${(w.title || '').replace(/"/g, '""')}","${w.url}","${w.category || ''}","${(w.description || '').replace(/"/g, '""')}","${w.order ?? 0}"`
+      );
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `kfc_websites_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('웹사이트 목록 CSV 다운로드가 완료되었습니다.', 'success');
     } else {
       const headers = ['LogID,UID,Email,DisplayName,Provider,Timestamp,Platform,UserAgent'];
       const rows = logs.map(
@@ -464,10 +505,35 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
               {t('admin.tabLogs', '관리자 접속 로그')} ({logs.length})
             </span>
           </button>
+          <button
+            onClick={() => setActiveTab('websites')}
+            id="admin-tab-websites-btn"
+            className={`px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'websites'
+                ? 'bg-white text-[#37352f] font-semibold shadow-2xs border border-[#e3e2de]'
+                : 'text-[#787774] hover:text-[#37352f]'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-600" />
+            <span>
+              {t('admin.tabWebsites', '외부 웹사이트 관리')} ({websites.length})
+            </span>
+          </button>
         </div>
 
-        {/* Right Search & Filters */}
+        {/* Right Search & Filters & Add Button */}
         <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end flex-wrap">
+          {activeTab === 'websites' && onAddWebsite && (
+            <button
+              onClick={onAddWebsite}
+              id="admin-users-view-add-site-btn"
+              className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-sans font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="새 웹사이트 추가"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>새 웹사이트 추가</span>
+            </button>
+          )}
           {activeTab === 'checkins' && (
             <>
               {/* Status Filter */}
@@ -677,6 +743,122 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({ onClose }) => {
                   </div>
                 );
               })}
+            </div>
+          )
+        ) : activeTab === 'websites' ? (
+          /* WEBSITES MANAGEMENT LIST */
+          filteredWebsites.length === 0 ? (
+            <div className="py-16 text-center bg-white rounded-lg border border-[#e3e2de] p-8 space-y-3">
+              <Globe className="w-8 h-8 text-[#9b9a97] mx-auto opacity-60" />
+              <p className="text-xs font-sans font-medium text-[#37352f]">
+                {searchTerm
+                  ? '검색 조건과 일치하는 외부 웹사이트가 없습니다.'
+                  : '등록된 외부 웹사이트가 없습니다.'}
+              </p>
+              {onAddWebsite && (
+                <button
+                  onClick={onAddWebsite}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>새 웹사이트 추가하기</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-[#f7f6f3] p-3 rounded-lg border border-[#e3e2de] text-xs text-[#787774] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span>
+                  포트폴리오의 <strong>'다른 왭사이트'</strong> 카테고리에 연동되는 외부 웹사이트 목록입니다.
+                </span>
+                {onAddWebsite && (
+                  <button
+                    onClick={onAddWebsite}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer self-start sm:self-auto"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>새 웹사이트 추가</span>
+                  </button>
+                )}
+              </div>
+              <div className="bg-white rounded-lg border border-[#e3e2de] shadow-2xs overflow-hidden divide-y divide-[#e3e2de]">
+                {filteredWebsites.map((site) => (
+                  <div
+                    key={site.id}
+                    className="p-4 hover:bg-[#fbfbfa] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#1a1a18] text-white flex items-center justify-center shrink-0 shadow-2xs border border-zinc-700 mt-0.5">
+                        <Store className="w-4 h-4 text-amber-400" />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-[#37352f] truncate">
+                            {site.title}
+                          </span>
+                          {site.category && (
+                            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                              {site.category}
+                            </span>
+                          )}
+                        </div>
+                        <a
+                          href={site.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-mono text-blue-600 hover:underline flex items-center gap-1 truncate max-w-md"
+                        >
+                          <span className="truncate">{site.url}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                        </a>
+                        {site.description && (
+                          <p className="text-xs text-[#787774] line-clamp-2">
+                            {site.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                      <a
+                        href={site.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1.5 rounded-md bg-white hover:bg-[#efefed] border border-[#e3e2de] text-xs font-medium text-[#37352f] flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                        title="새 창에서 열기"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
+                        <span>열기</span>
+                      </a>
+
+                      {onEditWebsite && (
+                        <button
+                          onClick={() => onEditWebsite(site)}
+                          className="px-2.5 py-1.5 rounded-md bg-white hover:bg-[#efefed] border border-[#e3e2de] text-xs font-medium text-[#37352f] flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                          title="웹사이트 수정"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-zinc-600" />
+                          <span>수정</span>
+                        </button>
+                      )}
+
+                      {onDeleteWebsite && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`'${site.title}' 웹사이트를 삭제하시겠습니까?`)) {
+                              onDeleteWebsite(site.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-md text-[#787774] hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                          title="웹사이트 삭제"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )
         ) : (

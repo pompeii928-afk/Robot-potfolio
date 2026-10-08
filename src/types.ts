@@ -232,3 +232,15 @@ export interface LoginLog {
   timestamp: string;
 }
 
+export interface ExternalSiteItem {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  category?: string;
+  isDefault?: boolean;
+  order?: number;
+  updatedAt?: string;
+}
+
+

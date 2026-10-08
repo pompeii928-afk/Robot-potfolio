@@ -10,6 +10,7 @@ export const CACHE_KEYS = {
   SKILLS: 'kfc_cache_skills',
   PROJECTS: 'kfc_cache_projects',
   REVIEWS: 'kfc_cache_reviews',
+  WEBSITES: 'kfc_cache_websites',
 } as const;
 
 export function getCachedData<T>(key: string, fallback: T): T {

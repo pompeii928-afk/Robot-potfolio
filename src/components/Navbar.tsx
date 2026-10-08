@@ -34,6 +34,7 @@ export interface CategoryCounts {
   skills?: number;
   projects?: number;
   videos?: number;
+  websites?: number;
 }
 
 interface NavbarProps {
@@ -191,6 +192,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       fallback: '유튜브 채널',
       icon: Youtube,
       count: counts.videos,
+    },
+    {
+      id: 'external-site',
+      key: 'nav.otherSite',
+      fallback: '다른 왭사이트',
+      icon: Globe,
+      count: counts.websites,
     },
   ];
 

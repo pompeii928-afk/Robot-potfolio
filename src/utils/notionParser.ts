@@ -127,7 +127,7 @@ export function parseNotionBlocksToReview(
           { name: '서프라이즈 미션 2', src: '/reviews/wro2026/surprise_mission_2.jpg' },
         ],
       },
-      strategy: '시간보다는 점수를 높이기로 함',
+      strategy: '시간보다는 정확도를 높이기로 함',
       codeSummary: '1, 2, 3라운드 실수를 딛고 4라운드에서 끝까지 포기하지 않고 179점 고득점 달성',
       codeFile: {
         name: 'WRO_FINAL_2026_MAIN_2.py',

@@ -24,6 +24,7 @@ import {
   Image as ImageIcon,
   Check,
   Lock,
+  ListOrdered,
 } from 'lucide-react';
 import { CompetitionReviewItem } from '../types';
 import { useLanguage } from '../context/ThemeContext';
@@ -445,28 +446,28 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               </div>
 
               {/* ========================================================= */}
-              {/* NOTION SECTION 1: [팀 명 & 팀 원] & [대회 사이트]          */}
+              {/* NOTION SECTION 1: 2-Column Grid [팀 명 & 팀 원] & [대회 사이트] */}
               {/* ========================================================= */}
-              <div className="space-y-2">
-                {/* Toggle: 팀 명 & 팀 원 */}
-                <div className="rounded-lg hover:bg-[#f7f6f3]/60 transition-colors p-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 my-2">
+                {/* Column 1: Toggle [팀 명 & 팀 원] */}
+                <div className="rounded-xl border border-[#e3e2de] bg-[#fbfbfa] overflow-hidden">
                   <button
                     onClick={() => toggleItem('team-info')}
-                    className="flex items-center gap-2 text-left w-full font-bold text-sm sm:text-base text-[#37352f] cursor-pointer group"
+                    className="flex items-center gap-2 text-left w-full p-2.5 hover:bg-[#f1f1ef] transition-colors cursor-pointer group"
                   >
-                    <span className="p-0.5 rounded text-[#787774] group-hover:text-[#37352f] group-hover:bg-[#efefed] transition-colors">
+                    <span className="p-0.5 rounded text-[#787774] group-hover:text-[#37352f] transition-colors">
                       {openToggles['team-info'] ? (
                         <ChevronDown className="w-4 h-4" />
                       ) : (
                         <ChevronRight className="w-4 h-4" />
                       )}
                     </span>
-                    <span className="text-zinc-900 group-hover:underline">
+                    <span className="font-bold text-sm text-[#37352f] bg-[#f1f1ef] px-2 py-0.5 rounded">
                       [팀 명 & 팀 원]
                     </span>
                   </button>
                   {openToggles['team-info'] && (
-                    <div className="pl-6 pt-1.5 pb-2 text-sm text-[#37352f] space-y-1">
+                    <div className="px-5 pb-3 pt-1 text-sm text-[#37352f] space-y-1.5 border-t border-[#f1f1ef] bg-white">
                       <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#37352f]" />
                         <span className="font-semibold text-zinc-900">{rev.teamName}</span>
@@ -479,25 +480,25 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                   )}
                 </div>
 
-                {/* Toggle: 대회 사이트 */}
-                <div className="rounded-lg hover:bg-[#f7f6f3]/60 transition-colors p-1">
+                {/* Column 2: Toggle [대회 사이트] */}
+                <div className="rounded-xl border border-[#e3e2de] bg-[#fbfbfa] overflow-hidden">
                   <button
                     onClick={() => toggleItem('site-info')}
-                    className="flex items-center gap-2 text-left w-full font-bold text-sm sm:text-base text-[#37352f] cursor-pointer group"
+                    className="flex items-center gap-2 text-left w-full p-2.5 hover:bg-[#f1f1ef] transition-colors cursor-pointer group"
                   >
-                    <span className="p-0.5 rounded text-[#787774] group-hover:text-[#37352f] group-hover:bg-[#efefed] transition-colors">
+                    <span className="p-0.5 rounded text-[#787774] group-hover:text-[#37352f] transition-colors">
                       {openToggles['site-info'] ? (
                         <ChevronDown className="w-4 h-4" />
                       ) : (
                         <ChevronRight className="w-4 h-4" />
                       )}
                     </span>
-                    <span className="text-zinc-900 group-hover:underline">
+                    <span className="font-bold text-sm text-[#37352f] bg-[#f1f1ef] px-2 py-0.5 rounded">
                       [대회 사이트]
                     </span>
                   </button>
                   {openToggles['site-info'] && (
-                    <div className="pl-6 pt-1.5 pb-2 text-sm">
+                    <div className="px-5 pb-3 pt-1 text-sm border-t border-[#f1f1ef] bg-white">
                       <a
                         href={rev.officialUrl || 'https://oc26.wroindia.org/schedule/'}
                         target="_blank"
@@ -512,20 +513,76 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                 </div>
               </div>
 
+              {/* Notion Table of Contents (목차) Block */}
+              <div className="p-4 rounded-xl border border-[#e3e2de] bg-[#fbfbfa] my-4 shadow-2xs">
+                <div className="flex items-center justify-between mb-2.5 pb-1.5 border-b border-[#ecebe8]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#787774] uppercase tracking-wider">
+                    <ListOrdered className="w-4 h-4 text-zinc-500" />
+                    <span>목차 (Table of Contents)</span>
+                  </div>
+                  <span className="text-[10px] text-[#9b9a97] font-mono">Notion Index</span>
+                </div>
+                <nav className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[#5f5e5b]">
+                  <a
+                    href="#notion-day1"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-blue-700 transition-colors border-l-2 border-blue-400"
+                  >
+                    <span className="font-semibold text-blue-700">1.</span>
+                    <span className="truncate">첫째 날 (연습 & 최종 전략 & 결과)</span>
+                  </a>
+                  <a
+                    href="#notion-day2"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-rose-700 transition-colors border-l-2 border-rose-400"
+                  >
+                    <span className="font-semibold text-rose-700">2.</span>
+                    <span className="truncate">둘째 날 (1~4라운드 & 서프라이즈 미션)</span>
+                  </a>
+                  <a
+                    href="#notion-day3"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-teal-700 transition-colors border-l-2 border-teal-400"
+                  >
+                    <span className="font-semibold text-teal-700">3.</span>
+                    <span className="truncate">셋째 날 (1~2라운드 & 챌린지 미션)</span>
+                  </a>
+                  <a
+                    href="#notion-library"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-pink-700 transition-colors border-l-2 border-pink-400"
+                  >
+                    <span className="font-semibold text-pink-700">4.</span>
+                    <span className="truncate italic">라이브러리 코드 (WRO_FINAL_LIB)</span>
+                  </a>
+                  <a
+                    href="#notion-reflections"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-amber-700 transition-colors border-l-2 border-amber-400"
+                  >
+                    <span className="font-semibold text-amber-700">5.</span>
+                    <span className="truncate">느낀 점 (좋았던 점 / 아쉬운 점 / 실수)</span>
+                  </a>
+                  <a
+                    href="#notion-details"
+                    className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-[#efefed] hover:text-zinc-800 transition-colors border-l-2 border-zinc-400"
+                  >
+                    <span className="font-semibold text-zinc-700">6.</span>
+                    <span className="truncate">대회 세부 사항 (장소, 규칙 및 주의점)</span>
+                  </a>
+                </nav>
+              </div>
+
               {/* Notion Divider Line */}
               <hr className="border-[#e3e2de] my-4" />
 
               {/* ========================================================= */}
               {/* NOTION SECTION 2: 첫째 날 (연습 및 결과)                  */}
               {/* ========================================================= */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#37352f] tracking-tight flex items-center gap-2">
-                    <span className="text-amber-500 font-mono text-sm sm:text-base font-extrabold px-2 py-0.5 rounded bg-amber-50 border border-amber-200">
-                      DAY 1
-                    </span>
+              <div id="notion-day1" className="space-y-4 scroll-mt-24">
+                {/* Notion Blue Header Banner */}
+                <div className="p-3.5 rounded-xl bg-[#e8f1fc] border border-[#d0e2f9] text-[#1c3879] flex items-center justify-between shadow-2xs">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
                     <span>{rev.day1.title}</span>
                   </h2>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-blue-100 text-blue-900 border border-blue-200">
+                    DAY 1 • 연습 & 전략
+                  </span>
                 </div>
 
                 <hr className="border-[#e3e2de]" />
@@ -623,30 +680,37 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
 
                 <hr className="border-[#e3e2de]" />
 
-                {/* Sub-header: 결과 */}
+                {/* Sub-header: 결과 (Notion Blue Callout Block) */}
                 <div className="space-y-2">
                   <h3 className="text-base sm:text-lg font-bold text-[#37352f]">
                     결과
                   </h3>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg inline-flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-amber-600" />
-                      <span className="text-base sm:text-lg font-extrabold text-amber-900">
-                        {rev.day1.result}
-                      </span>
+                  
+                  {/* Notion Blue Callout Block */}
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-[#eef5fc] border border-[#d0e2f9] text-[#1e3a8a] my-2 shadow-2xs">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0 mt-0.5">
+                      ℹ️
                     </div>
-
-                    {rev.scoringUrl && (
-                      <a
-                        href={rev.scoringUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-[#2383e2] hover:underline flex items-center gap-1 font-medium bg-[#f7f6f3] px-3 py-2 rounded-lg border border-[#e3e2de]"
-                      >
-                        <span>점수 사이트 : {rev.scoringUrl}</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="text-base sm:text-lg font-bold text-[#1e40af] flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-amber-500" />
+                        <span>11등 (249점)</span>
+                      </div>
+                      {rev.scoringUrl && (
+                        <div className="text-xs text-[#2563eb] flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-[#1e40af]">점수 사이트 :</span>
+                          <a
+                            href={rev.scoringUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-900 inline-flex items-center gap-1 font-mono font-medium truncate"
+                          >
+                            <span>{rev.scoringUrl}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -657,14 +721,15 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               {/* ========================================================= */}
               {/* NOTION SECTION 3: 둘째 날 (1, 2, 3, 4라운드 / 240점 만점) */}
               {/* ========================================================= */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#37352f] tracking-tight flex items-center gap-2">
-                    <span className="text-blue-500 font-mono text-sm sm:text-base font-extrabold px-2 py-0.5 rounded bg-blue-50 border border-blue-200">
-                      DAY 2
-                    </span>
+              <div id="notion-day2" className="space-y-4 scroll-mt-24">
+                {/* Notion Red Header Banner */}
+                <div className="p-3.5 rounded-xl bg-[#fbe9e7] border border-[#f5c6cb] text-[#9c271d] flex items-center justify-between shadow-2xs">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
                     <span>{rev.day2.title}</span>
                   </h2>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-rose-100 text-rose-900 border border-rose-200">
+                    DAY 2 • 1~4라운드
+                  </span>
                 </div>
 
                 <hr className="border-[#e3e2de]" />
@@ -953,14 +1018,15 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               {/* ========================================================= */}
               {/* NOTION SECTION 4: 셋째 날 (1, 2라운드 / 240점 만점)       */}
               {/* ========================================================= */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#37352f] tracking-tight flex items-center gap-2">
-                    <span className="text-emerald-500 font-mono text-sm sm:text-base font-extrabold px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200">
-                      DAY 3
-                    </span>
+              <div id="notion-day3" className="space-y-4 scroll-mt-24">
+                {/* Notion Teal Header Banner */}
+                <div className="p-3.5 rounded-xl bg-[#e2f5f4] border border-[#b2e5e1] text-[#0d5953] flex items-center justify-between shadow-2xs">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
                     <span>{rev.day3.title}</span>
                   </h2>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-teal-100 text-teal-900 border border-teal-200">
+                    DAY 3 • 챌린지 미션
+                  </span>
                 </div>
 
                 <hr className="border-[#e3e2de]" />
@@ -1226,37 +1292,40 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               {/* ========================================================= */}
               {/* NOTION SECTION: 라이브러리 코드                            */}
               {/* ========================================================= */}
-              <div className="rounded-lg hover:bg-[#f7f6f3]/60 transition-colors p-1">
+              <div id="notion-library" className="rounded-xl border border-pink-200 bg-[#fdf2f7] p-3 scroll-mt-24 shadow-2xs">
                 <button
                   onClick={() => toggleItem('lib-code')}
-                  className="flex items-center gap-2 text-left w-full font-bold text-sm sm:text-base text-[#37352f] cursor-pointer group"
+                  className="flex items-center gap-2 text-left w-full cursor-pointer group"
                 >
-                  <span className="p-0.5 rounded text-[#787774] group-hover:text-[#37352f] group-hover:bg-[#efefed] transition-colors">
+                  <span className="p-0.5 rounded text-pink-700 group-hover:bg-pink-100 transition-colors">
                     {openToggles['lib-code'] ? (
                       <ChevronDown className="w-4 h-4" />
                     ) : (
                       <ChevronRight className="w-4 h-4" />
                     )}
                   </span>
-                  <span className="font-bold text-zinc-900 group-hover:underline italic">
-                    ***라이브러리 코드***
+                  <span className="font-bold text-sm sm:text-base text-pink-900 bg-pink-100/80 px-2.5 py-0.5 rounded italic underline">
+                    라이브러리 코드
+                  </span>
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-pink-200/80 text-pink-800 ml-auto">
+                    LIB • Python
                   </span>
                 </button>
                 {openToggles['lib-code'] && (
-                  <div className="pl-6 pt-2 pb-2 text-sm text-[#37352f]">
+                  <div className="pl-6 pt-2.5 pb-1 text-sm text-[#37352f]">
                     <button
                       type="button"
                       onClick={() => handleRequestDownload('WRO_FINAL_2026_LIB.py', '/reviews/wro2026/WRO_FINAL_2026_LIB.py')}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-lg font-mono text-xs text-[#37352f] transition-all cursor-pointer group hover:border-[#2383e2]/40"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white hover:bg-pink-50/50 border border-pink-200 rounded-lg font-mono text-xs text-[#37352f] transition-all cursor-pointer group hover:border-pink-300 shadow-2xs"
                       title="관리자 비밀번호 인증 후 다운로드"
                     >
-                      <FileCode className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                      <span className="font-semibold">WRO_FINAL_2026_LIB.py</span>
+                      <FileCode className="w-4 h-4 text-pink-600 group-hover:scale-110 transition-transform" />
+                      <span className="font-semibold text-zinc-900">WRO_FINAL_2026_LIB.py</span>
                       <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-sans flex items-center gap-1">
                         <Lock className="w-2.5 h-2.5" />
                         관리자 인증
                       </span>
-                      <Download className="w-3.5 h-3.5 text-[#787774] group-hover:text-[#37352f]" />
+                      <Download className="w-3.5 h-3.5 text-[#787774] group-hover:text-pink-700" />
                     </button>
                   </div>
                 )}
@@ -1268,7 +1337,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               {/* ========================================================= */}
               {/* NOTION SECTION 5: 느낀 점 & 실수                          */}
               {/* ========================================================= */}
-              <div className="space-y-4">
+              <div id="notion-reflections" className="space-y-4 scroll-mt-24">
                 <h3 className="text-lg sm:text-xl font-bold text-[#37352f] flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-amber-500" />
                   <span>느낀 점</span>
@@ -1393,7 +1462,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               {/* ========================================================= */}
               {/* NOTION SECTION 6: 대회 세부 사항                           */}
               {/* ========================================================= */}
-              <div className="space-y-4">
+              <div id="notion-details" className="space-y-4 scroll-mt-24">
                 <h3 className="text-lg sm:text-xl font-bold text-[#37352f] flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-indigo-500" />
                   <span>대회 세부 사항</span>

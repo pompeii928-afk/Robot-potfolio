@@ -44,7 +44,9 @@ const SYSTEM_COLLECTION = 'system';
 // Helper to mark a collection as initialized in Firestore & local cache
 async function markInitialized(collectionName: string) {
   try {
-    localStorage.setItem(`kfc_init_${collectionName}`, 'true');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`kfc_init_${collectionName}`, 'true');
+    }
     const markerRef = doc(db, SYSTEM_COLLECTION, `${collectionName}_init`);
     await setDoc(markerRef, { initialized: true, updatedAt: new Date().toISOString() });
   } catch (err) {

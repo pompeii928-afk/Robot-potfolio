@@ -63,6 +63,17 @@ export interface SkillItem {
   updatedAt?: string;
 }
 
+export interface ProjectCodeFile {
+  id: string;
+  name: string;
+  size?: number; // bytes
+  language?: string; // 'python' | 'cpp' | 'c' | 'arduino' | 'json' | 'yaml' | 'markdown' | 'text' | 'shell' | 'other'
+  description?: string;
+  content?: string; // Text content for code viewer and clipboard copy
+  dataUrl?: string; // Base64 or download data URL
+  uploadedAt?: string;
+}
+
 export interface ProjectItem {
   id: string;
   projectId: string;
@@ -88,6 +99,7 @@ export interface ProjectItem {
     title: string;
     detail: string;
   }[];
+  codeFiles?: ProjectCodeFile[];
   order?: number;
   updatedAt?: string;
 }

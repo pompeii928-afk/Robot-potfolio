@@ -148,6 +148,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'projects.edit': '수정',
     'projects.delete': '삭제',
     'projects.deleteConfirm': '이 프로젝트를 삭제하시겠습니까?',
+    'projects.codeFiles': '소스 코드 및 첨부 파일',
+    'projects.viewCode': '코드 보기',
+    'projects.collapseCode': '접기',
+    'projects.copyCode': '코드 복사',
+    'projects.downloadFile': '다운로드',
+    'projects.copied': '복사됨!',
 
     // Project Modal
     'modal.abstract': '시스템 개요 & 목적',
@@ -351,6 +357,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'projects.edit': 'Edit',
     'projects.delete': 'Delete',
     'projects.deleteConfirm': 'Are you sure you want to delete this project?',
+    'projects.codeFiles': 'Source Code & Attachments',
+    'projects.viewCode': 'View Code',
+    'projects.collapseCode': 'Collapse',
+    'projects.copyCode': 'Copy Code',
+    'projects.downloadFile': 'Download',
+    'projects.copied': 'Copied!',
 
     // YouTube Section
     'youtube.badge': 'OFFICIAL MEDIA & RUNS',

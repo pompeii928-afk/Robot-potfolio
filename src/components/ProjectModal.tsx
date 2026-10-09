@@ -1,8 +1,30 @@
-import React from 'react';
-import { X, CheckCircle2, Cpu, Wrench, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  X,
+  CheckCircle2,
+  Cpu,
+  Wrench,
+  Layers,
+  FileCode,
+  Download,
+  Copy,
+  Check,
+  Code2,
+  ChevronDown,
+  ChevronUp,
+  Terminal,
+} from 'lucide-react';
 import { ProjectItem } from '../types';
 import { useTheme, useLanguage } from '../context/ThemeContext';
 import { getLocalizedProject } from '../utils/translationHelper';
+import { PROJECTS_DATA } from '../data/portfolioData';
+import {
+  downloadCodeFile,
+  formatFileSize,
+  getLanguageLabel,
+  getLanguageStyle,
+} from '../utils/codeFileHelper';
+import { useToast } from './Toast';
 
 interface ProjectModalProps {
   project: ProjectItem | null;
@@ -12,10 +34,33 @@ interface ProjectModalProps {
 export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject, onClose }) => {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
+  const { showToast } = useToast();
+
+  const [expandedCodeId, setExpandedCodeId] = useState<string | null>(null);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const project = rawProject ? getLocalizedProject(rawProject, lang) : null;
 
   if (!project || project.status === 'AWAITING') return null;
+
+  // Resolve code files: check item's own codeFiles, fallback to default if not yet populated
+  const defaultProj = PROJECTS_DATA.find((p) => p.id === project.id);
+  const effectiveCodeFiles =
+    project.codeFiles && project.codeFiles.length > 0
+      ? project.codeFiles
+      : defaultProj?.codeFiles || [];
+
+  const handleCopyCode = async (id: string, codeContent: string) => {
+    try {
+      await navigator.clipboard.writeText(codeContent);
+      setCopiedCodeId(id);
+      showToast('코드가 클립보드에 복사되었습니다.', 'success', '복사 완료');
+      setTimeout(() => setCopiedCodeId(null), 2500);
+    } catch (err) {
+      console.error('Clipboard copy error:', err);
+      showToast('코드 복사에 실패했습니다.', 'error', '오류');
+    }
+  };
 
   return (
     <div
@@ -262,6 +307,188 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Source Code & Engineering Files Section */}
+          {effectiveCodeFiles.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h4
+                  className={`text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 ${
+                    theme === 'light' ? 'text-red-600' : 'text-cyan-400'
+                  }`}
+                >
+                  <FileCode className="w-4 h-4" />
+                  <span>{t('projects.codeFiles', '소스 코드 및 첨부 파일 (Source Code & Files)')}</span>
+                </h4>
+                <span
+                  className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${
+                    theme === 'light'
+                      ? 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                      : 'bg-cyan-950/60 text-cyan-300 border-cyan-500/30'
+                  }`}
+                >
+                  {effectiveCodeFiles.length} {lang === 'en' ? 'files attached' : '개 파일 첨부'}
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {effectiveCodeFiles.map((file) => {
+                  const style = getLanguageStyle(file.language);
+                  const label = getLanguageLabel(file.language);
+                  const isExpanded = expandedCodeId === file.id;
+                  const isCopied = copiedCodeId === file.id;
+
+                  return (
+                    <div
+                      key={file.id}
+                      className={`rounded-2xl border transition-all overflow-hidden ${
+                        theme === 'light'
+                          ? 'bg-zinc-50 border-zinc-200 shadow-2xs'
+                          : 'bg-[#060c18] border-white/10'
+                      }`}
+                    >
+                      <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-start sm:items-center gap-3 min-w-0">
+                          <div
+                            className={`p-2.5 rounded-xl border shrink-0 ${
+                              theme === 'light'
+                                ? 'bg-white border-zinc-200 text-zinc-800'
+                                : 'bg-slate-900 border-slate-700 text-cyan-400'
+                            }`}
+                          >
+                            <FileCode className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className={`font-mono text-sm font-bold truncate ${
+                                  theme === 'light' ? 'text-zinc-950' : 'text-white'
+                                }`}
+                              >
+                                {file.name}
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${style.badgeBg}`}
+                              >
+                                {label}
+                              </span>
+                              <span className="text-[11px] font-mono text-zinc-500">
+                                {formatFileSize(file.size)}
+                              </span>
+                            </div>
+                            {file.description && (
+                              <p
+                                className={`text-xs mt-1 leading-snug line-clamp-2 ${
+                                  theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'
+                                }`}
+                              >
+                                {file.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          {file.content && (
+                            <button
+                              type="button"
+                              onClick={() => setExpandedCodeId(isExpanded ? null : file.id)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                                isExpanded
+                                  ? theme === 'light'
+                                    ? 'bg-zinc-200 border-zinc-300 text-zinc-900'
+                                    : 'bg-cyan-950 border-cyan-500/50 text-cyan-300'
+                                  : theme === 'light'
+                                  ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                                  : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300'
+                              }`}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                  <span>{t('projects.collapseCode', '접기')}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Code2 className="w-3.5 h-3.5" />
+                                  <span>{t('projects.viewCode', '코드 보기')}</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => downloadCodeFile(file)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                              theme === 'light'
+                                ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                                : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300'
+                            }`}
+                            title="파일 다운로드"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>{t('projects.downloadFile', '다운로드')}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Expanded Interactive Code Viewer with Line Numbers & Copy Button */}
+                      {isExpanded && file.content && (
+                        <div className="border-t border-zinc-200 dark:border-white/10 bg-[#070d19] text-slate-200 animate-in fade-in duration-150">
+                          <div className="px-4 py-2.5 bg-[#040813] border-b border-white/5 flex items-center justify-between">
+                            <span className="text-[11px] font-mono text-cyan-400 flex items-center gap-1.5">
+                              <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="font-semibold">{file.name}</span>
+                              <span className="text-slate-500">
+                                ({file.content.split('\n').length} lines)
+                              </span>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCode(file.id, file.content!)}
+                              className="px-2.5 py-1 rounded text-xs font-mono bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 text-cyan-300 flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              {isCopied ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span className="text-emerald-400 font-semibold">{t('projects.copied', '복사됨!')}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>{t('projects.copyCode', '코드 복사')}</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="p-4 overflow-x-auto max-h-96 font-mono text-xs leading-relaxed scrollbar-thin">
+                            <table className="w-full border-collapse">
+                              <tbody>
+                                {file.content.split('\n').map((line, lIdx) => (
+                                  <tr key={lIdx} className="hover:bg-white/[0.04]">
+                                    <td className="pr-4 select-none text-right text-slate-600 text-[11px] font-mono w-10">
+                                      {lIdx + 1}
+                                    </td>
+                                    <td className="text-slate-200 whitespace-pre font-mono selection:bg-cyan-500/30">
+                                      {line || ' '}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

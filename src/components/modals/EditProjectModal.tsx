@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, Layers, Plus } from 'lucide-react';
 import { ProjectItem } from '../../types';
 import { ImageUploader } from '../ImageUploader';
+import { CodeFileUploader } from '../CodeFileUploader';
 import { ConfirmModal } from './ConfirmModal';
 
 interface EditProjectModalProps {
@@ -32,6 +33,7 @@ const getDefaultProject = (): ProjectItem => ({
   },
   highlights: [],
   blueprintAnnotations: [],
+  codeFiles: [],
 });
 
 export const EditProjectModal: React.FC<EditProjectModalProps> = ({
@@ -249,6 +251,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 value={formData.image}
                 onChange={(imgUrl) => setFormData({ ...formData, image: imgUrl })}
                 label="대표 로봇 이미지 업로드 (JPG, PNG, WebP)"
+              />
+            </div>
+
+            {/* Code & Files Uploader */}
+            <div className="p-4 rounded-xl bg-[#050c1a] border border-cyan-500/20">
+              <CodeFileUploader
+                files={formData.codeFiles || []}
+                onChange={(newFiles) => setFormData({ ...formData, codeFiles: newFiles })}
               />
             </div>
 

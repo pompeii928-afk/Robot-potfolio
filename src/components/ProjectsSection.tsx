@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Bot, Plus, ArrowUpRight, Edit3, Trash2, ExternalLink } from 'lucide-react';
+import { Bot, Plus, ArrowUpRight, Edit3, Trash2, ExternalLink, FileCode } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { ProjectModal } from './ProjectModal';
 import { ConfirmModal } from './modals/ConfirmModal';
 import { useLanguage } from '../context/ThemeContext';
 import { getLocalizedProject } from '../utils/translationHelper';
+import { PROJECTS_DATA } from '../data/portfolioData';
 
 interface ProjectsSectionProps {
   projects: ProjectItem[];
@@ -74,6 +75,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {localizedProjects.map((project, idx) => {
             const rawProject = projects[idx] || project;
+            const defaultProj = PROJECTS_DATA.find((p) => p.id === project.id);
+            const codeFiles =
+              project.codeFiles && project.codeFiles.length > 0
+                ? project.codeFiles
+                : defaultProj?.codeFiles || [];
+
             if (project.status === 'AWAITING') {
               if (!isAdmin) return null;
               return (
@@ -157,9 +164,17 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     </div>
                   )}
 
-                  {/* Project ID Tag */}
-                  <div className="absolute top-3 left-3 font-mono font-semibold text-[11px] text-[#37352f] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded border border-[#e3e2de] shadow-2xs">
-                    {project.projectId}
+                  {/* Project ID & Code Files Tag */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                    <div className="font-mono font-semibold text-[11px] text-[#37352f] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded border border-[#e3e2de] shadow-2xs">
+                      {project.projectId}
+                    </div>
+                    {codeFiles.length > 0 && (
+                      <div className="font-mono font-medium text-[11px] text-cyan-800 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded border border-cyan-200/90 shadow-2xs flex items-center gap-1">
+                        <FileCode className="w-3 h-3 text-cyan-600" />
+                        <span>코드 {codeFiles.length}개</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -190,6 +205,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   {/* Bottom Tags & Button */}
                   <div className="pt-3 border-t border-[#e3e2de] flex items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
+                      {codeFiles.length > 0 && (
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-50/90 text-cyan-700 border border-cyan-200/80 flex items-center gap-1 font-medium">
+                          <FileCode className="w-3 h-3 text-cyan-600" /> {codeFiles.length} files
+                        </span>
+                      )}
                       {project.tags.slice(0, 3).map((tag, tIdx) => (
                         <span
                           key={tIdx}

@@ -252,6 +252,79 @@ export const PROJECTS_DATA: ProjectItem[] = [
       { x: 70, y: 68, title: 'Autonomous PCB & Power', detail: '저잡음 DC-DC 스텝다운 전원 분배기 및 메인 컨트롤러' },
       { x: 22, y: 72, title: 'High-Traction Wheelbase', detail: '실리콘 접지 휠 및 1:1.6 가속 기어 트레인' },
     ],
+    codeFiles: [
+      {
+        id: 'cf-wro-pid',
+        name: 'wro_pid_tracker.py',
+        size: 1420,
+        language: 'python',
+        description: 'MicroPython 기반 듀얼 광학 센서 초정밀 PID 라인트레이싱 및 자이로 헤딩 보정 제어 알고리즘',
+        content: `# WRO 2025 Autonomous Dual-Sensor PID Line Tracker
+import time
+from hub import port, motion_sensor
+
+class PIDController:
+    def __init__(self, kp=1.45, ki=0.015, kd=0.85):
+        self.kp, self.ki, self.kd = kp, ki, kd
+        self.last_error = 0.0
+        self.integral = 0.0
+        self.max_integral = 25.0
+
+    def compute(self, error, dt):
+        self.integral += error * dt
+        self.integral = max(-self.max_integral, min(self.max_integral, self.integral))
+        derivative = (error - self.last_error) / max(dt, 0.001)
+        self.last_error = error
+        return (self.kp * error) + (self.ki * self.integral) + (self.kd * derivative)
+
+# Initialize Dual Optical Sensors & Differential Motors
+pid = PIDController()
+BASE_SPEED = 75  # Target Base Velocity %
+
+def autonomous_run_loop():
+    last_t = time.ticks_ms()
+    print("[SYSTEM] Autonomous Line Tracking Activated at 100Hz")
+    while True:
+        now = time.ticks_ms()
+        dt = (now - last_t) / 1000.0
+        last_t = now
+
+        # Reflectance feedback (0 - 100)
+        left_val = port.C.device.get()[0]
+        right_val = port.D.device.get()[0]
+        error = left_val - right_val  # 0 denotes ideal track center
+        
+        steer = pid.compute(error, dt)
+        port.A.motor.run(int(BASE_SPEED - steer))
+        port.B.motor.run(int(-BASE_SPEED - steer))
+        time.sleep_ms(5)`,
+      },
+      {
+        id: 'cf-wro-mission',
+        name: 'spike_mission_dispatcher.py',
+        size: 980,
+        language: 'python',
+        description: '색상 분류 미션 및 리니어 랙-피니언 서보 액추에이터 제어 디스패처',
+        content: `# WRO 2025 Color Sorting & Payload Delivery
+from hub import port
+import time
+
+def dispatch_payload(color_id):
+    """
+    Color ID: 5 = Red Payload, 3 = Blue Payload, 1 = Green Target
+    """
+    if color_id == 5:
+        # High-Speed Rack Lift for Red Mission
+        port.E.motor.run_to_position(90, 85)
+        time.sleep_ms(150)
+        port.F.motor.run_to_position(-45, 60)
+    elif color_id == 3:
+        # Dual Gripper Engage for Blue Mission
+        port.E.motor.run_to_position(45, 85)
+        time.sleep_ms(150)
+        port.F.motor.run_to_position(45, 60)`,
+      },
+    ],
   },
   {
     id: 'autonomous-delivery-bot',
@@ -276,6 +349,68 @@ export const PROJECTS_DATA: ProjectItem[] = [
       '보행자 및 급작스러운 장애물 출현 시 50ms 이내 긴급 경로 재계획(Replanning)',
       '웹 기반 원격 관제 대시보드(ROSBridge & React) 연동',
     ],
+    codeFiles: [
+      {
+        id: 'cf-nav2-costmap',
+        name: 'dynamic_costmap_layer.cpp',
+        size: 2150,
+        language: 'cpp',
+        description: 'ROS 2 Humble 기반 동적 장애물 감지 및 국소 Costmap 실시간 팽창 필터 노드',
+        content: `// ROS 2 Humble Nav2 Custom Dynamic Obstacle Layer
+#include <rclcpp/rclcpp.hpp>
+#include <nav2_costmap_2d/layer.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+
+namespace nav2_dynamic_layer {
+
+class DynamicObstacleLayer : public nav2_costmap_2d::Layer {
+public:
+  DynamicObstacleLayer() = default;
+
+  void onInitialize() override {
+    RCLCPP_INFO(node_->get_logger(), "DynamicObstacleLayer initialized for AMR.");
+    current_ = true;
+  }
+
+  void updateBounds(double robot_x, double robot_y, double robot_yaw,
+                    double* min_x, double* min_y, double* max_x, double* max_y) override {
+    // Dynamic costmap inflation radius bounding box update
+    *min_x = std::min(*min_x, robot_x - 1.5);
+    *min_y = std::min(*min_y, robot_y - 1.5);
+    *max_x = std::max(*max_x, robot_x + 1.5);
+    *max_y = std::max(*max_y, robot_y + 1.5);
+  }
+};
+
+} // namespace nav2_dynamic_layer`,
+      },
+      {
+        id: 'cf-bringup-launch',
+        name: 'robot_bringup.launch.py',
+        size: 1100,
+        language: 'python',
+        description: 'LiDAR, 뎁스 카메라, EKF 오도메트리 노드 통합 런치 스크립트',
+        content: `import os
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='rplidar_ros',
+            executable='rplidar_composition',
+            name='rplidar_node',
+            parameters=[{'serial_port': '/dev/ttyUSB0', 'frame_id': 'laser_frame', 'angle_compensate': True}]
+        ),
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            parameters=[{'use_sim_time': False, 'frequency': 50.0}]
+        )
+    ])`,
+      },
+    ],
   },
   {
     id: 'six-dof-manipulator',
@@ -299,6 +434,33 @@ export const PROJECTS_DATA: ProjectItem[] = [
       '해석적(Analytical) 및 수치적(Numerical) IK 솔버 결합으로 특이점(Singularity) 회피',
       '최소 저크(Minimum-Jerk) 궤적 보간으로 진동 없는 고속 이동 구현',
       '디지털 트윈 기반 실시간 3D 뷰어 및 조인트 각도 모니터링',
+    ],
+    codeFiles: [
+      {
+        id: 'cf-ik-solver',
+        name: 'damped_ik_solver.cpp',
+        size: 1850,
+        language: 'cpp',
+        description: 'Damped Least Squares (DLS) 수치적 역기구학 솔버 및 특이점 회피 알고리즘',
+        content: `// 6-DoF Manipulator Numerical IK Solver with Singularity Avoidance
+#include <iostream>
+#include <Eigen/Dense>
+
+class ManipulatorIKSolver {
+public:
+    explicit ManipulatorIKSolver(double damping = 0.04) : lambda_(damping) {}
+
+    Eigen::VectorXd computeJointDelta(const Eigen::MatrixXd& J, const Eigen::VectorXd& cartesian_error) {
+        Eigen::MatrixXd J_T = J.transpose();
+        Eigen::MatrixXd identity = Eigen::MatrixXd::Identity(6, 6);
+        // DLS Inversion: J^T * (J * J^T + lambda^2 * I)^(-1)
+        Eigen::MatrixXd dls_inv = (J * J_T + (lambda_ * lambda_) * identity).inverse();
+        return J_T * dls_inv * cartesian_error;
+    }
+private:
+    double lambda_;
+};`,
+      },
     ],
   },
   {

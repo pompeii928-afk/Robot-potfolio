@@ -556,25 +556,6 @@ function PortfolioApp() {
     }
   };
 
-  const handleReviewSynced = async (updatedReview: CompetitionReviewItem) => {
-    setReviews((prev) => {
-      const idx = prev.findIndex((r) => r.id === updatedReview.id);
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = updatedReview;
-        return copy;
-      }
-      return [updatedReview, ...prev];
-    });
-    try {
-      const updatedList = [updatedReview];
-      setCachedData(CACHE_KEYS.REVIEWS, updatedList);
-      await updateReview(updatedReview.id, updatedReview);
-    } catch (err) {
-      console.warn('[App] Review sync persistence note:', err);
-    }
-  };
-
   const handleSaveWebsite = async (data: Partial<ExternalSiteItem> & { title: string; url: string }) => {
     try {
       const isExisting = Boolean(data.id && websites.some((w) => w.id === data.id));
@@ -700,7 +681,6 @@ function PortfolioApp() {
                 onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
                 onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
                 onDeleteReview={handleDeleteReview}
-                onReviewSynced={handleReviewSynced}
               />
             )}
 

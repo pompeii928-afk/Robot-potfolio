@@ -1,4 +1,5 @@
 import { CompetitionReviewItem } from '../types';
+import { DEFAULT_REVIEWS_DATA } from '../data/portfolioData';
 
 export function getText(block: any): string {
   if (!block || !block.properties || !block.properties.title) return '';
@@ -24,255 +25,241 @@ export function parseNotionBlocksToReview(
     : `${rootId.slice(0, 8)}-${rootId.slice(8, 12)}-${rootId.slice(12, 16)}-${rootId.slice(16, 20)}-${rootId.slice(20)}`;
 
   const root = blocks[normId]?.value?.value || blocks[normId]?.value || blocks[normId];
-  const pageTitle = getText(root) || 'WRO Open Championship 2026 India- ASIA PACIFIC';
+  const pageTitle = (root ? getText(root) : '') || 'WRO Open Championship 2026 India- ASIA PACIFIC';
 
-  // Default updated object
-  const review: CompetitionReviewItem = {
-    id: 'wro-oc-2026-india',
-    title: pageTitle,
-    competition: 'WRO Open Championship 2026 India (ASIA PACIFIC)',
-    period: '2026년 9월 25일 ~ 27일',
-    location: 'GMR Arena, Aerocity, Hyderabad, India',
-    teamName: 'K.F.C.',
-    members: ['배지훈', '송민규'],
-    officialUrl: 'https://oc26.wroindia.org/schedule/',
-    scoringUrl: 'https://scoring.wro-association.org/en/event/scoring/420',
-    notionUrl:
-      'https://app.notion.com/p/WRO-Open-Championship-2026-India-ASIA-PACIFIC-3b21be0cb00f802d9956ed228decbaff?source=copy_link',
-    coverImage: '/wro-oc-regular-apac-india-2026.webp',
-    icon: '/favicon.svg',
-    rankBadge: '11등 (총 249점)',
-    finalScore: '249점',
-    overviewSummary:
-      '인도 하이데라바드에서 개최된 WRO Open Championship 2026 ASIA PACIFIC 실전 참가 후기 및 라운드별 분석 기록입니다.',
-    day1: {
-      title: '첫째 날',
-      subtitle: '연습',
-      fixes: [
-        '먼지 미션을 할 때 빨간 베리어를 침',
-        '유물을 잡을 때 직진 속도가 너무 빨라 유물을 쳐서 잘 못 잡음',
-      ],
-      fixesDetailed: [
-        {
-          problem: '먼지 미션을 할 때 빨간 베리어를 침',
-          solution:
-            '빨간 베리어를 치는 문제의 요인이 팔 때문이라는 것을 인지하고 팔의 각도를 높여 베리어의 높이보다 높이 들어 베리어를 안 치게 하였다.',
-        },
-        {
-          problem: '유물을 잡을 때 직진 속도가 너무 빨라 유물을 쳐서 잘 못 잡음',
-          solution:
-            '유물을 집을 때 속도가 너무 빨라 유물을 놓치는 경우는 라이브러리 파일에서 유물을 잡는 함수를 찾은 뒤 속도를 낮추었다.',
-        },
-      ],
-      strategy: '속도는 둘째 치고 무조건 점수에 유리한 쪽으로 선택한다.',
-      strategyReason: '점수가 높아야지 속도가 빠른게 의미가 있기 때문이다.',
-      codeSummary: '연습 주행 및 경기장 조명·마찰력 적응형 제어 코드 튜닝',
-      result: '11등 (249점)',
-    },
-    day2: {
-      title: '둘째 날',
-      subtitle: '1, 2, 3, 4라운드 (240점 만점)',
-      rank: '11등',
-      scores: [
-        { round: '1라운드', score: 30 },
-        { round: '2라운드', score: 107 },
-        { round: '3라운드', score: 109 },
-        { round: '4라운드', score: 179 },
-      ],
-      scoresDetailed: [
-        {
-          round: '1라운드',
-          score: 30,
-          cause: '시작 지점을 잘못 잡아서 로봇이 미션을 수행하지 못함',
-          lesson: '시작 지점을 잘 잡도록 다음번에는 틀을 만들어 시작 지점을 잡아야겠다.',
-        },
-        {
-          round: '2라운드',
-          score: 107,
-          cause: '마지막에 코드를 작성할 때 콤마를 마침표로 찍었다.',
-          lesson: '콤마와 마침표를 구분을 잘 해야겠다.',
-        },
-        {
-          round: '3라운드',
-          score: 109,
-          cause:
-            '함수 이름을 착각해 다른 곳에 있는 코드를 고쳐 로봇이 미션을 수행하지 못하였다.',
-          lesson:
-            '함수 이름을 명확하게 구분해야 하고 다시 한번 고쳐야 될 함수가 맞는지 확인해야겠다.',
-        },
-        {
-          round: '4라운드',
-          score: 179,
-          cause: '유물 색깔 감지를 잘 하지 못하였다.',
-          lesson:
-            '다음에는 색깔 감지를 하는 객체의 높이에 맞춰 컬러센서 높이를 조정해야겠다.',
-        },
-      ],
-      surpriseMission: {
-        title: '서프라이즈 미션',
-        rules:
-          '새로운 유물인 하얀색 유물이 추가되어 하얀색 유물을 WRO 2026 seasonal logo가 있는 곳에 갖다 놓는 미션',
-        scoring: [
-          '부분적으로 유물이 seasonal logo에 걸쳐져 있음 : 15점',
-          '유물이 완전히 seasonal logo 안에 있음 : 25점 (넘어지면 안 됨)',
-        ],
-        reason:
-          '우리 상황에서 새로운 유물을 추가하면 오류가 더욱 날 것 같기도 하였고 흰색 유물은 프로그램에서 무작위 색상으로 판단해서 유물을 갔다놓는 것으로 되어있었기 때문에 기존에 있던 로직을 수정해야 하는데 스스로 고치기가 어려웠기 때문이다.',
-        disadvantage:
-          '유물 하나를 흰색 유물로 바꾸었기 때문에 흰색 유물을 포기한 팀 상황으로써는 25점을 손해 보았다.',
-        lesson:
-          '시도를 하기 위해 색상감지 프로그램은 미리 이해해야겠다.',
-        images: [
-          { name: '서프라이즈 미션 1', src: '/reviews/wro2026/surprise_mission_1.jpg' },
-          { name: '서프라이즈 미션 2', src: '/reviews/wro2026/surprise_mission_2.jpg' },
-        ],
-      },
-      strategy: '시간보다는 정확도를 높이기로 함',
-      codeSummary: '1, 2, 3라운드 실수를 딛고 4라운드에서 끝까지 포기하지 않고 179점 고득점 달성',
-      codeFile: {
-        name: 'WRO_FINAL_2026_MAIN_2.py',
-        path: '/reviews/wro2026/WRO_FINAL_2026_MAIN_2.py',
-      },
-      problemAndFix: {
-        problem: '로봇에 업로드된 프로그램이 실행이 안되었다.',
-        solution: '로봇을 계속 껐다 켰다를 로봇이 실행될 때까지 반복하였다.',
-      },
-      mustFix:
-        '아무리 상황이 급박해도 당황하지 않고 차근차근 코드를 쓰고 로봇이 잘 작동이 안되어도 시작 지점은 꼭 잘 지켜야 한다.',
-    },
-    day3: {
-      title: '셋째 날',
-      subtitle: '1, 2라운드 (240점 만점)',
-      rank: '11등',
-      scores: [
-        { round: '1라운드', score: 55 },
-        { round: '2라운드', score: 60 },
-        { round: '3라운드 (멀리건)', score: 70 },
-      ],
-      scoresDetailed: [
-        {
-          round: '1라운드',
-          score: 55,
-          cause: '뒤에 팔이 관객을 잘 잡지 못하는 구조여서 사람을 놓쳤다.',
-          lesson: '팀의 모형의 단점이 있으면 바로바로 고치고 문제점을 확인해야겠다.',
-        },
-        {
-          round: '2라운드',
-          score: 60,
-          cause: '빨간탑이 부서지면 점수가 없는데 부서져 점수를 못 얻었다.',
-          lesson: '탑 공략 시 물리적 충돌 및 감속 루틴 정밀 제어',
-        },
-        {
-          round: '3라운드 (멀리건)',
-          score: 70,
-          cause:
-            '마지막에 라인을 타는 프로그램에서 직진이 부족해 라인을 타는 과정이 잘못되어 점수를 못 얻었다.',
-          lesson: '라인을 잘 타는지 안타는지 검토를 제대로 해야겠다.',
-        },
-      ],
-      challengeMission: {
-        title: '챌린지 미션',
-        tasks: [
-          {
-            taskNumber: 1,
-            name: '앵무새 구출 (Free the parrot)',
-            description:
-              '앵무새가 스폰서 로고 구역 안에 울타리로 갇혀 있습니다. 앵무새가 로고 구역 안에서 세워진 상태를 유지하는 동안, 울타리를 로고(흰색) 구역 밖으로 완전히 치워야 합니다.',
-            score: '울타리가 흰색 구역 밖으로 완전히 벗어남 (20점 / 최대 20점)',
-          },
-          {
-            taskNumber: 2,
-            name: '빨간 탑 쓰러뜨리기 (Knock down the tower)',
-            description:
-              '매 라운드마다 지정된 빨간색 위치 중 한 곳에 큰 빨간 탑이 무작위로 배치됩니다. 이 탑을 쓰러뜨려야 합니다.',
-            score: '빨간 탑이 쓰러짐 (25점 / 최대 25점)',
-          },
-          {
-            taskNumber: 3,
-            name: '관람객 이동 (Move the visitors)',
-            description:
-              '4개의 빈 사각형 구역에 위치한 관람객들을 발굴 현장(excavation site)으로 완전히 옮겨야 합니다.',
-            score:
-              '발굴 현장에 완전히 이동하고 똑바로 세워진 관람객 1명당 15점 (개당 15점 / 최대 60점)',
-          },
-          {
-            taskNumber: 4,
-            name: '유물 재배치 (Rearrange the artefacts)',
-            description:
-              '파란색, 초록색, 빨간색, 노란색 유물이 초기에는 제자리가 아닌 곳에 무작위 배치되어 있습니다. 이를 박물관 내 알맞은 색상의 전시 위치로 옮겨야 합니다.',
-            score:
-              '박물관의 해당 색상 전시 구역에 완전히 또는 일부 들어간 유물 1개당 20점 (개당 20점 / 최대 80점)',
-          },
-          {
-            taskNumber: 5,
-            name: '탑 쌓기 (Build the tower)',
-            description:
-              '노란색 탑의 기둥(base)과 상단(top) 초기 위치가 시즌 챌린지와 반대로 바뀌어 있습니다. 탑 상단을 기둥 위에 똑바로 세워 놓아야 합니다.',
-            score:
-              '탑 상단이 기둥 위에 올바르게 놓이고 기둥이 노란색 목표 구역 안에 완전히 위치 시 20점(최대 40점), 일부만 위치 시 15점',
-          },
-          {
-            taskNumber: 6,
-            name: '로봇 주차 (Park the robot)',
-            description:
-              '주행 중 로봇이 시작 구역을 완전히 한 번 이상 벗어난 후, 최종적으로 시작 구역(Start area)에 완전히 또는 일부 주차해야 합니다.',
-            score: '시작 구역에 완전히 또는 일부 주차 (15점 / 최대 15점)',
-          },
-        ],
-        images: [
-          { name: '챌린지 미션 1', src: '/reviews/wro2026/challenge_mission.png' },
-          { name: '챌린지 미션 2', src: '/reviews/wro2026/challenge_mission_2.jpg' },
-        ],
-      },
-      strategy: '안되는것은 과감히 포기하고 할수 있는것 부터 함',
-      strategyTasks: [
-        '관객 3명 유물 픽업 위치에 갔다 놓는 미션',
-        '빨간탑을 넘어 뜨리는 미션',
-        '로봇이 멈췄을 때 시작지점에 있게 하는 미션 (1라운드, 멀리건에서 작동 x : 라인을 타지 못함)',
-      ],
-      codeSummary:
-        '멀리건 기회 활용 및 불안정한 미션을 과감히 제외하고 확정 점수 위주로 안정화',
-      codeFile: {
-        name: 'WRO_Challenge_MAIN.py',
-        path: '/reviews/wro2026/WRO_Challenge_MAIN.py',
-      },
-      problemAndFix: {
-        problem: '뒤에 있는 팔이 관객을 잘 잡지 못하는 구조였다.',
-        solution: '뒤에 있는 팔의 길이를 늘려 관객을 잘 잡도록 하였다.',
-      },
-      mustFix:
-        '한번에 많은 미션을 동시에 병행하지 않고 차근차근 자신이 할 수 있는 미션을 먼저 코드를 써야 한다',
-    },
-    libraryFile: {
-      name: 'WRO_FINAL_2026_LIB.py',
-      path: '/reviews/wro2026/WRO_FINAL_2026_LIB.py',
-    },
-    reflections: {
-      strengths:
-        '둘쨋날, 1,2,3라운드 모두 점수가 실수로 인해 망했는데 4라운드 때 끝까지 포기하지 않아서 좋은 점수를 얻음',
-      regrets:
-        '둘쨋날, 셋쨋날 모두 실수 때문에 점수를 잘내지 못하였고 셋쨋날에는 특히 못 하는 미션을 오래 붙잡아 두고 있어 시간을 낭비하였다.',
-      improvements: '코드에서 콤마를 점으로 잘못 고쳐 실수를 범하였다.',
-      mistakesList: [
-        '시작 지점을 잘못 잡아서 로봇이 미션을 수행하지 못함',
-        '마지막에 코드를 작성할 때 콤마를 마침표로 찍었다.',
-        '함수 이름을 착각해 다른 곳에 있는 코드를 고쳐 로봇이 미션을 수행하지 못하였다.',
-      ],
-    },
-    competitionDetails: {
-      venueAndDate:
-        'GMR Arena, Aerocity, Hyderabad, India / 2026년 9월 25일 ~ 27일',
-      criticalRules:
-        '유물 중 쓰러져도 그 색상에만 갔다 놓기만 하면 5점으로 처리됨 (우리나라의 룰과 다랐음)',
-      ruleLessonLearned:
-        '챌린지 미션 1라운드 때 룰 중 스타팅 지점에 마지막에 부분적으로 로봇이 포함되어 있으면 점수가 15점이 적립되는데 우리가 번역을 자세히 하지 못하여서 스타팅 지점에 나와 있어야지 15점을 얻는 줄 알아서 15점을 잃었다.',
-      differencesFromPrevious:
-        '미션 난이도가 쉽고 동선과 전략을 짜기가 훨씬 쉬웠다. (민규형 피셜)',
-    },
-    order: 1,
-    updatedAt: new Date().toISOString(),
-    lastSyncedAt: new Date().toISOString(),
-  };
+  // Base review with updated default content
+  const review: CompetitionReviewItem = JSON.parse(JSON.stringify(DEFAULT_REVIEWS_DATA[0]));
+  review.title = pageTitle;
+  review.lastSyncedAt = new Date().toISOString();
+  review.updatedAt = new Date().toISOString();
+
+  if (!blocks || Object.keys(blocks).length === 0) {
+    return review;
+  }
+
+  try {
+    // Helper to retrieve block
+    const getB = (id: string) => {
+      const b = blocks[id];
+      return b?.value?.value || b?.value || b;
+    };
+
+    // Helper to gather all nested text in a block
+    const getDeepText = (b: any): string => {
+      if (!b) return '';
+      let str = getText(b);
+      if (b.content && Array.isArray(b.content)) {
+        for (const cid of b.content) {
+          const childB = getB(cid);
+          if (childB) {
+            str += '\n' + getDeepText(childB);
+          }
+        }
+      }
+      return str;
+    };
+
+    // Traverse root content to find sections
+    const contentIds: string[] = root?.content || [];
+    let currentMainHeader = '';
+
+    for (const cid of contentIds) {
+      const b = getB(cid);
+      if (!b) continue;
+
+      const type = b.type;
+      const text = getText(b).trim();
+
+      if (type === 'header') {
+        currentMainHeader = text;
+      }
+
+      // 1. Column list for Team & Competition Site
+      if (type === 'column_list' && b.content) {
+        for (const colId of b.content) {
+          const colBlock = getB(colId);
+          if (colBlock?.content) {
+            for (const childId of colBlock.content) {
+              const childB = getB(childId);
+              const cText = getText(childB);
+              if (cText.includes('팀 명') && childB.content) {
+                const bullets = childB.content.map((bid: string) => getText(getB(bid))).filter(Boolean);
+                if (bullets[0]) review.teamName = bullets[0];
+                if (bullets[1]) {
+                  review.members = bullets[1].split(',').map((m: string) => m.trim());
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Day 1 sections
+      if (currentMainHeader.includes('첫째 날')) {
+        if (text.includes('연습 날 있었던 문제점') && b.content) {
+          const pList: string[] = [];
+          const dList: { problem: string; solution: string }[] = [];
+          for (const pid of b.content) {
+            const pb = getB(pid);
+            if (pb && pb.type === 'numbered_list') {
+              const pText = getText(pb);
+              pList.push(pText);
+              // Check sub-solutions under problem
+              let sol = '';
+              if (pb.content) {
+                for (const sid of pb.content) {
+                  const sb = getB(sid);
+                  const st = getText(sb);
+                  if (st.includes('수정 방법') && sb.content) {
+                    sol = sb.content.map((sbid: string) => getText(getB(sbid))).join(' ');
+                  }
+                }
+              }
+              if (sol) dList.push({ problem: pText, solution: sol });
+            }
+          }
+          if (pList.length > 0) review.day1.fixes = pList;
+          if (dList.length > 0) review.day1.fixesDetailed = dList;
+        }
+
+        if (text.includes('최종 전략') && b.content) {
+          const strat = getText(getB(b.content[0]));
+          if (strat) review.day1.strategy = strat;
+          for (const sbid of b.content) {
+            const sb = getB(sbid);
+            if (getText(sb).includes('이유') && sb.content) {
+              const reason = getText(getB(sb.content[0]));
+              if (reason) review.day1.strategyReason = reason;
+            }
+          }
+        }
+
+        if (type === 'callout') {
+          const calloutText = getDeepText(b);
+          if (calloutText.includes('11등') || calloutText.includes('점')) {
+            const lines = calloutText.split('\n').filter(Boolean);
+            if (lines[0]) review.day1.result = lines[0];
+          }
+        }
+      }
+
+      // 3. Day 2 sections
+      if (currentMainHeader.includes('둘째 날')) {
+        if (text.includes('surprise mission') && b.content) {
+          for (const sId of b.content) {
+            const sb = getB(sId);
+            const st = getText(sb);
+            if (st.includes('규칙') && sb.content) {
+              const rule = getText(getB(sb.content[0]));
+              if (rule && review.day2.surpriseMission) review.day2.surpriseMission.rules = rule;
+            }
+            if (st.includes('시도 x') && sb.content) {
+              for (const reasonId of sb.content) {
+                const rText = getText(getB(reasonId));
+                if (rText.includes('이유') && review.day2.surpriseMission) {
+                  review.day2.surpriseMission.reason = rText.replace(/^이유\s*:\s*/, '').trim();
+                } else if (rText.includes('불이익') && review.day2.surpriseMission) {
+                  review.day2.surpriseMission.disadvantage = rText.replace(/^불이익\s*:\s*/, '').trim();
+                }
+              }
+            }
+            if (st.includes('다음에 시도 하기 위한 대책') && sb.content && review.day2.surpriseMission) {
+              review.day2.surpriseMission.lesson = getText(getB(sb.content[0]));
+            }
+          }
+        }
+
+        if (text.includes('둘째 날에 일어난 문제점') && b.content) {
+          const prob = getText(getB(b.content[0]));
+          let sol = '';
+          const pb = getB(b.content[0]);
+          if (pb?.content) {
+            for (const subId of pb.content) {
+              const subB = getB(subId);
+              if (getText(subB).includes('수정 방법') && subB.content) {
+                sol = getText(getB(subB.content[0]));
+              }
+            }
+          }
+          if (prob && sol && review.day2.problemAndFix) {
+            review.day2.problemAndFix = { problem: prob, solution: sol };
+          }
+        }
+
+        if (text.includes('고쳐야 했던 점') && b.content) {
+          const mf = getText(getB(b.content[0]));
+          if (mf) review.day2.mustFix = mf;
+        }
+      }
+
+      // 4. Day 3 sections
+      if (currentMainHeader.includes('셋째 날')) {
+        if (text.includes('셋째 날에서 일어난 문제점') && b.content) {
+          const prob = getText(getB(b.content[0]));
+          let sol = '';
+          const pb = getB(b.content[0]);
+          if (pb?.content) {
+            for (const subId of pb.content) {
+              const subB = getB(subId);
+              if (getText(subB).includes('수정 방법') && subB.content) {
+                sol = getText(getB(subB.content[0]));
+              }
+            }
+          }
+          if (prob && sol && review.day3.problemAndFix) {
+            review.day3.problemAndFix = { problem: prob, solution: sol };
+          }
+        }
+
+        if (text.includes('고쳐야 했던 점') && b.content) {
+          const mf = getText(getB(b.content[0]));
+          if (mf) review.day3.mustFix = mf;
+        }
+
+        if (text.includes('시도 했던 미션') && b.content) {
+          const sTasks = b.content.map((tid: string) => getText(getB(tid))).filter(Boolean);
+          if (sTasks.length > 0) review.day3.strategyTasks = sTasks;
+        }
+      }
+
+      // 5. Reflections (느낀 점)
+      if (text.includes('느낀 점')) {
+        // Find sub sections under reflections
+      }
+      if (text.includes('좋았던 점') && b.content) {
+        const str = getText(getB(b.content[0]));
+        if (str) review.reflections.strengths = str;
+      }
+      if (text.includes('아쉬웠던 점') && b.content) {
+        const reg = getText(getB(b.content[0]));
+        if (reg) review.reflections.regrets = reg;
+      }
+      if (text.includes('부족했던 점') && b.content) {
+        const imp = getText(getB(b.content[0]));
+        if (imp) review.reflections.improvements = imp;
+      }
+      if (text.includes('실수') && b.content) {
+        const mist = b.content.map((mid: string) => getText(getB(mid))).filter(Boolean);
+        if (mist.length > 0) review.reflections.mistakesList = mist;
+      }
+
+      // 6. Competition Details
+      if (text.includes('대회 룰 중 중요했던 규칙') && b.content) {
+        const rule = getText(getB(b.content[0]));
+        if (rule) review.competitionDetails.criticalRules = rule;
+      }
+      if (text.includes('대회 규칙 중 모르는 게 있어서 피해를 본 것') && b.content) {
+        const ruleLesson = getText(getB(b.content[0]));
+        if (ruleLesson) review.competitionDetails.ruleLessonLearned = ruleLesson;
+      }
+      if (text.includes('작년 대회와 달랐던 점') && b.content) {
+        const diff = getText(getB(b.content[0]));
+        if (diff) review.competitionDetails.differencesFromPrevious = diff;
+      }
+    }
+  } catch (err) {
+    console.warn('[notionParser] Parse warning, using updated defaults:', err);
+  }
 
   return review;
 }

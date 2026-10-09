@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
   ChevronRight,
@@ -18,7 +18,6 @@ import {
   Minimize2,
   Award,
   Sparkles,
-  RefreshCw,
   FileCode,
   Download,
   Image as ImageIcon,
@@ -28,7 +27,6 @@ import {
 } from 'lucide-react';
 import { CompetitionReviewItem } from '../types';
 import { useLanguage } from '../context/ThemeContext';
-import { syncNotionReviewFromServer } from '../utils/notionSyncHelper';
 import { useToast } from './Toast';
 import { AdminDownloadModal } from './AdminDownloadModal';
 
@@ -38,7 +36,6 @@ interface CompetitionReviewsSectionProps {
   onAddReview?: () => void;
   onEditReview?: (review: CompetitionReviewItem) => void;
   onDeleteReview?: (id: string) => void;
-  onReviewSynced?: (updatedReview: CompetitionReviewItem) => void;
 }
 
 export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps> = ({
@@ -47,12 +44,9 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
   onAddReview,
   onEditReview,
   onDeleteReview,
-  onReviewSynced,
 }) => {
   const { t } = useLanguage();
   const { showToast } = useToast();
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>('방금 전');
 
   // Interactive Notion Toggles state
   const [openToggles, setOpenToggles] = useState<Record<string, boolean>>({
@@ -165,65 +159,13 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
     setOpenToggles({});
   };
 
-  // Real-time Notion Sync Handler
-  const handleSyncNotion = async (silent: boolean = false) => {
-    setIsSyncing(true);
-    try {
-      const res = await syncNotionReviewFromServer();
-      if (res.success && res.review) {
-        if (onReviewSynced) {
-          onReviewSynced(res.review);
-        }
-        const now = new Date();
-        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now
-          .getMinutes()
-          .toString()
-          .padStart(2, '0')}`;
-        setLastSyncTime(timeStr);
-        if (!silent) {
-          showToast(
-            '노션에서 최신 후기 데이터(점수, 미션 분석, 코드)가 성공적으로 동기화되었습니다!',
-            'success',
-            '노션 실시간 동기화 완료'
-          );
-        }
-      } else if (!silent) {
-        showToast('노션 동기화 중 일시적 지연이 발생하여 캐시된 데이터를 유지합니다.', 'info', '동기화 알림');
-      }
-    } catch (err) {
-      console.warn('Sync error:', err);
-      if (!silent) {
-        showToast('노션 동기화 요청에 실패했습니다.', 'error', '오류');
-      }
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // Auto-sync on component mount and every 60 seconds
-  useEffect(() => {
-    handleSyncNotion(true);
-
-    const interval = setInterval(() => {
-      handleSyncNotion(true);
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   if (!reviews || reviews.length === 0) {
     return (
       <section id="reviews" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="p-8 text-center bg-[#f7f6f3] rounded-xl border border-[#e3e2de]">
           <BookOpen className="w-10 h-10 text-[#787774] mx-auto mb-3" />
           <h3 className="text-base font-semibold text-[#37352f]">등록된 대회 후기가 없습니다</h3>
-          <p className="text-xs text-[#787774] mt-1">노션과 연동하여 대회 참가 후기를 확인하세요.</p>
-          <button
-            onClick={() => handleSyncNotion(false)}
-            className="mt-4 px-3 py-1.5 bg-[#2383e2] text-white text-xs font-medium rounded-md hover:bg-[#1b6dc1] transition-colors"
-          >
-            노션에서 불러오기
-          </button>
+          <p className="text-xs text-[#787774] mt-1">대회 참가 후기 및 회고를 확인하세요.</p>
         </div>
       </section>
     );
@@ -231,7 +173,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
 
   return (
     <section id="reviews" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-      {/* Top Header & Real-time Notion Sync Status Bar */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-[#e3e2de] gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#efefed] border border-[#e3e2de] flex items-center justify-center text-[#37352f]">
@@ -245,35 +187,15 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
               <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 WRO 2026 INDIA
               </span>
-              <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-600 bg-emerald-50/80 px-2 py-0.5 rounded border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                노션 실시간 연동
-              </span>
             </div>
             <p className="text-xs text-[#787774] mt-0.5">
-              노션 문서와 실시간 양방향 동기화되는 실전 라운드별 점수, 미션 분석 및 회고 기록
+              실전 라운드별 점수, 미션 분석 및 회고 기록
             </p>
           </div>
         </div>
 
-        {/* Sync & Toggle Controls */}
+        {/* Toggle Controls */}
         <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-          {/* Real-time Notion Sync Button */}
-          <button
-            onClick={() => handleSyncNotion(false)}
-            disabled={isSyncing}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all cursor-pointer shadow-2xs ${
-              isSyncing
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 opacity-80'
-                : 'bg-[#edf6ec] hover:bg-[#d2ebd0] text-emerald-900 border-[#d2ebd0]'
-            }`}
-            title="노션의 변경 사항을 지금 즉시 불러옵니다"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-700 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? '노션 동기화 중...' : '노션 즉시 동기화'}</span>
-            <span className="text-[10px] text-emerald-700 font-normal hidden md:inline">({lastSyncTime})</span>
-          </button>
-
           <button
             onClick={expandAll}
             className="flex items-center gap-1 px-2.5 py-1 text-xs text-[#5a5854] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-md transition-colors cursor-pointer"
@@ -830,29 +752,39 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                               '새로운 유물인 하얀색 유물이 추가되어 하얀색 유물을 WRO 2026 seasonal logo가 있는 곳에 갖다 놓는 미션이였다.'}
                           </p>
                           <div className="p-2 bg-amber-50/60 border border-amber-200 rounded-lg space-y-1">
-                            <span className="font-bold text-amber-900">점수 규정:</span>
+                            <span className="font-bold text-amber-900">점수:</span>
                             <ul className="list-disc list-inside text-zinc-800 space-y-0.5">
-                              <li>부분적으로 유물이 seasonal logo에 걸쳐져 있음 : 15점</li>
-                              <li>유물이 완전히 seasonal logo 안에 있음 : 25점 (넘어지면 안 됨)</li>
+                              {rev.day2.surpriseMission?.scoring && rev.day2.surpriseMission.scoring.length > 0 ? (
+                                rev.day2.surpriseMission.scoring.map((item, sIdx) => (
+                                  <li key={sIdx}>{item}</li>
+                                ))
+                              ) : (
+                                <>
+                                  <li>부분적으로 유물이 seasonal logo에 걸쳐져 있음 : 15점</li>
+                                  <li>유물이 완전히 seasonal logo안에 있음 : 25점 (넘어지면 안됨)</li>
+                                </>
+                              )}
                             </ul>
                           </div>
 
                           {/* Notion Additional Analysis */}
-                          {rev.day2.surpriseMission?.reason && (
+                          {(rev.day2.surpriseMission?.reason || rev.day2.surpriseMission?.lesson) && (
                             <div className="p-2.5 bg-[#f7f6f3] border border-[#e3e2de] rounded-lg space-y-1.5 text-xs text-zinc-800">
-                              <p className="flex items-start gap-1.5">
-                                <span className="font-bold text-amber-800 shrink-0">• 이유 :</span>
-                                <span>{rev.day2.surpriseMission.reason}</span>
-                              </p>
-                              {rev.day2.surpriseMission.disadvantage && (
+                              {rev.day2.surpriseMission?.reason && (
+                                <p className="flex items-start gap-1.5">
+                                  <span className="font-bold text-amber-800 shrink-0">• 이유 :</span>
+                                  <span>{rev.day2.surpriseMission.reason}</span>
+                                </p>
+                              )}
+                              {rev.day2.surpriseMission?.disadvantage && (
                                 <p className="flex items-start gap-1.5">
                                   <span className="font-bold text-rose-700 shrink-0">• 불이익 :</span>
                                   <span>{rev.day2.surpriseMission.disadvantage}</span>
                                 </p>
                               )}
-                              {rev.day2.surpriseMission.lesson && (
+                              {rev.day2.surpriseMission?.lesson && (
                                 <p className="flex items-start gap-1.5">
-                                  <span className="font-bold text-emerald-700 shrink-0">• 교훈/개선 :</span>
+                                  <span className="font-bold text-emerald-700 shrink-0">• 다음에 시도 하기 위한 대책 :</span>
                                   <span>{rev.day2.surpriseMission.lesson}</span>
                                 </p>
                               )}
@@ -1108,20 +1040,55 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                     {openToggles['day3-challenge'] && (
                       <div className="pl-6 pt-2 pb-3 space-y-3">
                         <div className="space-y-2">
-                          {rev.day3.challengeMission?.tasks.map((task) => (
-                            <div
-                              key={task.taskNumber}
-                              className="p-3 rounded-xl border bg-[#f7f6f3] border-[#e3e2de] space-y-1 text-xs"
-                            >
-                              <div className="font-bold text-sm text-zinc-900 flex items-center justify-between">
-                                <span>태스크 {task.taskNumber}: {task.name}</span>
+                          {rev.day3.challengeMission?.tasks.map((task) => {
+                            const desc = task.description || '';
+                            const hasGoal = desc.includes('목표:');
+                            const hasCondition = desc.includes('완료 조건:');
+                            let goalText = '';
+                            let conditionText = '';
+                            if (hasGoal && hasCondition) {
+                              const match = desc.match(/목표:\s*(.*?)(?:완료 조건:|$)/);
+                              const condMatch = desc.match(/완료 조건:\s*(.*?)$/);
+                              goalText = match ? match[1].trim() : '';
+                              conditionText = condMatch ? condMatch[1].trim() : '';
+                            }
+
+                            return (
+                              <div
+                                key={task.taskNumber}
+                                className="p-3.5 rounded-xl border bg-[#fbfbfa] border-[#e3e2de] space-y-2 text-xs"
+                              >
+                                <div className="font-bold text-sm text-zinc-900 flex items-center justify-between border-b border-[#f1f1ef] pb-1.5">
+                                  <span className="font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs">
+                                    태스크 {task.taskNumber}
+                                  </span>
+                                  <span className="font-semibold text-zinc-900 text-xs sm:text-sm">{task.name}</span>
+                                </div>
+                                <div className="space-y-1 pl-1 text-zinc-700">
+                                  {goalText ? (
+                                    <>
+                                      <p className="flex items-start gap-1.5 leading-relaxed">
+                                        <span className="font-bold text-zinc-900 shrink-0">• 목표:</span>
+                                        <span>{goalText}</span>
+                                      </p>
+                                      {conditionText && (
+                                        <p className="flex items-start gap-1.5 leading-relaxed">
+                                          <span className="font-bold text-zinc-900 shrink-0">• 완료 조건:</span>
+                                          <span>{conditionText}</span>
+                                        </p>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="leading-relaxed">{desc}</p>
+                                  )}
+                                  <p className="flex items-start gap-1.5 text-indigo-900 font-semibold pt-0.5">
+                                    <span className="text-indigo-600 shrink-0">• 배점:</span>
+                                    <span>{task.score}</span>
+                                  </p>
+                                </div>
                               </div>
-                              <p className="text-zinc-700 leading-relaxed">{task.description}</p>
-                              <div className="pt-1 text-indigo-700 font-semibold">
-                                <span>점수: </span>{task.score}
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
                         {/* Images */}

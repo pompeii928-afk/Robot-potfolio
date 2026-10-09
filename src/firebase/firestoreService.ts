@@ -830,10 +830,14 @@ export async function updateReview(id: string, updates: Partial<CompetitionRevie
   const path = `${REVIEWS_COLLECTION}/${id}`;
   try {
     const docRef = doc(db, REVIEWS_COLLECTION, id);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      docRef,
+      {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
     await markInitialized(REVIEWS_COLLECTION);
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, path);

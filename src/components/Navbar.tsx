@@ -22,10 +22,13 @@ import {
   ShieldCheck,
   Users,
   UserCheck,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useLanguage, SUPPORTED_LANGUAGES, Language } from '../context/ThemeContext';
 import { useAuth } from '../firebase/AuthContext';
 import { openGmailCompose } from '../utils/contactHelper';
+import { cyberAudio } from '../utils/cyberAudio';
 
 export interface CategoryCounts {
   reviews?: number;
@@ -240,14 +243,22 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const [isSoundActive, setIsSoundActive] = useState<boolean>(() => !cyberAudio.getMuted());
+
+  const handleToggleSound = () => {
+    const newMuted = cyberAudio.toggleMuted();
+    setIsSoundActive(!newMuted);
+    if (!newMuted) {
+      cyberAudio.playBootSound();
+    }
+  };
+
   const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === lang) || SUPPORTED_LANGUAGES[0];
 
   return (
     <header
       id="navbar-header"
-      className={`sticky top-0 z-50 w-full transition-all duration-200 bg-[#f4f2ee]/90 dark:bg-[#0a0b0e]/90 backdrop-blur-md border-b border-[#e2e0da] dark:border-white/10 ${
-        isScrolled ? 'shadow-[0_2px_12px_rgba(0,0,0,0.04)]' : ''
-      }`}
+      className="sticky top-0 z-50 w-full transition-all duration-200 bg-white/95 backdrop-blur-xl border-none border-0 shadow-none"
     >
       {/* Top Workspace Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -256,9 +267,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="nav-logo-btn"
             onClick={handleLogoClick}
-            className="flex items-center gap-2 sm:gap-3 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0 select-none"
+            className="flex items-center gap-2.5 sm:gap-3 group text-left cursor-pointer transition-opacity hover:opacity-85 shrink-0 min-w-0 select-none"
           >
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-[#e2e0da] dark:border-white/20 group-hover:scale-105 active:scale-95 transition-all duration-200">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-zinc-100 flex items-center justify-center shrink-0 shadow-2xs border border-zinc-200 group-hover:scale-105 active:scale-95 transition-all duration-200">
               <img
                 src="/favicon.svg?v=7"
                 alt="K.F.C. Code Chaser Logo"
@@ -267,19 +278,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               />
             </div>
             <div className="flex items-center gap-2 min-w-0">
-              <span className="font-sans font-bold text-sm sm:text-base text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight truncate">
+              <span className="font-sans font-black text-sm sm:text-base text-zinc-900 tracking-tight truncate">
                 K.F.C. Code Chaser
               </span>
-              <span className="hidden sm:inline font-mono text-[11px] text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
-                ( LAB ARCHIVES )
+              <span className="hidden sm:inline font-mono text-[10px] text-zinc-500 tracking-widest uppercase">
+                // ARCHIVE
               </span>
             </div>
           </button>
 
-          {/* Center (Desktop/Tablet): Stokt Editorial Category Bar */}
+          {/* Center (Desktop/Tablet): Alche Studio Category Bar (No lines) */}
           <nav
             ref={desktopNavRef}
-            className="hidden lg:flex items-center gap-1 bg-[#eae8e2]/70 dark:bg-white/[0.04] p-1 rounded-lg border border-[#e2e0da] dark:border-white/10 overflow-x-auto no-scrollbar max-w-2xl scroll-smooth"
+            className="hidden lg:flex items-center gap-1 bg-zinc-100/90 p-1 rounded-full overflow-x-auto no-scrollbar max-w-2xl scroll-smooth backdrop-blur-md"
           >
             {categories.map((cat, idx) => {
               const isActive = activeSection === cat.id;
@@ -293,10 +304,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   id={`top-cat-${cat.id}`}
                   data-category-id={cat.id}
                   onClick={() => handleSelectTab(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
-                      : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-black text-white font-bold shadow-xs'
+                      : 'text-zinc-600 hover:text-black hover:bg-black/5'
                   }`}
                 >
                   <Icon
@@ -304,19 +315,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                       isActive
                         ? isYouTube
                           ? 'text-red-400'
-                          : 'text-white dark:text-[#0a0a0a]'
+                          : 'text-white'
                         : isYouTube
-                        ? 'text-red-500/70'
-                        : 'text-[#6e6d6a] dark:text-[#a3a29e]'
+                        ? 'text-red-600'
+                        : 'text-zinc-500'
                     }`}
                   />
                   <span>{label}</span>
                   {cat.count !== undefined && cat.count > 0 && (
                     <span
-                      className={`text-[10px] font-mono px-1 rounded-sm leading-tight ${
+                      className={`text-[10px] font-mono px-1 rounded-full leading-tight ${
                         isActive
-                          ? 'bg-white/20 dark:bg-black/20 text-white dark:text-black'
-                          : 'text-[#8e8d89]'
+                          ? 'bg-white/20 text-white'
+                          : 'text-zinc-500'
                       }`}
                     >
                       ({cat.count})
@@ -327,32 +338,61 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Controls: Multi-Language Selector & Contact */}
+          {/* Right Controls: Sound Toggle, Multi-Language Selector & Contact */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Alche Studio Sound Toggle Button */}
+            <button
+              id="nav-sound-toggle-btn"
+              onClick={handleToggleSound}
+              className={`px-2.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer select-none shrink-0 ${
+                isSoundActive
+                  ? 'bg-black text-white shadow-xs'
+                  : 'bg-zinc-100 text-zinc-700 hover:text-black hover:bg-zinc-200'
+              }`}
+              title={isSoundActive ? 'Sound: ON (Click to Mute)' : 'Sound: OFF (Click to Enable)'}
+              aria-label="Sound Toggle"
+            >
+              {isSoundActive ? (
+                <Volume2 className="w-3.5 h-3.5 text-white shrink-0" />
+              ) : (
+                <VolumeX className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+              )}
+              <span className="hidden sm:inline text-[11px] font-mono tracking-wider font-semibold">
+                {isSoundActive ? 'SOUND ON' : 'SOUND OFF'}
+              </span>
+              {/* Equalizer animation bars */}
+              {isSoundActive && (
+                <span className="hidden md:flex items-center gap-0.5 h-3 ml-0.5">
+                  <span className="w-0.5 h-2 bg-white animate-pulse" />
+                  <span className="w-0.5 h-3 bg-white/80 animate-pulse delay-75" />
+                  <span className="w-0.5 h-1.5 bg-white animate-pulse delay-150" />
+                </span>
+              )}
+            </button>
             {/* Multi-Language Dropdown */}
             <div className="relative" ref={langDropdownRef}>
               <button
                 id="lang-toggle-btn"
                 onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                className="px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer select-none shrink-0"
+                className="px-2.5 py-1.5 rounded-full text-xs font-mono font-medium text-zinc-800 bg-zinc-100 hover:bg-zinc-200 flex items-center gap-1.5 transition-colors cursor-pointer select-none shrink-0"
                 title="Select language"
                 aria-label="Select language"
               >
-                <Globe className="w-3.5 h-3.5 text-[#787774] hidden xs:block" />
-                <span className="text-xs font-sans font-medium flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5 text-zinc-500 hidden xs:block" />
+                <span className="text-xs font-mono font-medium flex items-center gap-1">
                   <span>{currentLangObj.flag}</span>
-                  <span className="font-mono font-semibold text-[11px] sm:text-xs">
+                  <span className="font-semibold text-[11px] sm:text-xs">
                     {currentLangObj.code.toUpperCase()}
                   </span>
                 </span>
-                <ChevronDown className="w-3 h-3 text-[#787774]" />
+                <ChevronDown className="w-3 h-3 text-zinc-500" />
               </button>
 
               {/* Language Dropdown Menu */}
               {langDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-44 rounded-lg bg-white border border-[#e3e2de] shadow-lg py-1 z-50 animate-in fade-in-50 zoom-in-95 duration-100">
-                  <div className="px-2.5 py-1 text-[11px] font-mono text-[#787774] border-b border-[#e3e2de] uppercase">
-                    Select Language
+                <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-white border border-zinc-200 shadow-xl py-1.5 z-50 text-zinc-900 backdrop-blur-xl animate-in fade-in-50 zoom-in-95 duration-100">
+                  <div className="px-3 py-1 text-[10px] font-mono text-zinc-400 border-b border-zinc-100 uppercase tracking-wider">
+                    // SELECT LANGUAGE
                   </div>
                   {SUPPORTED_LANGUAGES.map((item) => {
                     const isSelected = item.code === lang;
@@ -363,17 +403,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setLanguage(item.code);
                           setLangDropdownOpen(false);
                         }}
-                        className={`w-full px-2.5 py-1.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
+                        className={`w-full px-3 py-1.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
-                            ? 'bg-[#f7f6f3] text-[#37352f] font-semibold'
-                            : 'text-[#5a5854] hover:bg-[#fbfbfa] hover:text-[#37352f]'
+                            ? 'bg-zinc-100 text-black font-bold'
+                            : 'text-zinc-700 hover:bg-zinc-50 hover:text-black'
                         }`}
                       >
                         <span className="flex items-center gap-2">
                           <span className="text-sm">{item.flag}</span>
                           <span>{item.nativeName}</span>
                         </span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#2383e2]" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400" />}
                       </button>
                     );
                   })}
@@ -387,29 +427,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="user-profile-btn"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 transition-colors cursor-pointer border shadow-2xs bg-[#edf6ec] hover:bg-[#d2ebd0] text-emerald-800 border-[#d2ebd0] shrink-0"
+                  className="px-2.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 transition-colors cursor-pointer border bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border-emerald-500/30 shrink-0"
                   title="Admin Account"
                 >
-                  <div className="w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold bg-emerald-700">
+                  <div className="w-4 h-4 rounded-full text-black flex items-center justify-center text-[9px] font-bold bg-emerald-400">
                     A
                   </div>
                   <span className="font-semibold text-xs hidden xs:inline">관리자</span>
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <ChevronDown className="w-3 h-3 text-emerald-700" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <ChevronDown className="w-3 h-3 text-emerald-300" />
                 </button>
 
                 {/* Admin Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-1.5 w-60 rounded-lg bg-white border border-[#e3e2de] shadow-lg py-1.5 z-50 animate-in fade-in-50 zoom-in-95 duration-100">
-                    <div className="px-3 py-2 border-b border-[#e3e2de] bg-[#fbfbfa]">
-                      <div className="font-semibold text-xs text-[#37352f] flex items-center gap-1.5">
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0c0d13] border border-white/10 shadow-2xl py-1.5 z-50 animate-in fade-in-50 zoom-in-95 duration-100 text-white">
+                    <div className="px-3.5 py-2.5 border-b border-white/10 bg-white/[0.02]">
+                      <div className="font-bold text-xs text-white flex items-center gap-1.5">
                         <span>{adminUser?.username || '관리자 마스터'}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#edf6ec] text-emerald-700 border border-[#d2ebd0] font-bold">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
                           ADMIN
                         </span>
                       </div>
-                      <div className="text-[11px] font-mono text-[#787774] truncate mt-0.5">
-                        포트폴리오 실시간 관리자
+                      <div className="text-[11px] font-mono text-zinc-400 truncate mt-0.5">
+                        시스템 실시간 관리자
                       </div>
                     </div>
 
@@ -420,9 +460,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                             setUserMenuOpen(false);
                             onOpenUsersView();
                           }}
-                          className="w-full px-3 py-2 text-xs text-left text-emerald-800 hover:bg-[#edf6ec] flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                          className="w-full px-3.5 py-2 text-xs text-left text-zinc-200 hover:bg-white/5 flex items-center gap-2 transition-colors cursor-pointer font-medium"
                         >
-                          <UserCheck className="w-4 h-4 text-emerald-600" />
+                          <UserCheck className="w-4 h-4 text-cyan-400" />
                           <span>👥 {t('admin.visitorList', '방문자 체크인 명단 확인')}</span>
                         </button>
                       )}
@@ -432,9 +472,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setUserMenuOpen(false);
                           await logout();
                         }}
-                        className="w-full px-3 py-1.5 text-xs text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors cursor-pointer border-t border-[#e3e2de] mt-1"
+                        className="w-full px-3.5 py-1.5 text-xs text-left text-rose-400 hover:bg-rose-950/30 flex items-center gap-2 transition-colors cursor-pointer border-t border-white/10 mt-1"
                       >
-                        <LogOut className="w-3.5 h-3.5 text-rose-500" />
+                        <LogOut className="w-3.5 h-3.5 text-rose-400" />
                         <span>{t('admin.logout', '로그아웃')}</span>
                       </button>
                     </div>
@@ -445,35 +485,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="nav-visitor-checkin-btn"
                 onClick={onOpenCheckin}
-                className="px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-emerald-900 bg-[#edf6ec] hover:bg-[#d2ebd0] border border-[#d2ebd0] flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer select-none shadow-2xs shrink-0"
+                className="px-3 py-1.5 rounded-full text-xs font-mono font-medium text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1.5 transition-colors cursor-pointer select-none shrink-0"
                 title={t('checkin.reenter', '수정/다시 입력')}
               >
                 <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span className="max-w-[70px] sm:max-w-[100px] truncate font-semibold">
                   {visitorName}
                 </span>
-                <span className="text-[10px] text-emerald-700 hidden sm:inline font-normal">
-                  {t('nav.checkedInBadge', '님 (체크인됨)')}
+                <span className="text-[10px] text-emerald-600 hidden sm:inline font-normal">
+                  {t('nav.checkedInBadge', '님')}
                 </span>
               </button>
             ) : (
               <button
                 id="nav-visitor-checkin-btn"
                 onClick={onOpenCheckin}
-                className="px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-sans font-medium text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer select-none shadow-2xs shrink-0"
+                className="px-3 py-1.5 rounded-full text-xs font-mono font-medium text-zinc-800 bg-zinc-100 hover:bg-zinc-200 flex items-center gap-1.5 transition-colors cursor-pointer select-none shrink-0"
                 title={t('nav.checkin', '방문자 체크인')}
               >
-                <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <UserCheck className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
                 <span className="hidden xs:inline">{t('nav.checkin', '방문자 체크인')}</span>
                 <span className="xs:hidden">체크인</span>
               </button>
             )}
 
-            {/* Contact Button (Stokt Signature Action Button) */}
+            {/* Contact Button */}
             <button
               id="nav-contact-btn"
               onClick={handleOpenGmail}
-              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-xs font-mono font-medium rounded-full text-white bg-[#0a0a0a] hover:bg-[#ff4d1d] dark:bg-[#f4f2ee] dark:text-[#0a0a0a] dark:hover:bg-[#ff4d1d] dark:hover:text-white transition-all duration-200 cursor-pointer group shadow-xs shrink-0"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-xs font-mono font-bold rounded-full text-white bg-black hover:bg-zinc-800 transition-all duration-200 cursor-pointer group shadow-xs shrink-0"
               title="Gmail로 바로 문의하기 (pompeii928@gmail.com)"
             >
               <Mail className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
@@ -484,7 +524,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="mobile-menu-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] transition-colors cursor-pointer shrink-0"
+              className="lg:hidden p-1.5 rounded-full text-zinc-800 bg-zinc-100 hover:bg-zinc-200 transition-colors cursor-pointer shrink-0"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -492,10 +532,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Responsive Mobile / Tablet Sub-strip Category Navigation */}
+        {/* Responsive Mobile / Tablet Sub-strip Category Navigation (Line Removed) */}
         <div
           ref={mobileNavRef}
-          className="lg:hidden -mx-4 px-4 py-2 border-t border-[#e3e2de]/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain touch-pan-x"
+          className="lg:hidden -mx-4 px-4 py-2 border-none border-0 shadow-none flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain touch-pan-x"
         >
           {categories.map((cat) => {
             const isActive = activeSection === cat.id;
@@ -508,28 +548,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={cat.id}
                 data-category-id={cat.id}
                 onClick={() => handleSelectTab(cat.id)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-sans font-medium shrink-0 transition-all cursor-pointer whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono shrink-0 transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#37352f] text-white font-semibold shadow-2xs'
-                    : 'text-[#5a5854] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de]'
+                    ? 'bg-black text-white font-bold shadow-xs'
+                    : 'text-zinc-600 bg-zinc-100 hover:bg-zinc-200'
                 }`}
               >
                 <Icon
                   className={`w-3.5 h-3.5 ${
                     isActive
                       ? isYouTube
-                        ? 'text-red-400'
-                        : 'text-white'
+                        ? 'text-red-600'
+                        : 'text-black'
                       : isYouTube
-                      ? 'text-red-600'
-                      : 'text-[#787774]'
+                      ? 'text-red-400'
+                      : 'text-zinc-400'
                   }`}
                 />
                 <span>{label}</span>
                 {cat.count !== undefined && cat.count > 0 && (
                   <span
                     className={`text-[10px] font-mono px-1 rounded-sm ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-[#e3e2de] text-[#787774]'
+                      isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'
                     }`}
                   >
                     {cat.count}
@@ -545,9 +585,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <div
           id="mobile-menu-drawer"
-          className="lg:hidden px-4 pt-3 pb-5 bg-white border-b border-[#e3e2de] shadow-lg animate-in slide-in-from-top duration-200"
+          className="lg:hidden px-4 pt-3 pb-5 bg-white/98 backdrop-blur-2xl shadow-xl animate-in slide-in-from-top duration-200 text-zinc-900 border-b-0"
         >
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5">
             {categories.map((item) => {
               const isActive = activeSection === item.id;
               const Icon = item.icon;
@@ -556,18 +596,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectTab(item.id)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-sans font-medium flex items-center justify-between cursor-pointer transition-colors ${
+                  className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-mono flex items-center justify-between cursor-pointer transition-colors ${
                     isActive
-                      ? 'text-[#37352f] bg-[#efefed] font-semibold border border-[#e3e2de]'
-                      : 'text-[#5a5854] hover:bg-[#f7f6f3]'
+                      ? 'text-white bg-black font-bold shadow-xs'
+                      : 'text-zinc-700 hover:bg-zinc-100'
                   }`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4 text-[#787774]" />
+                    <Icon className="w-4 h-4 text-zinc-500" />
                     <span>{label}</span>
                   </span>
                   {item.count !== undefined && (
-                    <span className="text-xs font-mono text-[#787774] bg-[#e3e2de] px-1.5 py-0.5 rounded">
+                    <span className="text-xs font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded-full">
                       {item.count}
                     </span>
                   )}
@@ -576,9 +616,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
 
             {/* Mobile Language Selector */}
-            <div className="pt-3 mt-2 border-t border-[#e3e2de]">
-              <div className="text-[11px] font-mono text-[#787774] uppercase mb-1.5">
-                Language
+            <div className="pt-3 mt-2 border-t border-zinc-100">
+              <div className="text-[11px] font-mono text-zinc-400 uppercase mb-2">
+                // LANGUAGE
               </div>
               <div className="grid grid-cols-3 gap-1.5">
                 {SUPPORTED_LANGUAGES.map((item) => {
@@ -590,10 +630,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setLanguage(item.code);
                         setMobileMenuOpen(false);
                       }}
-                      className={`px-2 py-1.5 rounded text-xs flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${
+                      className={`px-2 py-1.5 rounded-lg text-xs font-mono flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-[#37352f] text-white border-[#37352f] font-semibold'
-                          : 'bg-[#f7f6f3] text-[#5a5854] border-[#e3e2de] hover:bg-[#efefed]'
+                          ? 'bg-black text-white border-black font-bold'
+                          : 'bg-zinc-100 text-zinc-700 border-transparent hover:bg-zinc-200'
                       }`}
                     >
                       <span>{item.flag}</span>
@@ -604,14 +644,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
 
-            <div className="pt-3 mt-2 border-t border-[#e3e2de] flex items-center justify-between text-xs text-[#787774]">
+            <div className="pt-3 mt-2 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500 font-mono">
               <button
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleOpenGmail();
                 }}
-                className="flex items-center gap-1.5 hover:text-[#37352f] cursor-pointer"
+                className="flex items-center gap-1.5 hover:text-black cursor-pointer"
                 title="Gmail로 바로 연락하기 (pompeii928@gmail.com)"
               >
                 <Mail className="w-3.5 h-3.5 text-red-500" />

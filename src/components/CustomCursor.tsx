@@ -7,49 +7,49 @@ export const CustomCursor: React.FC = () => {
   const [label, setLabel] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  // Position references for smooth interpolation (Lerp)
+  // Position references for 60/120fps smooth interpolation (Lerp)
   const mousePos = useRef({ x: -100, y: -100 });
-  const dotPos = useRef({ x: -100, y: -100 });
   const circlePos = useRef({ x: -100, y: -100 });
+  const isFirstMove = useRef(true);
 
-  const dotRef = useRef<HTMLDivElement>(null);
   const circleRef = useRef<HTMLDivElement>(null);
   const animFrameId = useRef<number | null>(null);
 
   useEffect(() => {
-    // Detect touchscreen / non-pointer devices
-    if (typeof window !== 'undefined') {
-      const isTouch =
-        window.matchMedia('(pointer: coarse)').matches ||
-        'ontouchstart' in window ||
-        navigator.maxTouchPoints > 0;
-      setIsTouchDevice(isTouch);
-      if (isTouch) return;
+    if (typeof window === 'undefined') return;
 
-      document.body.classList.add('has-custom-cursor');
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
-      if (!isVisible) setIsVisible(true);
+
+      if (isFirstMove.current) {
+        circlePos.current = { x: e.clientX, y: e.clientY };
+        isFirstMove.current = false;
+      }
+
+      setIsVisible(true);
+      document.body.classList.add('has-custom-cursor');
     };
 
-    const handleMouseDown = () => setIsClicking(true);
-    const handleMouseUp = () => setIsClicking(false);
+    const onMouseDown = () => setIsClicking(true);
+    const onMouseUp = () => setIsClicking(false);
 
-    const handleMouseLeave = () => {
+    const onMouseLeave = () => {
       setIsVisible(false);
       setVariant('default');
     };
 
-    const handleMouseEnter = () => {
+    const onMouseEnter = () => {
       setIsVisible(true);
     };
 
-    // Global event listener to detect hovered element types and attributes
-    const handleMouseOver = (e: MouseEvent) => {
+    const onTouchStart = () => {
+      setIsVisible(false);
+      document.body.classList.remove('has-custom-cursor');
+    };
+
+    // Global element hover inspector
+    const onMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
@@ -60,13 +60,24 @@ export const CustomCursor: React.FC = () => {
         const customLabel = cursorTarget.getAttribute('data-cursor-label');
         if (customType) {
           setVariant(customType);
-          setLabel(customLabel || (customType === 'view' ? 'VIEW ↗' : customType === 'play' ? 'PLAY ▶' : customType === 'external' ? 'VISIT ↗' : ''));
+          setLabel(
+            customLabel ||
+              (customType === 'view'
+                ? 'VIEW ↗'
+                : customType === 'play'
+                ? 'PLAY ▶'
+                : customType === 'external'
+                ? 'VISIT ↗'
+                : '')
+          );
           return;
         }
       }
 
-      // 2. Project Card or Media Card detection
-      const projectCard = target.closest<HTMLElement>('#experience .group, [data-project-card]');
+      // 2. Project Card or Media Card
+      const projectCard = target.closest<HTMLElement>(
+        '#experience .group, [data-project-card], .project-card'
+      );
       if (projectCard) {
         setVariant('view');
         setLabel('VIEW ↗');
@@ -81,9 +92,9 @@ export const CustomCursor: React.FC = () => {
         return;
       }
 
-      // 4. External site iframe / card
-      const externalCard = target.closest<HTMLElement>('#external-site .group, a[target="_blank"]');
-      if (externalCard) {
+      // 4. External site links
+      const externalLink = target.closest<HTMLElement>('#external-site .group, a[target="_blank"]');
+      if (externalLink) {
         setVariant('external');
         setLabel('VISIT ↗');
         return;
@@ -111,26 +122,20 @@ export const CustomCursor: React.FC = () => {
       setLabel('');
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('mouseover', handleMouseOver, { passive: true });
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mouseleave', onMouseLeave);
+    document.addEventListener('mouseenter', onMouseEnter);
+    document.addEventListener('mouseover', onMouseOver, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
 
-    // Animation Loop: High-performance Lerp
+    // Smooth Lerp Animation Loop
     const render = () => {
-      // Dot follows closely (factor 0.35)
-      dotPos.current.x += (mousePos.current.x - dotPos.current.x) * 0.35;
-      dotPos.current.y += (mousePos.current.y - dotPos.current.y) * 0.35;
+      // White follower disc follows with elegant smooth inertia
+      circlePos.current.x += (mousePos.current.x - circlePos.current.x) * 0.22;
+      circlePos.current.y += (mousePos.current.y - circlePos.current.y) * 0.22;
 
-      // Outer follower follows with elegant inertia (factor 0.16)
-      circlePos.current.x += (mousePos.current.x - circlePos.current.x) * 0.16;
-      circlePos.current.y += (mousePos.current.y - circlePos.current.y) * 0.16;
-
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${dotPos.current.x}px, ${dotPos.current.y}px, 0)`;
-      }
       if (circleRef.current) {
         circleRef.current.style.transform = `translate3d(${circlePos.current.x}px, ${circlePos.current.y}px, 0)`;
       }
@@ -142,37 +147,35 @@ export const CustomCursor: React.FC = () => {
 
     return () => {
       document.body.classList.remove('has-custom-cursor');
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mouseleave', onMouseLeave);
+      document.removeEventListener('mouseenter', onMouseEnter);
+      document.removeEventListener('mouseover', onMouseOver);
+      window.removeEventListener('touchstart', onTouchStart);
       if (animFrameId.current) {
         cancelAnimationFrame(animFrameId.current);
       }
     };
-  }, [isVisible]);
+  }, []);
 
-  if (isTouchDevice) return null;
-
-  // Compute outer circle styles based on variant
+  // Size calculation: Solid white fill, zero center dot, tight border
   const isEnlarged = variant === 'view' || variant === 'play' || variant === 'external';
   const isHover = variant === 'hover';
   const isText = variant === 'text';
 
-  // Size calculation
-  const circleSize = isEnlarged ? 76 : isHover ? 44 : isText ? 4 : 28;
-  const dotSize = isEnlarged ? 0 : isHover ? 0 : isText ? 0 : 6;
+  // Tight default disc: 11px pure solid white. Interactive hover: 34px smooth expansion. Card hover: 74px disc with black text.
+  const circleSize = isEnlarged ? 74 : isHover ? 34 : isText ? 0 : 11;
 
   return (
     <div
-      className={`fixed inset-0 pointer-events-none z-[999999] transition-opacity duration-300 ${
+      className={`fixed inset-0 pointer-events-none z-[9999999] transition-opacity duration-200 ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
       aria-hidden="true"
     >
-      {/* Trailing Outer Ring / Backdrop Disc */}
+      {/* Pure Solid White Cursor Disc (No center dot, zero dot, filled white interior, thin crisp edge) */}
       <div
         ref={circleRef}
         style={{
@@ -182,39 +185,23 @@ export const CustomCursor: React.FC = () => {
           marginTop: `-${circleSize / 2}px`,
         }}
         className={`fixed top-0 left-0 rounded-full flex items-center justify-center transition-[width,height,margin,background-color,border-color,transform] duration-200 ease-out select-none will-change-transform ${
-          isClicking ? 'scale-90' : 'scale-100'
+          isClicking ? 'scale-85' : 'scale-100'
         } ${
           isEnlarged
-            ? variant === 'play'
-              ? 'bg-[#ff4d1d] text-white shadow-xl border border-white/20'
-              : 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] shadow-xl border border-white/10 dark:border-black/10'
+            ? 'bg-black text-white font-mono font-black shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-black'
             : isHover
-            ? 'bg-[#ff4d1d]/15 border border-[#ff4d1d]/60 backdrop-blur-[2px]'
+            ? 'bg-white text-black shadow-[0_4px_16px_rgba(0,0,0,0.18)] border border-black/30'
             : isText
-            ? 'bg-transparent'
-            : 'border border-[#0a0a0a]/30 dark:border-white/30 bg-transparent'
+            ? 'bg-transparent border-transparent'
+            : 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.22)] border border-black/30'
         }`}
       >
         {isEnlarged && label && (
-          <span className="font-mono text-[10px] font-bold tracking-wider uppercase whitespace-nowrap animate-in fade-in duration-150">
+          <span className="font-mono text-[10px] font-black tracking-widest uppercase whitespace-nowrap text-white select-none pointer-events-none">
             {label}
           </span>
         )}
       </div>
-
-      {/* Central Precision Dot */}
-      {dotSize > 0 && (
-        <div
-          ref={dotRef}
-          style={{
-            width: `${dotSize}px`,
-            height: `${dotSize}px`,
-            marginLeft: `-${dotSize / 2}px`,
-            marginTop: `-${dotSize / 2}px`,
-          }}
-          className="fixed top-0 left-0 rounded-full bg-[#ff4d1d] shadow-xs will-change-transform"
-        />
-      )}
     </div>
   );
 };

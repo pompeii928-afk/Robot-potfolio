@@ -77,21 +77,24 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   return (
     <section id="experience" className="relative py-12 sm:py-20 border-t border-[#e2e0da] dark:border-white/10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Stokt Signature Section Header */}
+        {/* Alche Studio Signature Section Header */}
         <div className="mb-8 sm:mb-12">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
-              ( works &amp; ARCHIVES )
+          <div className="flex items-center gap-3 mb-4">
+            <span className="font-mono text-xs text-cyan-700 tracking-widest uppercase font-semibold">
+              02 // SYSTEMS &amp; PHYSICAL BUILDS
             </span>
-            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
+            <span className="h-px flex-1 bg-zinc-200 max-w-[120px]" />
+            <span className="font-mono text-[11px] text-zinc-500 tracking-widest hidden sm:inline">
+              [ EMBEDDED COMPUTING &amp; ROBOTICS ]
+            </span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-[#0a0a0a] dark:text-[#f4f2ee] leading-[1.05]">
-                {lang === 'ko' ? 'Every Project across era & disciplines' : 'Every Project across era & disciplines'}
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-zinc-900 leading-[1.05]">
+                {lang === 'ko' ? '자율주행 & 정밀 로보틱스 시스템 아카이브' : 'Autonomous Systems & Precision Robotics'}
               </h2>
-              <p className="mt-3 text-sm sm:text-base text-[#6e6d6a] dark:text-[#a3a29e] max-w-2xl font-sans leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-2xl font-sans leading-relaxed">
                 {t('projects.subtitle', '직접 설계하고 제작한 자율주행 알고리즘, 임베디드 제어기 및 정밀 로보틱스 하드웨어 실전 아카이브입니다.')}
               </p>
             </div>
@@ -101,7 +104,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               <button
                 onClick={onAddProject}
                 id="add-project-btn"
-                className="px-4 py-2 rounded-full text-xs font-mono font-medium flex items-center gap-2 bg-[#0a0a0a] text-white hover:bg-black dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-all cursor-pointer shrink-0 self-start lg:self-auto shadow-xs"
+                className="px-4 py-2 rounded-full text-xs font-mono font-bold flex items-center gap-2 bg-black text-white hover:bg-zinc-800 transition-all cursor-pointer shrink-0 self-start lg:self-auto shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Register Project</span>
@@ -109,18 +112,18 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             )}
           </div>
 
-          {/* Stokt Filter & View Switcher Bar */}
-          <div className="mt-8 pt-4 pb-3 border-y border-[#e2e0da] dark:border-white/10 flex flex-wrap items-center justify-between gap-4">
+          {/* Alche Studio Filter & View Switcher Bar */}
+          <div className="mt-8 pt-4 pb-3 border-y border-zinc-200 flex flex-wrap items-center justify-between gap-4">
             {/* Filter Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveFilter(cat.id)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                     activeFilter === cat.id
-                      ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold'
-                      : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-black text-white font-bold shadow-xs'
+                      : 'text-zinc-600 hover:text-black bg-zinc-100 hover:bg-zinc-200'
                   }`}
                 >
                   {cat.label}
@@ -129,30 +132,30 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             </div>
 
             {/* View Mode Toggle: Grid vs Archive Table */}
-            <div className="flex items-center gap-1 border border-[#e2e0da] dark:border-white/10 rounded-lg p-0.5 bg-white/70 dark:bg-white/[0.04]">
+            <div className="flex items-center gap-1 border border-zinc-200 rounded-xl p-1 bg-zinc-50 backdrop-blur-md">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-1 rounded-md text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold'
-                    : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white'
+                    ? 'bg-black text-white font-bold shadow-xs'
+                    : 'text-zinc-600 hover:text-black'
                 }`}
                 title="Grid View"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="text-[11px] uppercase tracking-wider font-medium">Grid</span>
+                <span className="text-[11px] uppercase tracking-wider font-semibold">Grid</span>
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-1 rounded-md text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold'
-                    : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white'
+                    ? 'bg-black text-white font-bold shadow-xs'
+                    : 'text-zinc-600 hover:text-black'
                 }`}
                 title="Archive Index List"
               >
                 <List className="w-3.5 h-3.5" />
-                <span className="text-[11px] uppercase tracking-wider font-medium">Index</span>
+                <span className="text-[11px] uppercase tracking-wider font-semibold">Index</span>
               </button>
             </div>
           </div>

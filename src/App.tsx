@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { JourneySection } from './components/JourneySection';
@@ -16,6 +16,9 @@ import { ExternalSiteSection } from './components/ExternalSiteSection';
 import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
+import { Hero3DLogo } from './components/Hero3DLogo';
+import { cyberAudio } from './utils/cyberAudio';
+import { ChevronUp, ChevronDown, Layers } from 'lucide-react';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
 import { ThemeProvider, LanguageProvider, useTheme, useLanguage } from './context/ThemeContext';
@@ -265,17 +268,164 @@ function PortfolioApp() {
       unsubProjects();
       unsubYouTube();
       unsubReviews();
-      unsubWebsites();
     };
   }, []);
 
+  // Alche Studio 3D Rotating Scene Manager
+  const SCENES = [
+    { id: 'hero', key: '01', title: 'MISSION & PHILOSOPHY', categoryId: 'about' },
+    { id: 'projects', key: '02', title: 'SYSTEMS & PHYSICAL BUILDS', categoryId: 'experience' },
+    { id: 'journey', key: '03', title: 'COMPETITION JOURNEY', categoryId: 'journey' },
+    { id: 'awards', key: '04', title: 'HONORS & AWARDS', categoryId: 'awards' },
+    { id: 'skills', key: '05', title: 'SYSTEM CAPABILITIES', categoryId: 'skills' },
+    { id: 'youtube', key: '06', title: 'BROADCAST & MEDIA', categoryId: 'youtube' },
+    { id: 'ecosystem', key: '07', title: 'ECOSYSTEM & REVIEWS', categoryId: 'external-site' },
+  ];
+
+  const [activeSceneIndex, setActiveSceneIndex] = useState<number>(0);
+  const [scrollDirection, setScrollDirection] = useState<number>(1);
+  const [sceneRotation, setSceneRotation] = useState<number>(0);
+  const [scrollMode, setScrollMode] = useState<'3d-scene' | 'continuous'>('3d-scene');
+  const scrollCooldownRef = useRef<boolean>(false);
+
+  // 3D Rotating Scene Wheel, Keyboard & Touch Listeners
+  useEffect(() => {
+    if (activeSection !== 'all' || scrollMode !== '3d-scene') return;
+
+    let touchStartY = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (document.body.classList.contains('modal-open')) return;
+
+      // Always intercept wheel when in 3D Scene Mode so the browser page NEVER scrolls down natively
+      if (activeSection === 'all' && scrollMode === '3d-scene') {
+        e.preventDefault();
+      }
+
+      if (Math.abs(e.deltaY) < 16) return;
+
+      if (scrollCooldownRef.current) return;
+      scrollCooldownRef.current = true;
+      setTimeout(() => {
+        scrollCooldownRef.current = false;
+      }, 550);
+
+      if (e.deltaY > 0) {
+        // Scroll DOWN -> 3D logo rotates and screen turns to next scene
+        setScrollDirection(1);
+        setActiveSceneIndex((prev) => {
+          if (prev < SCENES.length - 1) {
+            setSceneRotation((r) => r + 1.2);
+            cyberAudio.playScanLaser();
+            return prev + 1;
+          }
+          return prev;
+        });
+      } else {
+        // Scroll UP -> 3D logo rotates back and screen turns to previous scene
+        setScrollDirection(-1);
+        setActiveSceneIndex((prev) => {
+          if (prev > 0) {
+            setSceneRotation((r) => r - 1.2);
+            cyberAudio.playKeyTick();
+            return prev - 1;
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
+        e.preventDefault();
+        setScrollDirection(1);
+        setActiveSceneIndex((prev) => {
+          if (prev < SCENES.length - 1) {
+            setSceneRotation((r) => r + 1.2);
+            cyberAudio.playScanLaser();
+            return prev + 1;
+          }
+          return prev;
+        });
+      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        setScrollDirection(-1);
+        setActiveSceneIndex((prev) => {
+          if (prev > 0) {
+            setSceneRotation((r) => r - 1.2);
+            cyberAudio.playKeyTick();
+            return prev - 1;
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+      if (Math.abs(diffY) > 35) {
+        if (scrollCooldownRef.current) return;
+        scrollCooldownRef.current = true;
+        setTimeout(() => {
+          scrollCooldownRef.current = false;
+        }, 550);
+
+        if (diffY > 0) {
+          // Swipe Up -> Turn to Next Scene
+          setScrollDirection(1);
+          setActiveSceneIndex((prev) => {
+            if (prev < SCENES.length - 1) {
+              setSceneRotation((r) => r + 1.2);
+              cyberAudio.playScanLaser();
+              return prev + 1;
+            }
+            return prev;
+          });
+        } else {
+          // Swipe Down -> Turn to Previous Scene
+          setScrollDirection(-1);
+          setActiveSceneIndex((prev) => {
+            if (prev > 0) {
+              setSceneRotation((r) => r - 1.2);
+              cyberAudio.playKeyTick();
+              return prev - 1;
+            }
+            return prev;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [activeSection, scrollMode, SCENES.length]);
+
   const handleNavigate = (sectionId: string) => {
-    setActiveSection(sectionId);
-    if (typeof window !== 'undefined') {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+    const mappedIndex = SCENES.findIndex(
+      (s) => s.categoryId === sectionId || s.id === sectionId
+    );
+    if (mappedIndex !== -1) {
+      setScrollDirection(mappedIndex >= activeSceneIndex ? 1 : -1);
+      setActiveSceneIndex(mappedIndex);
+      setSceneRotation((r) => r + 1.2);
+      cyberAudio.playKeyTick();
+      setActiveSection('all');
+    } else {
+      setActiveSection(sectionId);
     }
   };
 
@@ -620,14 +770,29 @@ function PortfolioApp() {
   const isEditingEnabled = currentPath === '/admin' && isAdmin;
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-[#f5f0e9] dark:bg-[#0a0a0a] text-[#0a0a0a] dark:text-[#f4f2ee] selection:bg-[#ff6a37]/20 selection:text-[#ff4d1d] antialiased">
-      {/* Stokt Custom Animated Cursor */}
+    <div
+      className={`flex flex-col relative bg-white text-zinc-900 selection:bg-black selection:text-white antialiased font-sans ${
+        activeSection === 'all' && scrollMode === '3d-scene'
+          ? 'h-screen max-h-screen overflow-hidden'
+          : 'min-h-screen'
+      }`}
+    >
+      {/* Alche Studio Custom Solid White Cursor */}
       <CustomCursor />
 
-      {/* Subtle Stokt ambient background tone */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[#f5f0e9] dark:bg-[#0a0a0a]" />
+      {/* Persistent 3D WebGL Logo (Rotating dynamically with scroll & scene transitions) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <Hero3DLogo
+          sceneIndex={activeSection === 'all' && scrollMode === '3d-scene' ? activeSceneIndex : 0}
+          rotationProgress={sceneRotation}
+          isWhiteBg={true}
+        />
+      </div>
 
-      {/* Sticky Header with Integrated Category Bar */}
+      {/* Subtle clean ambient gradient */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(0,0,0,0.02),transparent)]" />
+
+      {/* Sticky Header with Integrated Category Bar (No lines) */}
       <div className="sticky top-0 z-50 w-full shrink-0">
         {isEditingEnabled && (
           <AdminBar
@@ -638,7 +803,13 @@ function PortfolioApp() {
           />
         )}
         <Navbar
-          activeSection={activeSection}
+          activeSection={
+            activeSection === 'all' && scrollMode === '3d-scene'
+              ? SCENES[activeSceneIndex].categoryId === 'about'
+                ? 'all'
+                : SCENES[activeSceneIndex].categoryId
+              : activeSection
+          }
           onNavigate={handleNavigate}
           isAdmin={isAdmin}
           visitorName={visitorName}
@@ -657,102 +828,366 @@ function PortfolioApp() {
         />
       </div>
 
-      {/* Main Content Sections with AnimatePresence */}
-      <main className="relative z-10 flex-1 flex flex-col w-full">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -16, filter: 'blur(6px)' }}
-            transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full space-y-6 flex-1 flex flex-col"
+      {/* Main Content Sections: 3D Rotating Scene Flow for 'All' View */}
+      <main
+        className={`relative z-10 flex-1 flex flex-col w-full ${
+          activeSection === 'all' && scrollMode === '3d-scene' ? 'overflow-hidden' : ''
+        }`}
+      >
+        {activeSection === 'all' && scrollMode === '3d-scene' ? (
+          /* 3D Rotating Scene Transitions (Scroll triggers 3D screen rotation & reveals scene) */
+          <div
+            className="w-full flex-1 flex flex-col overflow-hidden"
+            style={{ perspective: 1400 }}
           >
-            {(activeSection === 'all' || activeSection === 'about') && (
-              <HeroSection
-                aboutData={aboutData}
-                isAdmin={isEditingEnabled}
-                onEditAbout={() => setIsEditAboutOpen(true)}
-                onExploreProjects={() => handleNavigate('experience')}
-                onNavigate={handleNavigate}
-              />
-            )}
+            <AnimatePresence mode="wait" custom={scrollDirection}>
+              <motion.div
+                key={activeSceneIndex}
+                custom={scrollDirection}
+                initial={(dir: number) => ({
+                  opacity: 0,
+                  rotateY: dir > 0 ? 38 : -38,
+                  rotateX: dir > 0 ? 8 : -8,
+                  translateZ: -140,
+                  scale: 0.9,
+                  filter: 'blur(8px)',
+                })}
+                animate={{
+                  opacity: 1,
+                  rotateY: 0,
+                  rotateX: 0,
+                  translateZ: 0,
+                  scale: 1,
+                  filter: 'blur(0px)',
+                  transition: {
+                    duration: 0.58,
+                    ease: [0.16, 1, 0.3, 1],
+                  },
+                }}
+                exit={(dir: number) => ({
+                  opacity: 0,
+                  rotateY: dir > 0 ? -38 : 38,
+                  rotateX: dir > 0 ? -8 : 8,
+                  translateZ: -140,
+                  scale: 0.9,
+                  filter: 'blur(8px)',
+                  transition: {
+                    duration: 0.46,
+                    ease: [0.16, 1, 0.3, 1],
+                  },
+                })}
+                style={{ transformStyle: 'preserve-3d' }}
+                className="w-full flex-1 flex flex-col overflow-y-auto no-scrollbar scroll-smooth overscroll-contain"
+              >
+                {activeSceneIndex === 0 && (
+                  <div className="flex-1 flex flex-col justify-between py-2 sm:py-6">
+                    <HeroSection
+                      aboutData={aboutData}
+                      isAdmin={isEditingEnabled}
+                      onEditAbout={() => setIsEditAboutOpen(true)}
+                      onExploreProjects={() => {
+                        setScrollDirection(1);
+                        setActiveSceneIndex(1);
+                        setSceneRotation((r) => r + 1.2);
+                        cyberAudio.playScanLaser();
+                      }}
+                      onNavigate={handleNavigate}
+                    />
+                    {/* Alche Studio Scroll Cue */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 pt-4 flex justify-between items-center text-xs font-mono text-zinc-500">
+                      <button
+                        onClick={() => {
+                          setScrollDirection(1);
+                          setActiveSceneIndex(1);
+                          setSceneRotation((r) => r + 1.2);
+                          cyberAudio.playScanLaser();
+                        }}
+                        className="flex items-center gap-2 hover:text-black transition-colors cursor-pointer group"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
+                        <span className="tracking-widest uppercase font-semibold">
+                          SCROLL DOWN TO ROTATE SCENE ↓
+                        </span>
+                      </button>
+                      <span className="tracking-widest text-zinc-400 font-semibold">
+                        [ 01 / 07 ] MISSION &amp; PHILOSOPHY
+                      </span>
+                    </div>
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'reviews') && (
-              <CompetitionReviewsSection
-                reviews={reviews}
-                isAdmin={isEditingEnabled}
-                onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
-                onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
-                onDeleteReview={handleDeleteReview}
-              />
-            )}
+                {activeSceneIndex === 1 && (
+                  <div className="flex-1 flex flex-col pb-24 pt-4">
+                    <ProjectsSection
+                      projects={projects}
+                      isAdmin={isEditingEnabled}
+                      onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
+                      onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
+                      onDeleteProject={handleDeleteProject}
+                    />
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'journey') && (
-              <JourneySection
-                journeys={journeys}
-                isAdmin={isEditingEnabled}
-                onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
-                onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
-                onDeleteJourney={handleDeleteJourney}
-              />
-            )}
+                {activeSceneIndex === 2 && (
+                  <div className="flex-1 flex flex-col pb-24 pt-4">
+                    <JourneySection
+                      journeys={journeys}
+                      isAdmin={isEditingEnabled}
+                      onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
+                      onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
+                      onDeleteJourney={handleDeleteJourney}
+                    />
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'awards') && (
-              <AwardsSection
-                awards={awards}
-                isAdmin={isEditingEnabled}
-                onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
-                onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
-                onDeleteAward={handleDeleteAward}
-              />
-            )}
+                {activeSceneIndex === 3 && (
+                  <div className="flex-1 flex flex-col pb-24 pt-4">
+                    <AwardsSection
+                      awards={awards}
+                      isAdmin={isEditingEnabled}
+                      onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
+                      onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
+                      onDeleteAward={handleDeleteAward}
+                    />
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'skills') && (
-              <SkillsSection
-                skills={skills}
-                isAdmin={isEditingEnabled}
-                onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
-                onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
-                onDeleteSkill={handleDeleteSkill}
-              />
-            )}
+                {activeSceneIndex === 4 && (
+                  <div className="flex-1 flex flex-col pb-24 pt-4">
+                    <SkillsSection
+                      skills={skills}
+                      isAdmin={isEditingEnabled}
+                      onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
+                      onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
+                      onDeleteSkill={handleDeleteSkill}
+                    />
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'experience') && (
-              <ProjectsSection
-                projects={projects}
-                isAdmin={isEditingEnabled}
-                onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
-                onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
-                onDeleteProject={handleDeleteProject}
-              />
-            )}
+                {activeSceneIndex === 5 && (
+                  <div className="flex-1 flex flex-col pb-24 pt-4">
+                    <YouTubeSection
+                      videos={youtubeVideos}
+                      isAdmin={isEditingEnabled}
+                      onAddVideo={() => setYoutubeModalData({ isOpen: true, item: null })}
+                      onEditVideo={(video) => setYoutubeModalData({ isOpen: true, item: video })}
+                      onDeleteVideo={handleDeleteYouTubeVideo}
+                    />
+                  </div>
+                )}
 
-            {(activeSection === 'all' || activeSection === 'youtube') && (
-              <YouTubeSection
-                videos={youtubeVideos}
-                isAdmin={isEditingEnabled}
-                onAddVideo={() => setYoutubeModalData({ isOpen: true, item: null })}
-                onEditVideo={(video) => setYoutubeModalData({ isOpen: true, item: video })}
-                onDeleteVideo={handleDeleteYouTubeVideo}
-              />
-            )}
+                {activeSceneIndex === 6 && (
+                  <div className="space-y-8 flex-1 flex flex-col justify-between pb-24 pt-4">
+                    <div className="space-y-12">
+                      <ExternalSiteSection
+                        sites={websites}
+                        isAdmin={isEditingEnabled}
+                        onAddSite={() => setWebsiteModalData({ isOpen: true, item: null })}
+                        onEditSite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
+                        onDeleteSite={handleDeleteWebsite}
+                      />
+                      <CompetitionReviewsSection
+                        reviews={reviews}
+                        isAdmin={isEditingEnabled}
+                        onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
+                        onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
+                        onDeleteReview={handleDeleteReview}
+                      />
+                    </div>
+                    <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        ) : (
+          /* Continuous Scroll or Single Section Mode */
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSection}
+              initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -16, filter: 'blur(4px)' }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full space-y-6 flex-1 flex flex-col"
+            >
+              {(activeSection === 'all' || activeSection === 'about') && (
+                <HeroSection
+                  aboutData={aboutData}
+                  isAdmin={isEditingEnabled}
+                  onEditAbout={() => setIsEditAboutOpen(true)}
+                  onExploreProjects={() => handleNavigate('experience')}
+                  onNavigate={handleNavigate}
+                />
+              )}
 
-            {(activeSection === 'all' || activeSection === 'external-site') && (
-              <ExternalSiteSection
-                sites={websites}
-                isAdmin={isEditingEnabled}
-                onAddSite={() => setWebsiteModalData({ isOpen: true, item: null })}
-                onEditSite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
-                onDeleteSite={handleDeleteWebsite}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+              {(activeSection === 'all' || activeSection === 'experience') && (
+                <ProjectsSection
+                  projects={projects}
+                  isAdmin={isEditingEnabled}
+                  onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
+                  onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
+                  onDeleteProject={handleDeleteProject}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'journey') && (
+                <JourneySection
+                  journeys={journeys}
+                  isAdmin={isEditingEnabled}
+                  onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
+                  onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
+                  onDeleteJourney={handleDeleteJourney}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'awards') && (
+                <AwardsSection
+                  awards={awards}
+                  isAdmin={isEditingEnabled}
+                  onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
+                  onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
+                  onDeleteAward={handleDeleteAward}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'skills') && (
+                <SkillsSection
+                  skills={skills}
+                  isAdmin={isEditingEnabled}
+                  onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
+                  onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
+                  onDeleteSkill={handleDeleteSkill}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'youtube') && (
+                <YouTubeSection
+                  videos={youtubeVideos}
+                  isAdmin={isEditingEnabled}
+                  onAddVideo={() => setYoutubeModalData({ isOpen: true, item: null })}
+                  onEditVideo={(video) => setYoutubeModalData({ isOpen: true, item: video })}
+                  onDeleteVideo={handleDeleteYouTubeVideo}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'external-site') && (
+                <ExternalSiteSection
+                  sites={websites}
+                  isAdmin={isEditingEnabled}
+                  onAddSite={() => setWebsiteModalData({ isOpen: true, item: null })}
+                  onEditSite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
+                  onDeleteSite={handleDeleteWebsite}
+                />
+              )}
+
+              {(activeSection === 'all' || activeSection === 'reviews') && (
+                <CompetitionReviewsSection
+                  reviews={reviews}
+                  isAdmin={isEditingEnabled}
+                  onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
+                  onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
+                  onDeleteReview={handleDeleteReview}
+                />
+              )}
+
+              {activeSection === 'all' && (
+                <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </main>
 
-      {/* Footer */}
-      <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
+      {/* Alche Studio Floating 3D Scene Controller HUD */}
+      {activeSection === 'all' && (
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-4 bg-white/95 backdrop-blur-2xl border border-zinc-200/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] px-4 sm:px-6 py-2 rounded-full font-mono text-xs select-none">
+          {/* Previous Scene Button */}
+          <button
+            onClick={() => {
+              if (activeSceneIndex > 0) {
+                setScrollDirection(-1);
+                setActiveSceneIndex((prev) => prev - 1);
+                setSceneRotation((r) => r - 1.2);
+                cyberAudio.playKeyTick();
+              }
+            }}
+            disabled={activeSceneIndex === 0 || scrollMode !== '3d-scene'}
+            className="p-1.5 rounded-full text-zinc-700 hover:text-black hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Previous Scene (Scroll Up)"
+            aria-label="Previous Scene"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
+
+          {/* Current Scene Index & Title */}
+          <div className="flex items-center gap-1.5 px-1 min-w-0">
+            <span className="font-bold text-black">{SCENES[activeSceneIndex].key}</span>
+            <span className="text-zinc-400">/</span>
+            <span className="text-zinc-500">{`0${SCENES.length}`}</span>
+            <span className="hidden md:inline font-semibold text-zinc-800 ml-1 truncate max-w-[200px]">
+              [ {SCENES[activeSceneIndex].title} ]
+            </span>
+          </div>
+
+          {/* 7 Interactive Stage Dots */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2 border-x border-zinc-200">
+            {SCENES.map((scene, idx) => (
+              <button
+                key={scene.id}
+                onClick={() => {
+                  setScrollDirection(idx >= activeSceneIndex ? 1 : -1);
+                  setActiveSceneIndex(idx);
+                  setSceneRotation((r) => r + 1.2);
+                  cyberAudio.playKeyTick();
+                }}
+                className={`h-2 rounded-full transition-all cursor-pointer ${
+                  activeSceneIndex === idx
+                    ? 'w-6 bg-black'
+                    : 'w-2 bg-zinc-300 hover:bg-zinc-500'
+                }`}
+                title={scene.title}
+              />
+            ))}
+          </div>
+
+          {/* Next Scene Button */}
+          <button
+            onClick={() => {
+              if (activeSceneIndex < SCENES.length - 1) {
+                setScrollDirection(1);
+                setActiveSceneIndex((prev) => prev + 1);
+                setSceneRotation((r) => r + 1.2);
+                cyberAudio.playScanLaser();
+              }
+            }}
+            disabled={activeSceneIndex === SCENES.length - 1 || scrollMode !== '3d-scene'}
+            className="p-1.5 rounded-full text-zinc-700 hover:text-black hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Next Scene (Scroll Down)"
+            aria-label="Next Scene"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+
+          {/* 3D Scene Flow / Continuous Scroll Toggle */}
+          <button
+            onClick={() => {
+              setScrollMode((prev) => (prev === '3d-scene' ? 'continuous' : '3d-scene'));
+              cyberAudio.playKeyTick();
+            }}
+            className="ml-1 pl-2 sm:pl-3 border-l border-zinc-200 text-zinc-600 hover:text-black text-[11px] flex items-center gap-1 cursor-pointer font-semibold"
+            title={scrollMode === '3d-scene' ? 'Switch to Continuous Scroll' : 'Switch to 3D Rotating Scenes'}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">{scrollMode === '3d-scene' ? '3D SCENE' : 'CONTINUOUS'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Footer for single section views (when not in 'all' view) */}
+      {activeSection !== 'all' && (
+        <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
+      )}
 
       {/* Modals for Editing Content (Only operable when admin modal is opened) */}
       {isEditingEnabled && (

@@ -36,7 +36,7 @@ export const AdminBar: React.FC<AdminBarProps> = ({
   const displayEmail = currentUser?.email || userProfile?.email || adminUser?.email;
 
   return (
-    <div className="w-full px-4 sm:px-8 py-2.5 text-xs font-sans bg-[#f7f6f3] border-b border-[#e3e2de] text-[#37352f]">
+    <div className="w-full px-4 sm:px-8 py-2.5 text-xs font-sans bg-[#f7f6f3] border-none text-[#37352f]">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Left: Admin Status Indicator */}
         <div className="flex items-center gap-2.5 flex-wrap">

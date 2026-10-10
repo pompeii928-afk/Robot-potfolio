@@ -40,7 +40,7 @@ export const THEME_STORAGE_KEY = 'kfc_theme_mode';
 export const LANG_STORAGE_KEY = 'kfc_language';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const theme: ThemeMode = 'light';
+  const [theme, setThemeState] = useState<ThemeMode>('light');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -50,11 +50,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const toggleTheme = () => {
-    // Kept for interface compatibility; no-op in clean Notion light mode
+    // Alche Studio signature deep void theme
   };
 
-  const setTheme = () => {
-    // Kept for interface compatibility
+  const setTheme = (newTheme: ThemeMode) => {
+    setThemeState(newTheme);
   };
 
   return (

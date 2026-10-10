@@ -15,6 +15,7 @@ import {
   Plus,
   Edit3,
   Trash2,
+  Zap,
 } from 'lucide-react';
 import { SkillItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
@@ -119,47 +120,58 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
   };
 
   return (
-    <section id="skills" className="relative py-10 sm:py-14 border-t border-[#e3e2de] scroll-mt-20">
+    <section id="skills" className="relative py-12 sm:py-20 border-t border-[#e2e0da] dark:border-white/10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Notion Section Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl select-none">⚡</span>
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#37352f] tracking-tight">
-                {t('skills.title', '기술 스택 및 핵심 역량')}
-              </h2>
-              <p className="text-xs sm:text-sm text-[#787774] mt-0.5">
-                {t('skills.subtitle', '하드웨어 설계, 펌웨어 제어, 알고리즘 구현 역량입니다.')}
-              </p>
-            </div>
+        {/* Stokt Section Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+              ( 04 / DISCIPLINES &amp; CAPABILITIES )
+            </span>
+            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
           </div>
 
-          {/* Admin Action: Add Skill */}
-          {isAdmin && onAddSkill && (
-            <button
-              onClick={onAddSkill}
-              id="add-skill-btn"
-              className="px-3 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#787774]" />
-              <span>{t('skills.addBtn', '새 역량 추가')}</span>
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-orange-500/15 border border-amber-500/25 text-amber-500 shadow-2xs shrink-0 select-none transition-all duration-300 hover:scale-105 hover:border-amber-500/40">
+                <Zap className="w-5 h-5 text-amber-500 fill-amber-500/20 stroke-[2.2]" />
+              </span>
+              <div>
+                <h2 className="text-2xl sm:text-4xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                  {t('skills.title', '기술 스택 및 핵심 역량')}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-sans">
+                  {t('skills.subtitle', '하드웨어 설계, 펌웨어 제어, 알고리즘 구현 역량입니다.')}
+                </p>
+              </div>
+            </div>
+
+            {/* Admin Action: Add Skill */}
+            {isAdmin && onAddSkill && (
+              <button
+                onClick={onAddSkill}
+                id="add-skill-btn"
+                className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Capability</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Notion Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-6">
+        {/* Stokt Category Filter Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-2 mb-6">
           {categories.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-md text-xs font-sans font-medium transition-colors cursor-pointer border ${
+                className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-[#37352f] text-white border-[#37352f]'
-                    : 'bg-[#f7f6f3] text-[#787774] border-[#e3e2de] hover:bg-[#efefed] hover:text-[#37352f]'
+                    ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
+                    : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
                 {getCategoryLabel(cat)}
@@ -169,26 +181,26 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
         </div>
 
         {filteredSkills.length === 0 ? (
-          <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
+          <div className="p-8 text-center rounded-2xl border border-dashed border-[#e2e0da] dark:border-white/10 bg-white/40 dark:bg-white/[0.02] text-sm text-[#6e6d6a] dark:text-[#a3a29e]">
             {t('skills.empty', '해당 카테고리에 등록된 기술 역량이 없습니다.')}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredSkills.map((skill) => {
               const rawSkill = skills.find((s) => s.id === skill.id) || skill;
 
               return (
                 <div
                   key={skill.id}
-                  className="relative p-5 rounded-xl border border-[#e3e2de] bg-white hover:bg-[#fbfbfa] transition-colors flex flex-col justify-between group shadow-2xs"
+                  className="relative p-6 rounded-2xl border border-[#e2e0da] dark:border-white/10 bg-white dark:bg-[#121318] hover:border-[#0a0a0a]/30 dark:hover:border-white/30 transition-all duration-200 flex flex-col justify-between group shadow-2xs hover:shadow-lg"
                 >
                   {/* Admin Actions */}
                   {isAdmin && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
+                    <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
                       {onEditSkill && (
                         <button
                           onClick={() => onEditSkill(rawSkill)}
-                          className="p-1 rounded text-xs bg-[#f7f6f3] hover:bg-[#efefed] text-[#787774] border border-[#e3e2de] cursor-pointer"
+                          className="p-1 rounded text-xs bg-white/90 dark:bg-black/80 hover:bg-[#eae8e2] text-[#6e6d6a] dark:text-[#a3a29e] border border-[#e2e0da] dark:border-white/20 cursor-pointer shadow-xs"
                           title="Edit"
                         >
                           <Edit3 className="w-3 h-3" />
@@ -197,7 +209,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                       {onDeleteSkill && (
                         <button
                           onClick={() => setSkillToDelete(rawSkill)}
-                          className="p-1 rounded text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 cursor-pointer"
+                          className="p-1 rounded text-xs bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 cursor-pointer shadow-xs"
                           title="Delete"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -207,44 +219,40 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                   )}
 
                   <div>
-                    {/* Category & Proficiency */}
-                    <div className="flex items-center justify-between gap-2 mb-2.5 pr-12">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-mono font-medium border ${getCategoryTagStyle(
-                          skill.category
-                        )}`}
-                      >
-                        {skill.category}
+                    {/* Category & Proficiency (Clean unboxed Stokt metadata) */}
+                    <div className="flex items-center justify-between gap-2 mb-3 pr-12 text-xs font-mono">
+                      <span className="text-[#6e6d6a] dark:text-[#a3a29e] uppercase tracking-wider text-[11px]">
+                        ( {skill.category} )
                       </span>
                       {skill.proficiency !== undefined && (
-                        <span className="text-xs font-mono font-semibold text-[#787774]">
+                        <span className="font-semibold text-[#0a0a0a] dark:text-[#f4f2ee]">
                           {skill.proficiency}%
                         </span>
                       )}
                     </div>
 
                     {/* Skill Name */}
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-md bg-[#f7f6f3] border border-[#e3e2de] flex items-center justify-center text-[#37352f]">
+                    <div className="flex items-center gap-2.5 mb-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#f5f0e9] dark:bg-white/[0.06] border border-[#e2e0da] dark:border-white/10 flex items-center justify-center text-[#0a0a0a] dark:text-[#f4f2ee] shrink-0 group-hover:scale-105 transition-transform">
                         {renderIcon(skill.iconName || 'Cpu')}
                       </div>
-                      <h4 className="text-base font-sans font-bold text-[#37352f]">
+                      <h4 className="text-base font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
                         {skill.name}
                       </h4>
                     </div>
 
                     {/* Description */}
-                    <p className="text-xs font-sans text-[#5a5854] leading-relaxed mb-4 whitespace-pre-line">
+                    <p className="text-xs sm:text-sm font-sans text-[#4a4946] dark:text-[#b4b3ae] leading-relaxed mb-4 whitespace-pre-line">
                       {skill.description}
                     </p>
                   </div>
 
-                  {/* Proficiency Bar (Notion Progress) */}
+                  {/* Proficiency Bar (Minimalist Stokt Track) */}
                   {skill.proficiency !== undefined && (
-                    <div className="space-y-1 pt-2 border-t border-[#e3e2de]">
-                      <div className="h-1.5 w-full rounded-full bg-[#f1f1ef] overflow-hidden">
+                    <div className="space-y-1.5 pt-3 border-t border-[#e2e0da] dark:border-white/10">
+                      <div className="h-1 w-full rounded-full bg-[#eae8e2] dark:bg-white/10 overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-[#37352f]"
+                          className="h-full rounded-full bg-[#0a0a0a] dark:bg-[#f4f2ee] group-hover:bg-[#ff6a37] transition-all duration-300"
                           style={{ width: `${Math.min(Math.max(skill.proficiency, 5), 100)}%` }}
                         />
                       </div>

@@ -2,27 +2,27 @@
 
 @layer base {
   :root {
-    --bg-primary: #070b14;
-    --bg-secondary: #0b1120;
-    --bg-card: #0f172a;
-    --bg-card-sub: #090e1a;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --border-accent: rgba(6, 182, 212, 0.3);
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    --bg-primary: #0a0b0e;
+    --bg-secondary: #121318;
+    --bg-card: #15161c;
+    --bg-card-sub: #101116;
+    --text-primary: #f4f2ee;
+    --text-secondary: #a3a29e;
+    --text-muted: #6e6d6a;
+    --border-accent: rgba(244, 242, 238, 0.4);
+    --border-subtle: rgba(255, 255, 255, 0.09);
   }
 
   html.light {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
+    --bg-primary: #f4f2ee;
+    --bg-secondary: #eae8e2;
     --bg-card: #ffffff;
-    --bg-card-sub: #f8fafc;
-    --text-primary: #09090b;
-    --text-secondary: #3f3f46;
-    --text-muted: #71717a;
-    --border-accent: rgba(9, 9, 11, 0.85);
-    --border-subtle: rgba(228, 228, 231, 0.9);
+    --bg-card-sub: #faf9f6;
+    --text-primary: #0a0a0a;
+    --text-secondary: #4a4946;
+    --text-muted: #82807c;
+    --border-accent: #0a0a0a;
+    --border-subtle: #e2e0da;
   }
 
   html, body, #root {
@@ -38,12 +38,12 @@
   body {
     font-family: 'Plus Jakarta Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-primary);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   /* Prevent mobile browsers from auto-zooming and misaligning viewport on input focus */
@@ -56,8 +56,8 @@
   }
 
   html.light body {
-    background-color: #ffffff;
-    color: #18181b;
+    background-color: #f4f2ee;
+    color: #0a0a0a;
   }
 
   code, pre, .font-mono {
@@ -66,13 +66,18 @@
   }
 
   .font-display {
-    font-family: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+    font-family: 'Space Grotesk', 'Outfit', -apple-system, sans-serif;
+    letter-spacing: -0.035em;
+  }
+
+  .font-editorial {
+    font-family: 'Plus Jakarta Sans', 'Space Grotesk', sans-serif;
     letter-spacing: -0.03em;
   }
 
   .font-tech {
-    font-family: 'Space Grotesk', 'Outfit', sans-serif;
-    letter-spacing: -0.015em;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -252,4 +257,23 @@ html.light .bg-blueprint-dots {
 
 html.light .box-glow-gold {
   box-shadow: 0 10px 30px -4px rgba(217, 119, 6, 0.25), 0 4px 10px -2px rgba(217, 119, 6, 0.15);
+}
+
+/* Stokt Custom Cursor Support (Fine Pointer Devices Only) */
+@media (pointer: fine) {
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"],
+  body.has-custom-cursor .cursor-pointer,
+  body.has-custom-cursor summary,
+  body.has-custom-cursor select {
+    cursor: none !important;
+  }
+
+  body.has-custom-cursor input,
+  body.has-custom-cursor textarea,
+  body.has-custom-cursor [contenteditable="true"] {
+    cursor: text !important;
+  }
 }

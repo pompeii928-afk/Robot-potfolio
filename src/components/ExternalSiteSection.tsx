@@ -96,23 +96,31 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
       id="external-site"
       className={`relative w-full transition-all duration-300 scroll-mt-20 ${
         isExpanded ? 'px-2 sm:px-4' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
-      } py-4 sm:py-6`}
+      } py-6 sm:py-10`}
     >
+      {/* Stokt Section Kicker */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+          ( 06 / STORE &amp; SATELLITE SITES )
+        </span>
+        <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
+      </div>
+
       {/* Header Info & Toolbar */}
-      <div className="mb-4 p-4 sm:p-5 rounded-2xl bg-[#f7f6f3] border border-[#e3e2de] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Left: Site Identity (Targeted LIVE CONNECTED badge has been removed as requested) */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#1a1a18] text-white flex items-center justify-center shrink-0 shadow-xs border border-zinc-700">
-            <Store className="w-5 h-5 text-amber-400" />
+      <div className="mb-4 p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#121318] border border-[#e2e0da] dark:border-white/10 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Left: Site Identity */}
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#0a0a0a] dark:bg-white/[0.08] text-white flex items-center justify-center shrink-0 shadow-xs border border-[#e2e0da] dark:border-white/20">
+            <Store className="w-5 h-5 text-amber-500 dark:text-amber-400" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base sm:text-lg font-bold text-[#37352f] leading-snug truncate">
-                {t('nav.otherSite', '다른 왭사이트')}
+              <h2 className="text-base sm:text-lg font-bold font-sans text-[#0a0a0a] dark:text-[#f4f2ee] leading-snug tracking-tight truncate">
+                {t('nav.otherSite', '다른 웹사이트')}
               </h2>
             </div>
-            <p className="text-xs text-[#787774] truncate mt-0.5">
-              {activeTitle} • {activeDescription}
+            <p className="text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e] truncate mt-0.5">
+              {activeTitle} · {activeDescription}
             </p>
           </div>
         </div>
@@ -124,11 +132,11 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
             <button
               onClick={onAddSite}
               id="admin-add-website-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium bg-[#0a0a0a] text-white hover:bg-black dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
               title="새 웹사이트 추가 (관리자)"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>새 웹사이트 추가</span>
+              <span>+ Add Website</span>
             </button>
           )}
 

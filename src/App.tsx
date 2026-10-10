@@ -20,6 +20,7 @@ import { AuthProvider, useAuth } from './firebase/AuthContext';
 import { ToastProvider, useToast } from './components/Toast';
 import { ThemeProvider, LanguageProvider, useTheme, useLanguage } from './context/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { CustomCursor } from './components/CustomCursor';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   subscribeAboutConfig,
@@ -619,9 +620,12 @@ function PortfolioApp() {
   const isEditingEnabled = currentPath === '/admin' && isAdmin;
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-white text-[#37352f] selection:bg-[#efefed] selection:text-[#37352f] antialiased">
-      {/* Subtle Notion page top border/gradient */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[#ffffff]" />
+    <div className="min-h-screen flex flex-col relative bg-[#f5f0e9] dark:bg-[#0a0a0a] text-[#0a0a0a] dark:text-[#f4f2ee] selection:bg-[#ff6a37]/20 selection:text-[#ff4d1d] antialiased">
+      {/* Stokt Custom Animated Cursor */}
+      <CustomCursor />
+
+      {/* Subtle Stokt ambient background tone */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[#f5f0e9] dark:bg-[#0a0a0a]" />
 
       {/* Sticky Header with Integrated Category Bar */}
       <div className="sticky top-0 z-50 w-full shrink-0">

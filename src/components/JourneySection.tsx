@@ -10,6 +10,7 @@ import {
   Gauge,
   Calendar,
   ChevronRight,
+  Compass,
 } from 'lucide-react';
 import { JourneyItem } from '../types';
 import { ConfirmModal } from './modals/ConfirmModal';
@@ -72,33 +73,44 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   };
 
   return (
-    <section id="journey" className="relative py-10 sm:py-14 border-t border-[#e3e2de] scroll-mt-20">
+    <section id="journey" className="relative py-12 sm:py-20 border-t border-[#e2e0da] dark:border-white/10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Notion Section Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl select-none">🗺️</span>
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-sans font-bold text-[#37352f] tracking-tight">
-                {t('journey.title', '대회 및 연구 여정')}
-              </h2>
-              <p className="text-xs sm:text-sm text-[#787774] mt-0.5">
-                {t('journey.subtitle', '실패와 성공, 문제 해결을 통해 축적된 엔지니어링 기록입니다.')}
-              </p>
-            </div>
+        {/* Stokt Section Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+              ( 02 / TIMELINE &amp; LOGS )
+            </span>
+            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
           </div>
 
-          {/* Admin Action: Add Journey */}
-          {isAdmin && onAddJourney && (
-            <button
-              onClick={onAddJourney}
-              id="add-journey-btn"
-              className="px-3 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 bg-[#f7f6f3] hover:bg-[#efefed] text-[#37352f] border border-[#e3e2de] transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#787774]" />
-              <span>{t('journey.addBtn', '새 여정 추가')}</span>
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/15 via-sky-500/10 to-teal-500/15 border border-indigo-500/25 text-indigo-600 shadow-2xs shrink-0 select-none transition-all duration-300 hover:scale-105 hover:border-indigo-500/40">
+                <Compass className="w-5 h-5 text-indigo-600 stroke-[2.2]" />
+              </span>
+              <div>
+                <h2 className="text-2xl sm:text-4xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                  {t('journey.title', '대회 및 연구 여정')}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-sans">
+                  {t('journey.subtitle', '실패와 성공, 문제 해결을 통해 축적된 엔지니어링 기록입니다.')}
+                </p>
+              </div>
+            </div>
+
+            {/* Admin Action: Add Journey */}
+            {isAdmin && onAddJourney && (
+              <button
+                onClick={onAddJourney}
+                id="add-journey-btn"
+                className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Log</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {journeys.length === 0 ? (
@@ -107,8 +119,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Notion Database Horizontal Tab Selector */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 border-b border-[#e3e2de]">
+            {/* Stokt Timeline Horizontal Tab Selector */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-2 border-b border-[#e2e0da] dark:border-white/10">
               {localizedJourneys.map((item, idx) => {
                 const rawItem = journeys[idx] || item;
                 const isSelected = selectedItem?.id === item.id;
@@ -118,19 +130,19 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center rounded-t-md border-t border-x transition-colors ${
-                      isSelected
-                        ? 'bg-white border-[#e3e2de] text-[#37352f] shadow-2xs font-semibold'
-                        : 'bg-[#f7f6f3] border-transparent text-[#787774] hover:text-[#37352f] hover:bg-[#efefed]'
-                    }`}
+                    className="flex items-center shrink-0"
                   >
                     <button
                       type="button"
                       onClick={() => setSelectedJourneyId(item.id)}
-                      className="flex items-center gap-2 px-3.5 py-2 text-xs font-sans cursor-pointer whitespace-nowrap"
+                      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
+                          : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
+                      }`}
                     >
-                      <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[#e3e2de]/60 text-[#5a5854]">
-                        {item.step || idx + 1}
+                      <span className="text-[11px] font-mono opacity-70">
+                        ( {String(item.step || idx + 1).padStart(2, '0')} )
                       </span>
                       <span>{itemYear}</span>
                       <span className="max-w-[140px] truncate">{itemTitle}</span>
@@ -143,7 +155,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                           e.stopPropagation();
                           setJourneyToDelete(rawItem);
                         }}
-                        className="p-1.5 mr-1 text-[#787774] hover:text-red-600 rounded transition-colors cursor-pointer"
+                        className="p-1 ml-1 text-[#6e6d6a] hover:text-rose-600 rounded transition-colors cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -156,40 +168,40 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
             {/* Selected Journey Document Page */}
             {selectedItem && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white border border-[#e3e2de] rounded-xl p-5 sm:p-7 shadow-xs">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 bg-white dark:bg-[#121318] border border-[#e2e0da] dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xs">
                 {/* Left Column: Metadata & Overview */}
-                <div className="lg:col-span-5 space-y-5 lg:border-r lg:border-[#e3e2de] lg:pr-6">
+                <div className="lg:col-span-5 space-y-5 lg:border-r lg:border-[#e2e0da] dark:lg:border-white/10 lg:pr-6">
                   {/* Step & Competition Title */}
                   <div>
-                    <div className="flex items-center gap-2 text-xs font-mono text-[#787774] mb-1">
+                    <div className="flex items-center gap-2 text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e] mb-1.5">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{selectedItem.year || selectedItem.season || ''}</span>
-                      <span>•</span>
-                      <span className="px-1.5 py-0.2 rounded bg-[#f1f1ef] text-[#37352f]">
-                        STEP {selectedItem.step || 1}
+                      <span>·</span>
+                      <span className="font-semibold text-[#0a0a0a] dark:text-[#f4f2ee]">
+                        ( STEP {String(selectedItem.step || 1).padStart(2, '0')} )
                       </span>
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-sans font-bold text-[#37352f] leading-snug">
+                    <h3 className="text-xl sm:text-2xl font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] leading-snug tracking-tight">
                       {selectedItem.competition || selectedItem.title || ''}
                     </h3>
                   </div>
 
-                  {/* Award Tag (Notion Yellow/Gold Tag) */}
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#fbf3db] border border-[#f5e9d3] text-xs font-sans font-medium text-[#8f5b1d]">
+                  {/* Award Tag (Clean Stokt Monospace Tag) */}
+                  <div className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-amber-600 dark:text-amber-400">
                     <span>🏆</span>
                     <span>{selectedItem.award || t('journey.inProgress', '대회 참가 / 진행')}</span>
                   </div>
 
                   {/* Summary Text */}
-                  <p className="text-sm font-sans text-[#37352f] leading-relaxed whitespace-pre-line">
+                  <p className="text-sm font-sans text-[#4a4946] dark:text-[#b4b3ae] leading-relaxed whitespace-pre-line">
                     {selectedItem.summary || selectedItem.description || ''}
                   </p>
 
                   {/* Team Callout */}
-                  <div className="p-3 rounded-lg bg-[#f7f6f3] border border-[#e3e2de] flex items-center gap-2.5 text-xs text-[#37352f]">
-                    <Users className="w-4 h-4 text-[#787774] shrink-0" />
+                  <div className="p-3.5 rounded-xl bg-[#f5f0e9]/70 dark:bg-white/[0.04] border border-[#e2e0da] dark:border-white/10 flex items-center gap-2.5 text-xs text-[#0a0a0a] dark:text-[#f4f2ee]">
+                    <Users className="w-4 h-4 text-[#6e6d6a] dark:text-[#a3a29e] shrink-0" />
                     <div>
-                      <span className="text-[#787774] mr-1.5">{t('journey.team', '팀')}:</span>
+                      <span className="text-[#6e6d6a] dark:text-[#a3a29e] mr-1.5 font-mono">{t('journey.team', '팀')}:</span>
                       <span className="font-semibold">{selectedItem.teamName || selectedItem.team || 'Team K.F.C.Code Chaser'}</span>
                     </div>
                   </div>

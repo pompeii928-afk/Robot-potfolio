@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   CheckCircle2,
@@ -39,7 +39,75 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
   const [expandedCodeId, setExpandedCodeId] = useState<string | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
+  const modalContainerRef = useRef<HTMLDivElement>(null);
+  const modalBodyRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
   const project = rawProject ? getLocalizedProject(rawProject, lang) : null;
+
+  // Auto focus and keyboard accessibility trap when modal opens
+  useEffect(() => {
+    if (project) {
+      previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      // Focus modal container and ensure top scroll
+      const timer = setTimeout(() => {
+        if (modalContainerRef.current) {
+          modalContainerRef.current.focus();
+        } else if (closeButtonRef.current) {
+          closeButtonRef.current.focus();
+        }
+        if (modalBodyRef.current) {
+          modalBodyRef.current.scrollTop = 0;
+        }
+      }, 30);
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onClose();
+          return;
+        }
+
+        // Trap Tab focus inside modal
+        if (e.key === 'Tab' && modalContainerRef.current) {
+          const focusableElements = modalContainerRef.current.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusableElements.length === 0) return;
+
+          const firstElement = focusableElements[0];
+          const lastElement = focusableElements[focusableElements.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement || document.activeElement === modalContainerRef.current) {
+              e.preventDefault();
+              lastElement.focus();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              e.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = originalOverflow;
+        window.removeEventListener('keydown', handleKeyDown);
+        if (previousActiveElementRef.current && typeof previousActiveElementRef.current.focus === 'function') {
+          previousActiveElementRef.current.focus();
+        }
+      };
+    }
+  }, [project, onClose]);
 
   if (!project || project.status === 'AWAITING') return null;
 
@@ -69,12 +137,17 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
       onClick={onClose}
     >
       <div
+        ref={modalContainerRef}
         id="project-modal-container"
-        className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 ${
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+        tabIndex={-1}
+        className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden outline-none focus:outline-none focus:ring-1 ${
           theme === 'light'
-            ? 'bg-white border-zinc-200 text-zinc-900 shadow-2xl'
-            : 'bg-[#0b1120] border-white/10 text-zinc-200 shadow-[0_0_50px_rgba(6,182,212,0.3)]'
-        }`}
+            ? 'bg-white border-zinc-200 text-zinc-900 shadow-2xl focus:ring-zinc-400/40'
+            : 'bg-[#0b1120] border-white/10 text-zinc-200 shadow-[0_0_50px_rgba(6,182,212,0.3)] focus:ring-cyan-500/40'
+        } animate-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -96,6 +169,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
               {project.projectId}
             </span>
             <h3
+              id="project-modal-title"
               className={`font-display text-lg sm:text-xl font-black uppercase tracking-tight ${
                 theme === 'light' ? 'text-zinc-950' : 'text-white'
               }`}
@@ -105,11 +179,12 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
           </div>
 
           <button
+            ref={closeButtonRef}
             onClick={onClose}
-            className={`p-2 rounded-full transition-all cursor-pointer ${
+            className={`p-2 rounded-full transition-all cursor-pointer focus:outline-none focus:ring-2 ${
               theme === 'light'
-                ? 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                ? 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 focus:ring-zinc-400'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800 focus:ring-cyan-400'
             }`}
             aria-label="Close modal"
           >
@@ -118,7 +193,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 max-h-[calc(90vh-130px)] scrollbar-thin">
+        <div
+          ref={modalBodyRef}
+          tabIndex={0}
+          className="p-6 sm:p-8 overflow-y-auto space-y-6 max-h-[calc(90vh-130px)] scrollbar-thin outline-none focus:outline-none"
+        >
           {/* Main Visual Banner */}
           {project.image && (
             <div

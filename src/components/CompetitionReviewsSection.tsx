@@ -172,54 +172,62 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
   }
 
   return (
-    <section id="reviews" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <section id="reviews" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-[#e3e2de] gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#efefed] border border-[#e3e2de] flex items-center justify-center text-[#37352f]">
-            <BookOpen className="w-4 h-4 text-emerald-600" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-[#e2e0da] dark:border-white/10 gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+              ( FIELD REVIEWS &amp; RETROSPECTIVES )
+            </span>
+            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[60px]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-bold text-[#37352f] tracking-tight">
-                {t('nav.reviews', '대회 후기')}
-              </h2>
-              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                WRO 2026 INDIA
-              </span>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shadow-2xs">
+              <BookOpen className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-xs text-[#787774] mt-0.5">
-              실전 라운드별 점수, 미션 분석 및 회고 기록
-            </p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-2xl sm:text-3xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                  {t('nav.reviews', '대회 후기 & 실전 회고')}
+                </h2>
+                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
+                  / WRO 2026 INDIA
+                </span>
+              </div>
+              <p className="text-xs text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-mono">
+                실전 라운드별 점수, 미션 분석 및 엔지니어링 회고 아카이브
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Toggle Controls */}
-        <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+        <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap font-mono">
           <button
             onClick={expandAll}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs text-[#5a5854] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-md transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-white/[0.04] hover:bg-[#eae8e2] dark:hover:bg-white/10 border border-[#e2e0da] dark:border-white/10 rounded-md transition-colors cursor-pointer shadow-2xs"
             title="모든 토글 펼치기"
           >
-            <Maximize2 className="w-3 h-3 text-[#787774]" />
+            <Maximize2 className="w-3 h-3 text-[#6e6d6a] dark:text-[#a3a29e]" />
             <span>모두 펼치기</span>
           </button>
           <button
             onClick={collapseAll}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs text-[#5a5854] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] rounded-md transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-white/[0.04] hover:bg-[#eae8e2] dark:hover:bg-white/10 border border-[#e2e0da] dark:border-white/10 rounded-md transition-colors cursor-pointer shadow-2xs"
             title="모든 토글 접기"
           >
-            <Minimize2 className="w-3 h-3 text-[#787774]" />
+            <Minimize2 className="w-3 h-3 text-[#6e6d6a] dark:text-[#a3a29e]" />
             <span>모두 접기</span>
           </button>
 
           {isAdmin && onAddReview && (
             <button
               onClick={onAddReview}
-              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-[#2383e2] hover:bg-[#1b6dc1] rounded-md transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-3.5 py-1.5 text-xs font-mono font-medium text-white bg-[#0a0a0a] hover:bg-black dark:bg-[#f4f2ee] dark:text-[#0a0a0a] rounded-full transition-colors cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>후기 추가</span>
+              <span>+ Add Review</span>
             </button>
           )}
         </div>
@@ -230,7 +238,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
         {reviews.map((rev) => (
           <article
             key={rev.id}
-            className="relative bg-white rounded-2xl border border-[#e3e2de] shadow-[0_2px_15px_rgba(0,0,0,0.04)] overflow-hidden transition-all duration-200 hover:border-[#cfcdca]"
+            className="relative bg-white dark:bg-[#121318] rounded-2xl border border-[#e2e0da] dark:border-white/10 shadow-2xs overflow-hidden transition-all duration-200 hover:border-[#0a0a0a]/30 dark:hover:border-white/30"
           >
             {/* Notion Style Cover Header Banner */}
             <div className="relative w-full h-44 sm:h-64 lg:h-72 bg-zinc-900 overflow-hidden">

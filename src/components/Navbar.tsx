@@ -245,20 +245,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       id="navbar-header"
-      className={`sticky top-0 z-50 w-full transition-all duration-200 bg-white/95 backdrop-blur-md border-b border-[#e3e2de] ${
-        isScrolled ? 'shadow-[0_2px_10px_rgba(0,0,0,0.04)]' : ''
+      className={`sticky top-0 z-50 w-full transition-all duration-200 bg-[#f4f2ee]/90 dark:bg-[#0a0b0e]/90 backdrop-blur-md border-b border-[#e2e0da] dark:border-white/10 ${
+        isScrolled ? 'shadow-[0_2px_12px_rgba(0,0,0,0.04)]' : ''
       }`}
     >
       {/* Top Workspace Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-15 gap-2 sm:gap-3">
-          {/* Left: Notion Page Identity */}
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3">
+          {/* Left: Brand Identity */}
           <button
             id="nav-logo-btn"
             onClick={handleLogoClick}
-            className="flex items-center gap-2 sm:gap-2.5 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0 select-none"
+            className="flex items-center gap-2 sm:gap-3 group text-left cursor-pointer transition-opacity hover:opacity-80 shrink-0 min-w-0 select-none"
           >
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-zinc-800 group-hover:scale-105 active:scale-95 transition-all duration-200">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-black flex items-center justify-center shrink-0 shadow-xs border border-[#e2e0da] dark:border-white/20 group-hover:scale-105 active:scale-95 transition-all duration-200">
               <img
                 src="/favicon.svg?v=7"
                 alt="K.F.C. Code Chaser Logo"
@@ -266,19 +266,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 referrerPolicy="no-referrer"
               />
             </div>
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-sans font-bold text-xs sm:text-base text-[#37352f] tracking-tight truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none">
-                K.F.C.Code Chaser
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-sans font-bold text-sm sm:text-base text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight truncate">
+                K.F.C. Code Chaser
+              </span>
+              <span className="hidden sm:inline font-mono text-[11px] text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+                ( LAB ARCHIVES )
               </span>
             </div>
           </button>
 
-          {/* Center (Desktop/Tablet): Notion Integrated Category Bar */}
+          {/* Center (Desktop/Tablet): Stokt Editorial Category Bar */}
           <nav
             ref={desktopNavRef}
-            className="hidden lg:flex items-center gap-1 bg-[#f7f6f3] p-1 rounded-lg border border-[#e3e2de] overflow-x-auto no-scrollbar max-w-2xl scroll-smooth"
+            className="hidden lg:flex items-center gap-1 bg-[#eae8e2]/70 dark:bg-white/[0.04] p-1 rounded-lg border border-[#e2e0da] dark:border-white/10 overflow-x-auto no-scrollbar max-w-2xl scroll-smooth"
           >
-            {categories.map((cat) => {
+            {categories.map((cat, idx) => {
               const isActive = activeSection === cat.id;
               const Icon = cat.icon;
               const label = t(cat.key, cat.fallback);
@@ -290,21 +293,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                   id={`top-cat-${cat.id}`}
                   data-category-id={cat.id}
                   onClick={() => handleSelectTab(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-sans font-medium transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-white text-[#37352f] font-semibold shadow-2xs border border-[#e3e2de]'
-                      : 'text-[#787774] hover:text-[#37352f] hover:bg-white/60 border border-transparent'
+                      ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
+                      : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 shrink-0 ${
                       isActive
                         ? isYouTube
-                          ? 'text-red-600'
-                          : 'text-[#37352f]'
+                          ? 'text-red-400'
+                          : 'text-white dark:text-[#0a0a0a]'
                         : isYouTube
                         ? 'text-red-500/70'
-                        : 'text-[#787774]'
+                        : 'text-[#6e6d6a] dark:text-[#a3a29e]'
                     }`}
                   />
                   <span>{label}</span>
@@ -312,11 +315,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span
                       className={`text-[10px] font-mono px-1 rounded-sm leading-tight ${
                         isActive
-                          ? 'bg-[#efefed] text-[#37352f]'
-                          : 'bg-[#e3e2de]/60 text-[#787774]'
+                          ? 'bg-white/20 dark:bg-black/20 text-white dark:text-black'
+                          : 'text-[#8e8d89]'
                       }`}
                     >
-                      {cat.count}
+                      ({cat.count})
                     </span>
                   )}
                 </button>
@@ -466,15 +469,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Contact Button (Direct Gmail Integration) */}
+            {/* Contact Button (Stokt Signature Action Button) */}
             <button
               id="nav-contact-btn"
               onClick={handleOpenGmail}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold rounded-md text-[#37352f] bg-[#f7f6f3] hover:bg-[#efefed] border border-[#e3e2de] hover:border-red-300 transition-colors cursor-pointer group shadow-2xs shrink-0"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-xs font-mono font-medium rounded-full text-white bg-[#0a0a0a] hover:bg-[#ff4d1d] dark:bg-[#f4f2ee] dark:text-[#0a0a0a] dark:hover:bg-[#ff4d1d] dark:hover:text-white transition-all duration-200 cursor-pointer group shadow-xs shrink-0"
               title="Gmail로 바로 문의하기 (pompeii928@gmail.com)"
             >
-              <Mail className="w-3.5 h-3.5 text-red-500 group-hover:scale-110 transition-transform" />
-              <span>{t('nav.contact', 'CONTACT')}</span>
+              <Mail className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <span>{lang === 'ko' ? '문의하기 ↗' : 'Get in touch ↗'}</span>
             </button>
 
             {/* Mobile Menu Button */}

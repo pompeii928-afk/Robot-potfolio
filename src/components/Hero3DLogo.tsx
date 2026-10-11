@@ -43,49 +43,59 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
 
-    // 2. Lighting Setup (Cinematic High-Contrast Studio Lighting for White/Dark backgrounds)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isWhiteBg ? 1.4 : 0.8);
+    // 2. Lighting Setup (Cinematic Studio Lighting for Sleek Obsidian Black Cube)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isWhiteBg ? 1.6 : 1.0);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xffffff, 3.0);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 3.5);
     mainLight.position.set(5, 8, 7);
     scene.add(mainLight);
 
-    // Electric Cyan Rim Light
-    const cyanLight = new THREE.PointLight(0x0284c7, 4.0, 15);
-    cyanLight.position.set(-6, -3, 3);
-    scene.add(cyanLight);
+    // Crisp Cool Silver Rim Light
+    const rimLight = new THREE.PointLight(0xffffff, 3.0, 16);
+    rimLight.position.set(-6, -3, 3);
+    scene.add(rimLight);
 
-    // Subtle Purple/Cobalt Accent Light
-    const cobaltLight = new THREE.PointLight(0x818cf8, 3.0, 15);
-    cobaltLight.position.set(6, -4, 2);
-    scene.add(cobaltLight);
+    // Subtle Secondary Accent Light
+    const accentLight = new THREE.PointLight(0xcccccc, 2.5, 16);
+    accentLight.position.set(6, -4, 2);
+    scene.add(accentLight);
 
     // Dynamic mouse tracking specular light
-    const mouseLight = new THREE.PointLight(0xffffff, 2.0, 10);
+    const mouseLight = new THREE.PointLight(0xffffff, 2.2, 10);
     mouseLight.position.set(0, 0, 4);
     scene.add(mouseLight);
 
-    // 3. Central 3D Logo Group
+    // 3. Central 3D Medallion Emblem Logo Group (Original 3D Circular Emblem Badge)
     const logoGroup = new THREE.Group();
     scene.add(logoGroup);
 
-    // 3.1 Beveled Metallic Shield / Chassis Disc
-    const discRadius = 1.6;
-    const discThickness = 0.32;
-    const discGeometry = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 64, 1, false);
-    discGeometry.rotateX(Math.PI / 2); // face camera
+    // 3.1 Iconic Circular 3D Disc (Original Emblem Medallion)
+    const discRadius = 2.15;
+    const discDepth = 0.38;
+    const discGeometry = new THREE.CylinderGeometry(discRadius, discRadius, discDepth, 64);
 
-    // Chrome Metallic Outer Material
+    // Premium Dark Obsidian Chrome Material
     const chromeMaterial = new THREE.MeshStandardMaterial({
-      color: 0x18181f,
-      metalness: 0.92,
+      color: 0x18181b,
+      metalness: 0.88,
       roughness: 0.18,
     });
     const discMesh = new THREE.Mesh(discGeometry, chromeMaterial);
+    discMesh.rotation.x = Math.PI / 2; // Circular face faces camera
     logoGroup.add(discMesh);
 
-    // 3.2 Authentic KFC Code Chaser Logo Front & Back Plaques
+    // 3.2 Outer Beveled Cybernetic Rim Ring
+    const outerRingGeometry = new THREE.TorusGeometry(discRadius + 0.03, 0.065, 16, 80);
+    const cyanGlowMaterial = new THREE.MeshStandardMaterial({
+      color: 0x27272a,
+      metalness: 0.95,
+      roughness: 0.12,
+    });
+    const outerRing = new THREE.Mesh(outerRingGeometry, cyanGlowMaterial);
+    logoGroup.add(outerRing);
+
+    // 3.3 Authentic KFC Code Chaser Logo Front & Back Plaques on Circular Disc
     const textureLoader = new THREE.TextureLoader();
     const logoTexture = textureLoader.load('/kfc_codechaser_logo.png', (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -93,7 +103,7 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     });
 
     // 503 x 383 aspect ratio plane for exact logo proportions
-    const planeW = discRadius * 1.7;
+    const planeW = discRadius * 1.68;
     const planeH = planeW * (383 / 503);
     const plaqueGeometry = new THREE.PlaneGeometry(planeW, planeH);
     const plaqueMaterial = new THREE.MeshStandardMaterial({
@@ -104,58 +114,44 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
       alphaTest: 0.05,
     });
     const frontPlaque = new THREE.Mesh(plaqueGeometry, plaqueMaterial);
-    frontPlaque.position.z = discThickness / 2 + 0.008;
+    frontPlaque.position.z = discDepth / 2 + 0.01;
     logoGroup.add(frontPlaque);
 
-    // Back Plaque
+    // Back Plaque on Circular Disc
     const backPlaque = new THREE.Mesh(plaqueGeometry, plaqueMaterial);
-    backPlaque.position.z = -discThickness / 2 - 0.008;
+    backPlaque.position.z = -discDepth / 2 - 0.01;
     backPlaque.rotateY(Math.PI);
     logoGroup.add(backPlaque);
 
-    // 3.3 Outer Chamfer Ring / Cybernetic Bezel
-    const outerRingGeometry = new THREE.TorusGeometry(discRadius * 1.05, 0.05, 16, 64);
-    const cyanGlowMaterial = new THREE.MeshStandardMaterial({
-      color: 0x38bdf8,
-      emissive: 0x0284c7,
-      emissiveIntensity: 0.4,
-      metalness: 0.8,
-      roughness: 0.2,
-    });
-    const outerBezel = new THREE.Mesh(outerRingGeometry, cyanGlowMaterial);
-    logoGroup.add(outerBezel);
-
-    // 3.4 Orbiting Gyroscope Cybernetic Ring 1
-    const gyroRing1Geo = new THREE.TorusGeometry(2.3, 0.035, 16, 80);
+    // 3.4 Orbiting Gyroscope Cybernetic Ring 1 (Silver / White Platinum)
+    const gyroRing1Geo = new THREE.TorusGeometry(2.35, 0.035, 16, 80);
     const gyroMat1 = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       metalness: 0.95,
       roughness: 0.1,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
     });
     const gyroRing1 = new THREE.Mesh(gyroRing1Geo, gyroMat1);
     gyroRing1.rotation.x = Math.PI / 4;
     gyroRing1.rotation.y = Math.PI / 6;
     scene.add(gyroRing1);
 
-    // 3.5 Orbiting Gyroscope Cybernetic Ring 2
-    const gyroRing2Geo = new THREE.TorusGeometry(2.7, 0.025, 16, 80);
+    // 3.5 Orbiting Gyroscope Cybernetic Ring 2 (Monochrome Obsidian Black / Chrome)
+    const gyroRing2Geo = new THREE.TorusGeometry(2.75, 0.028, 16, 80);
     const gyroMat2 = new THREE.MeshStandardMaterial({
-      color: 0x38bdf8,
-      emissive: 0x0369a1,
-      emissiveIntensity: 0.3,
-      metalness: 0.9,
+      color: 0x1a1a1a,
+      metalness: 0.92,
       roughness: 0.15,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.75,
     });
     const gyroRing2 = new THREE.Mesh(gyroRing2Geo, gyroMat2);
     gyroRing2.rotation.x = -Math.PI / 3;
     gyroRing2.rotation.z = Math.PI / 4;
     scene.add(gyroRing2);
 
-    // 3.6 Ambient Spatial Depth Particle Field (Alche Studio spatial tech atmosphere)
+    // 3.6 Ambient Spatial Depth Particle Field (Warm Amber & White Tech Atmosphere)
     const particleCount = 200;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
@@ -211,33 +207,26 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
       currentRotationX += (targetRotationX - currentRotationX) * 0.05;
       currentRotationY += (targetRotationY - currentRotationY) * 0.05;
 
-      // Smooth kinetic rotation towards current scene angle
-      const targetSceneRotY = (sceneIndexRef.current || 0) * (Math.PI * 0.85) + (rotationProgressRef.current || 0);
-      currentSceneRotY += (targetSceneRotY - currentSceneRotY) * 0.07;
+      // Smooth kinetic rotation towards current scene angle (slow & elegant rotation like alche.studio)
+      const targetSceneRotY = (sceneIndexRef.current || 0) * 0.95 + (rotationProgressRef.current || 0) * 0.75;
+      currentSceneRotY += (targetSceneRotY - currentSceneRotY) * 0.05;
 
-      // Responsive positioning: center for hero, dynamically offsetting to balance content in subsequent scenes
-      const isDesktop = (container.clientWidth || window.innerWidth) >= 1024;
-      const targetPosX = isDesktop
-        ? sceneIndexRef.current === 0
-          ? 0
-          : sceneIndexRef.current % 2 === 1
-          ? 2.1
-          : -2.1
-        : 0;
-      currentPosX += (targetPosX - currentPosX) * 0.07;
-
-      logoGroup.position.x = currentPosX;
-      gyroRing1.position.x = currentPosX;
-      gyroRing2.position.x = currentPosX;
+      // Centered horizontal positioning; slightly lower in card scenes to peek beneath curved card like in the photo
+      const basePosY = (sceneIndexRef.current === 0 ? 0 : -0.26) + Math.sin(elapsedTime * 1.5) * 0.09;
+      logoGroup.position.x = 0;
+      logoGroup.position.y = basePosY;
+      gyroRing1.position.x = 0;
+      gyroRing1.position.y = basePosY;
+      gyroRing2.position.x = 0;
+      gyroRing2.position.y = basePosY;
 
       // Orbiting rings rotation and kinetic acceleration during scene transitions
-      const isTransitioning = Math.abs(targetSceneRotY - currentSceneRotY) > 0.04;
-      const spinSpeed = isTransitioning ? 3.2 : 1.0;
-      const transitionTiltX = isTransitioning ? Math.sin((targetSceneRotY - currentSceneRotY) * 1.5) * 0.22 : 0;
-      const scalePulse = isTransitioning ? 1.04 : 1.0;
+      const isTransitioning = Math.abs(targetSceneRotY - currentSceneRotY) > 0.03;
+      const spinSpeed = isTransitioning ? 2.4 : 1.0;
+      const transitionTiltX = isTransitioning ? Math.sin((targetSceneRotY - currentSceneRotY) * 1.2) * 0.18 : 0;
+      const scalePulse = isTransitioning ? 1.03 : 1.0;
 
       // Base idle floating animation combined with 3D scene rotation & kinetic tilt
-      logoGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
       logoGroup.rotation.x = currentRotationX + transitionTiltX + Math.sin(elapsedTime * 0.8) * 0.04;
       logoGroup.rotation.y = currentSceneRotY + currentRotationY + Math.cos(elapsedTime * 0.6) * 0.06;
       logoGroup.scale.set(scalePulse, scalePulse, scalePulse);
@@ -276,10 +265,10 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
       // Disposal of geometries and materials
       discGeometry.dispose();
       chromeMaterial.dispose();
-      plaqueGeometry.dispose();
-      plaqueMaterial.dispose();
       outerRingGeometry.dispose();
       cyanGlowMaterial.dispose();
+      plaqueGeometry.dispose();
+      plaqueMaterial.dispose();
       gyroRing1Geo.dispose();
       gyroMat1.dispose();
       gyroRing2Geo.dispose();

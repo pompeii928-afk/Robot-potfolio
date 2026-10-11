@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import { RobotLogo } from './RobotLogo';
 import {
   Menu,
@@ -105,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     openGmailCompose(lang);
   };
 
-  // Auto-scroll the category bar so the active category button follows and stays visible in view
+  // Auto-scroll the category bar so the active category button is smoothly centered in view
   useEffect(() => {
     const scrollCategoryIntoView = () => {
       if (desktopNavRef.current) {
@@ -113,11 +114,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           `[data-category-id="${activeSection}"]`
         );
         if (activeBtn) {
-          activeBtn.scrollIntoView({
-            behavior: 'smooth',
-            inline: 'center',
-            block: 'nearest',
-          });
+          const container = desktopNavRef.current;
+          const btnRect = activeBtn.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const scrollTarget =
+            container.scrollLeft +
+            (btnRect.left - containerRect.left) -
+            containerRect.width / 2 +
+            btnRect.width / 2;
+          container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
         }
       }
 
@@ -126,16 +131,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           `[data-category-id="${activeSection}"]`
         );
         if (activeMobileBtn) {
-          activeMobileBtn.scrollIntoView({
-            behavior: 'smooth',
-            inline: 'center',
-            block: 'nearest',
-          });
+          const container = mobileNavRef.current;
+          const btnRect = activeMobileBtn.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const scrollTarget =
+            container.scrollLeft +
+            (btnRect.left - containerRect.left) -
+            containerRect.width / 2 +
+            btnRect.width / 2;
+          container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
         }
       }
     };
 
-    const timeoutId = setTimeout(scrollCategoryIntoView, 50);
+    const timeoutId = setTimeout(scrollCategoryIntoView, 60);
     return () => clearTimeout(timeoutId);
   }, [activeSection]);
 
@@ -144,6 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'all',
       key: 'nav.overview',
       fallback: '전체 보기',
+      englishLabel: 'OVERVIEW',
       icon: LayoutGrid,
       count: undefined,
     },
@@ -151,20 +161,23 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'about',
       key: 'nav.about',
       fallback: '소개 & 비전',
+      englishLabel: 'ABOUT & VISION',
       icon: Bot,
       count: undefined,
     },
     {
-      id: 'reviews',
-      key: 'nav.reviews',
-      fallback: '대회 후기',
-      icon: BookOpen,
-      count: counts.reviews,
+      id: 'experience',
+      key: 'nav.experience',
+      fallback: '로봇 시스템',
+      englishLabel: 'ROBOT SYSTEM',
+      icon: FolderGit2,
+      count: counts.projects,
     },
     {
       id: 'journey',
       key: 'nav.journey',
       fallback: '대회 여정',
+      englishLabel: 'JOURNEY',
       icon: TrendingUp,
       count: counts.journeys,
     },
@@ -172,6 +185,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'awards',
       key: 'nav.awards',
       fallback: '수상 내역',
+      englishLabel: 'AWARDS',
       icon: Trophy,
       count: counts.awards,
     },
@@ -179,27 +193,31 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'skills',
       key: 'nav.skills',
       fallback: '핵심 역량',
+      englishLabel: 'SKILLS',
       icon: Cpu,
       count: counts.skills,
-    },
-    {
-      id: 'experience',
-      key: 'nav.experience',
-      fallback: '로봇 시스템',
-      icon: FolderGit2,
-      count: counts.projects,
     },
     {
       id: 'youtube',
       key: 'nav.youtube',
       fallback: '유튜브 채널',
+      englishLabel: 'YOUTUBE',
       icon: Youtube,
       count: counts.videos,
+    },
+    {
+      id: 'reviews',
+      key: 'nav.reviews',
+      fallback: '대회 후기',
+      englishLabel: 'REVIEWS',
+      icon: BookOpen,
+      count: counts.reviews,
     },
     {
       id: 'external-site',
       key: 'nav.otherSite',
       fallback: '다른 왭사이트',
+      englishLabel: 'OTHER SITES',
       icon: Globe,
       count: counts.websites,
     },
@@ -258,7 +276,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       id="navbar-header"
-      className="sticky top-0 z-50 w-full transition-all duration-200 bg-white/95 backdrop-blur-xl border-none border-0 shadow-none"
+      className="sticky top-0 z-50 w-full transition-all duration-200 bg-transparent border-none border-0 shadow-none pointer-events-auto"
     >
       {/* Top Workspace Header Row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,16 +305,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </button>
 
-          {/* Center (Desktop/Tablet): Alche Studio Category Bar (No lines) */}
+          {/* Center (Desktop/Tablet): Alche Studio Category Bar (Transparent Background & English Text Only) */}
           <nav
             ref={desktopNavRef}
-            className="hidden lg:flex items-center gap-1 bg-zinc-100/90 p-1 rounded-full overflow-x-auto no-scrollbar max-w-2xl scroll-smooth backdrop-blur-md"
+            className="hidden lg:flex items-center gap-4 xl:gap-5 bg-transparent py-1 overflow-x-auto no-scrollbar max-w-3xl scroll-smooth"
           >
-            {categories.map((cat, idx) => {
+            {categories.map((cat) => {
               const isActive = activeSection === cat.id;
-              const Icon = cat.icon;
-              const label = t(cat.key, cat.fallback);
-              const isYouTube = cat.id === 'youtube';
 
               return (
                 <button
@@ -304,34 +319,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   id={`top-cat-${cat.id}`}
                   data-category-id={cat.id}
                   onClick={() => handleSelectTab(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                  className={`relative py-1 px-1.5 text-xs font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 bg-transparent flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-black text-white font-bold shadow-xs'
-                      : 'text-zinc-600 hover:text-black hover:bg-black/5'
+                      ? 'text-black font-black scale-105'
+                      : 'text-zinc-400 hover:text-black font-medium'
                   }`}
                 >
-                  <Icon
-                    className={`w-3.5 h-3.5 shrink-0 ${
-                      isActive
-                        ? isYouTube
-                          ? 'text-red-400'
-                          : 'text-white'
-                        : isYouTube
-                        ? 'text-red-600'
-                        : 'text-zinc-500'
-                    }`}
-                  />
-                  <span>{label}</span>
-                  {cat.count !== undefined && cat.count > 0 && (
-                    <span
-                      className={`text-[10px] font-mono px-1 rounded-full leading-tight ${
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'text-zinc-500'
-                      }`}
-                    >
-                      ({cat.count})
-                    </span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 animate-pulse" />
+                  )}
+                  <span>{cat.englishLabel}</span>
+                  {isActive && (
+                    <motion.span
+                      layoutId="navbar-active-focus-desktop"
+                      className="absolute -bottom-1.5 left-0 right-0 h-[2.5px] bg-black rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.25)]"
+                      transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                    />
                   )}
                 </button>
               );
@@ -532,48 +535,35 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Responsive Mobile / Tablet Sub-strip Category Navigation (Line Removed) */}
+        {/* Responsive Mobile / Tablet Sub-strip Category Navigation (Transparent & English Text Only) */}
         <div
           ref={mobileNavRef}
-          className="lg:hidden -mx-4 px-4 py-2 border-none border-0 shadow-none flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain touch-pan-x"
+          className="lg:hidden -mx-4 px-4 py-2 border-none border-0 shadow-none flex items-center gap-4 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain touch-pan-x bg-transparent"
         >
           {categories.map((cat) => {
             const isActive = activeSection === cat.id;
-            const Icon = cat.icon;
-            const label = t(cat.key, cat.fallback);
-            const isYouTube = cat.id === 'youtube';
 
             return (
               <button
                 key={cat.id}
                 data-category-id={cat.id}
                 onClick={() => handleSelectTab(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono shrink-0 transition-all cursor-pointer whitespace-nowrap ${
+                className={`relative py-1 px-1.5 text-xs font-mono uppercase tracking-wider shrink-0 transition-all cursor-pointer whitespace-nowrap bg-transparent flex items-center gap-1.5 ${
                   isActive
-                    ? 'bg-black text-white font-bold shadow-xs'
-                    : 'text-zinc-600 bg-zinc-100 hover:bg-zinc-200'
+                    ? 'text-black font-black scale-105'
+                    : 'text-zinc-500 hover:text-black font-medium'
                 }`}
               >
-                <Icon
-                  className={`w-3.5 h-3.5 ${
-                    isActive
-                      ? isYouTube
-                        ? 'text-red-600'
-                        : 'text-black'
-                      : isYouTube
-                      ? 'text-red-400'
-                      : 'text-zinc-400'
-                  }`}
-                />
-                <span>{label}</span>
-                {cat.count !== undefined && cat.count > 0 && (
-                  <span
-                    className={`text-[10px] font-mono px-1 rounded-sm ${
-                      isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'
-                    }`}
-                  >
-                    {cat.count}
-                  </span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 animate-pulse" />
+                )}
+                <span>{cat.englishLabel}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="navbar-active-focus-mobile"
+                    className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-black rounded-full shadow-[0_1px_4px_rgba(0,0,0,0.25)]"
+                    transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                  />
                 )}
               </button>
             );
@@ -604,7 +594,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <span className="flex items-center gap-2.5">
                     <Icon className="w-4 h-4 text-zinc-500" />
-                    <span>{label}</span>
+                    <span className="font-bold tracking-wide">{item.englishLabel}</span>
+                    <span className="text-[10px] text-zinc-400 font-sans">({label})</span>
                   </span>
                   {item.count !== undefined && (
                     <span className="text-xs font-mono text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded-full">

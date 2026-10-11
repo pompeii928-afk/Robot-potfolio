@@ -17,6 +17,8 @@ import { Footer } from './components/Footer';
 import { AdminBar } from './components/AdminBar';
 import { AdminLoginView } from './components/AdminLoginView';
 import { Hero3DLogo } from './components/Hero3DLogo';
+import { SceneStageShowcase } from './components/SceneStageShowcase';
+import { LogoDrawingLoader } from './components/LogoDrawingLoader';
 import { cyberAudio } from './utils/cyberAudio';
 import { ChevronUp, ChevronDown, Layers } from 'lucide-react';
 import { AuthProvider, useAuth } from './firebase/AuthContext';
@@ -85,6 +87,7 @@ function PortfolioApp() {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>('all');
+  const [showIntroLoader, setShowIntroLoader] = useState<boolean>(true);
   const [visitorName, setVisitorName] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('kfc_visitor_name') || '';
@@ -271,15 +274,17 @@ function PortfolioApp() {
     };
   }, []);
 
-  // Alche Studio 3D Rotating Scene Manager
+  // Alche Studio 3D Rotating Scene Manager with Exact Category Titles
   const SCENES = [
-    { id: 'hero', key: '01', title: 'MISSION & PHILOSOPHY', categoryId: 'about' },
-    { id: 'projects', key: '02', title: 'SYSTEMS & PHYSICAL BUILDS', categoryId: 'experience' },
-    { id: 'journey', key: '03', title: 'COMPETITION JOURNEY', categoryId: 'journey' },
-    { id: 'awards', key: '04', title: 'HONORS & AWARDS', categoryId: 'awards' },
-    { id: 'skills', key: '05', title: 'SYSTEM CAPABILITIES', categoryId: 'skills' },
-    { id: 'youtube', key: '06', title: 'BROADCAST & MEDIA', categoryId: 'youtube' },
-    { id: 'ecosystem', key: '07', title: 'ECOSYSTEM & REVIEWS', categoryId: 'external-site' },
+    { id: 'hero', key: '00', title: 'K.F.C. CODE CHASER', categoryId: 'all' },
+    { id: 'about', key: '01', title: '소개 & 비전', categoryId: 'about' },
+    { id: 'experience', key: '02', title: '로봇 시스템', categoryId: 'experience' },
+    { id: 'journey', key: '03', title: '대회 여정', categoryId: 'journey' },
+    { id: 'awards', key: '04', title: '수상 내역', categoryId: 'awards' },
+    { id: 'skills', key: '05', title: '핵심 역량', categoryId: 'skills' },
+    { id: 'youtube', key: '06', title: '유튜브 채널', categoryId: 'youtube' },
+    { id: 'reviews', key: '07', title: '대회 후기', categoryId: 'reviews' },
+    { id: 'external-site', key: '08', title: '다른 왭사이트', categoryId: 'external-site' },
   ];
 
   const [activeSceneIndex, setActiveSceneIndex] = useState<number>(0);
@@ -415,18 +420,23 @@ function PortfolioApp() {
   }, [activeSection, scrollMode, SCENES.length]);
 
   const handleNavigate = (sectionId: string) => {
-    const mappedIndex = SCENES.findIndex(
-      (s) => s.categoryId === sectionId || s.id === sectionId
-    );
-    if (mappedIndex !== -1) {
-      setScrollDirection(mappedIndex >= activeSceneIndex ? 1 : -1);
-      setActiveSceneIndex(mappedIndex);
-      setSceneRotation((r) => r + 1.2);
-      cyberAudio.playKeyTick();
+    if (sectionId === 'all') {
       setActiveSection('all');
-    } else {
-      setActiveSection(sectionId);
+      setScrollMode('3d-scene');
+      setActiveSceneIndex(0);
+      setSceneRotation(0);
+      cyberAudio.playScanLaser();
+      return;
     }
+
+    // Direct navigation to specific category's detailed view (세부사항)
+    const matchedSceneIdx = SCENES.findIndex((s) => s.categoryId === sectionId);
+    if (matchedSceneIdx !== -1) {
+      setActiveSceneIndex(matchedSceneIdx);
+    }
+    setActiveSection(sectionId);
+    cyberAudio.playKeyTick();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // CRUD Handlers with Toast Feedback (Real-time DB updates)
@@ -777,6 +787,13 @@ function PortfolioApp() {
           : 'min-h-screen'
       }`}
     >
+      {/* Interactive Logo Drawing Motion Loader */}
+      <AnimatePresence>
+        {showIntroLoader && (
+          <LogoDrawingLoader onComplete={() => setShowIntroLoader(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Alche Studio Custom Solid White Cursor */}
       <CustomCursor />
 
@@ -792,8 +809,8 @@ function PortfolioApp() {
       {/* Subtle clean ambient gradient */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(0,0,0,0.02),transparent)]" />
 
-      {/* Sticky Header with Integrated Category Bar (No lines) */}
-      <div className="sticky top-0 z-50 w-full shrink-0">
+      {/* Sticky Header with Integrated Category Bar (Transparent Background) */}
+      <div className="sticky top-0 z-50 w-full shrink-0 bg-transparent">
         {isEditingEnabled && (
           <AdminBar
             onViewPublic={() => navigateTo('/')}
@@ -805,9 +822,7 @@ function PortfolioApp() {
         <Navbar
           activeSection={
             activeSection === 'all' && scrollMode === '3d-scene'
-              ? SCENES[activeSceneIndex].categoryId === 'about'
-                ? 'all'
-                : SCENES[activeSceneIndex].categoryId
+              ? SCENES[activeSceneIndex]?.categoryId || 'all'
               : activeSection
           }
           onNavigate={handleNavigate}
@@ -835,170 +850,46 @@ function PortfolioApp() {
         }`}
       >
         {activeSection === 'all' && scrollMode === '3d-scene' ? (
-          /* 3D Rotating Scene Transitions (Scroll triggers 3D screen rotation & reveals scene) */
-          <div
-            className="w-full flex-1 flex flex-col overflow-hidden"
-            style={{ perspective: 1400 }}
-          >
-            <AnimatePresence mode="wait" custom={scrollDirection}>
-              <motion.div
-                key={activeSceneIndex}
-                custom={scrollDirection}
-                initial={(dir: number) => ({
-                  opacity: 0,
-                  rotateY: dir > 0 ? 38 : -38,
-                  rotateX: dir > 0 ? 8 : -8,
-                  translateZ: -140,
-                  scale: 0.9,
-                  filter: 'blur(8px)',
-                })}
-                animate={{
-                  opacity: 1,
-                  rotateY: 0,
-                  rotateX: 0,
-                  translateZ: 0,
-                  scale: 1,
-                  filter: 'blur(0px)',
-                  transition: {
-                    duration: 0.58,
-                    ease: [0.16, 1, 0.3, 1],
-                  },
-                }}
-                exit={(dir: number) => ({
-                  opacity: 0,
-                  rotateY: dir > 0 ? -38 : 38,
-                  rotateX: dir > 0 ? -8 : 8,
-                  translateZ: -140,
-                  scale: 0.9,
-                  filter: 'blur(8px)',
-                  transition: {
-                    duration: 0.46,
-                    ease: [0.16, 1, 0.3, 1],
-                  },
-                })}
-                style={{ transformStyle: 'preserve-3d' }}
-                className="w-full flex-1 flex flex-col overflow-y-auto no-scrollbar scroll-smooth overscroll-contain"
-              >
-                {activeSceneIndex === 0 && (
-                  <div className="flex-1 flex flex-col justify-between py-2 sm:py-6">
-                    <HeroSection
-                      aboutData={aboutData}
-                      isAdmin={isEditingEnabled}
-                      onEditAbout={() => setIsEditAboutOpen(true)}
-                      onExploreProjects={() => {
-                        setScrollDirection(1);
-                        setActiveSceneIndex(1);
-                        setSceneRotation((r) => r + 1.2);
-                        cyberAudio.playScanLaser();
-                      }}
-                      onNavigate={handleNavigate}
-                    />
-                    {/* Alche Studio Scroll Cue */}
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 pt-4 flex justify-between items-center text-xs font-mono text-zinc-500">
-                      <button
-                        onClick={() => {
-                          setScrollDirection(1);
-                          setActiveSceneIndex(1);
-                          setSceneRotation((r) => r + 1.2);
-                          cyberAudio.playScanLaser();
-                        }}
-                        className="flex items-center gap-2 hover:text-black transition-colors cursor-pointer group"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
-                        <span className="tracking-widest uppercase font-semibold">
-                          SCROLL DOWN TO ROTATE SCENE ↓
-                        </span>
-                      </button>
-                      <span className="tracking-widest text-zinc-400 font-semibold">
-                        [ 01 / 07 ] MISSION &amp; PHILOSOPHY
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {activeSceneIndex === 1 && (
-                  <div className="flex-1 flex flex-col pb-24 pt-4">
-                    <ProjectsSection
-                      projects={projects}
-                      isAdmin={isEditingEnabled}
-                      onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
-                      onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
-                      onDeleteProject={handleDeleteProject}
-                    />
-                  </div>
-                )}
-
-                {activeSceneIndex === 2 && (
-                  <div className="flex-1 flex flex-col pb-24 pt-4">
-                    <JourneySection
-                      journeys={journeys}
-                      isAdmin={isEditingEnabled}
-                      onAddJourney={() => setJourneyModalData({ isOpen: true, item: null })}
-                      onEditJourney={(item) => setJourneyModalData({ isOpen: true, item })}
-                      onDeleteJourney={handleDeleteJourney}
-                    />
-                  </div>
-                )}
-
-                {activeSceneIndex === 3 && (
-                  <div className="flex-1 flex flex-col pb-24 pt-4">
-                    <AwardsSection
-                      awards={awards}
-                      isAdmin={isEditingEnabled}
-                      onAddAward={() => setAwardModalData({ isOpen: true, item: null })}
-                      onEditAward={(award) => setAwardModalData({ isOpen: true, item: award })}
-                      onDeleteAward={handleDeleteAward}
-                    />
-                  </div>
-                )}
-
-                {activeSceneIndex === 4 && (
-                  <div className="flex-1 flex flex-col pb-24 pt-4">
-                    <SkillsSection
-                      skills={skills}
-                      isAdmin={isEditingEnabled}
-                      onAddSkill={() => setSkillModalData({ isOpen: true, item: null })}
-                      onEditSkill={(skill) => setSkillModalData({ isOpen: true, item: skill })}
-                      onDeleteSkill={handleDeleteSkill}
-                    />
-                  </div>
-                )}
-
-                {activeSceneIndex === 5 && (
-                  <div className="flex-1 flex flex-col pb-24 pt-4">
-                    <YouTubeSection
-                      videos={youtubeVideos}
-                      isAdmin={isEditingEnabled}
-                      onAddVideo={() => setYoutubeModalData({ isOpen: true, item: null })}
-                      onEditVideo={(video) => setYoutubeModalData({ isOpen: true, item: video })}
-                      onDeleteVideo={handleDeleteYouTubeVideo}
-                    />
-                  </div>
-                )}
-
-                {activeSceneIndex === 6 && (
-                  <div className="space-y-8 flex-1 flex flex-col justify-between pb-24 pt-4">
-                    <div className="space-y-12">
-                      <ExternalSiteSection
-                        sites={websites}
-                        isAdmin={isEditingEnabled}
-                        onAddSite={() => setWebsiteModalData({ isOpen: true, item: null })}
-                        onEditSite={(site) => setWebsiteModalData({ isOpen: true, item: site })}
-                        onDeleteSite={handleDeleteWebsite}
-                      />
-                      <CompetitionReviewsSection
-                        reviews={reviews}
-                        isAdmin={isEditingEnabled}
-                        onAddReview={() => setReviewModalData({ isOpen: true, item: null })}
-                        onEditReview={(item) => setReviewModalData({ isOpen: true, item })}
-                        onDeleteReview={handleDeleteReview}
-                      />
-                    </div>
-                    <Footer onOpenAdmin={() => navigateTo('/admin')} isAdmin={isAdmin} />
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+          /* Continuous 3D Curved Ribbon Scene Transitions (All cards connected seamlessly) */
+          <div className="w-full flex-1 flex flex-col overflow-hidden relative">
+            <SceneStageShowcase
+              sceneIndex={activeSceneIndex}
+              totalScenes={SCENES.length}
+              onNavigate={handleNavigate}
+              onNextScene={() => {
+                if (activeSceneIndex < SCENES.length - 1) {
+                  setScrollDirection(1);
+                  setActiveSceneIndex((prev) => prev + 1);
+                  setSceneRotation((r) => r + 1.2);
+                  cyberAudio.playScanLaser();
+                }
+              }}
+              onPrevScene={() => {
+                if (activeSceneIndex > 0) {
+                  setScrollDirection(-1);
+                  setActiveSceneIndex((prev) => prev - 1);
+                  setSceneRotation((r) => r - 1.2);
+                  cyberAudio.playKeyTick();
+                }
+              }}
+              onSelectScene={(idx) => {
+                setScrollDirection(idx >= activeSceneIndex ? 1 : -1);
+                setActiveSceneIndex(idx);
+                setSceneRotation((r) => r + (idx - activeSceneIndex) * 1.2);
+                cyberAudio.playScanLaser();
+              }}
+              aboutData={aboutData}
+              projects={projects}
+              journeys={journeys}
+              awards={awards}
+              skills={skills}
+              youtubeVideos={youtubeVideos}
+              websites={websites}
+              reviews={reviews}
+              isAdmin={isEditingEnabled}
+              onEditAbout={() => setIsEditAboutOpen(true)}
+              onOpenProjectDetail={(project) => setProjectModalData({ isOpen: true, item: project })}
+            />
           </div>
         ) : (
           /* Continuous Scroll or Single Section Mode */

@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Globe,
   ExternalLink,
-  RefreshCw,
   Copy,
   Check,
-  Maximize2,
-  Minimize2,
   Store,
+  Users,
   ShieldCheck,
   ArrowUpRight,
   Plus,
   Edit2,
   Trash2,
+  Lock,
+  Sparkles,
 } from 'lucide-react';
 import { ExternalSiteItem } from '../types';
 import { useLanguage } from '../context/ThemeContext';
@@ -40,11 +40,6 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
   const { lang, t } = useLanguage();
   const [selectedSiteId, setSelectedSiteId] = useState<string>('');
   const [copied, setCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [canEmbedDirectly, setCanEmbedDirectly] = useState<boolean | null>(null);
-  const [hasBlockedEmbed, setHasBlockedEmbed] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Determine active site list
   const siteList: ExternalSiteItem[] =
@@ -74,69 +69,30 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
   const activeUrl = activeSite?.url || fallbackUrl;
   const activeTitle = activeSite?.title || fallbackTitle;
   const activeDescription =
-    activeSite?.description || 'WRO & CoSpace Robotics 공식 스토어 및 리소스 사이트';
+    activeSite?.description || 'WRO & CoSpace Robotics 공식 스토어 및 커뮤니티 사이트';
+  const activeCategory = (activeSite?.category || 'ECOSYSTEM').toUpperCase();
 
-  // Check if site has X-Frame-Options: DENY or CSP frame-ancestors blocking
-  useEffect(() => {
-    let isMounted = true;
-    setCanEmbedDirectly(null);
-    setHasBlockedEmbed(false);
-
-    fetch(`/api/check-site-embed?url=${encodeURIComponent(activeUrl)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!isMounted) return;
-        setCanEmbedDirectly(data.canEmbedDirectly);
-        if (data.canEmbedDirectly === false) {
-          setHasBlockedEmbed(true);
-        }
-      })
-      .catch((err) => {
-        if (!isMounted) return;
-        console.warn('Check site embed error:', err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [activeUrl]);
-
-  // Automatically use server proxy if embedding is blocked by X-Frame-Options/CSP
-  const shouldUseProxy = canEmbedDirectly === false || hasBlockedEmbed;
-
-  const effectiveIframeUrl = shouldUseProxy
-    ? `/api/proxy-site?url=${encodeURIComponent(activeUrl)}`
-    : activeUrl;
-
-  // When active URL or effective URL changes, trigger loading with auto-timeout
-  useEffect(() => {
-    setIsLoading(true);
-    // Safety timeout: prevents infinite spinner if iframe onLoad does not fire
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [effectiveIframeUrl]);
-
-  const handleCopyUrl = () => {
+  const handleCopyUrl = (e: React.MouseEvent) => {
+    e.stopPropagation();
     navigator.clipboard.writeText(activeUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleReload = () => {
-    setIsLoading(true);
-    if (iframeRef.current) {
-      iframeRef.current.src = effectiveIframeUrl;
+  const getCategoryIcon = (cat: string) => {
+    if (cat.includes('STORE') || cat.includes('SHOP') || cat.includes('MARKET')) {
+      return <Store className="w-5 h-5 text-amber-500" />;
     }
+    if (cat.includes('COMMUNITY') || cat.includes('CLUB') || cat.includes('FORUM')) {
+      return <Users className="w-5 h-5 text-cyan-500" />;
+    }
+    return <Globe className="w-5 h-5 text-emerald-500" />;
   };
 
   return (
     <section
       id="external-site"
-      className={`relative w-full transition-all duration-300 scroll-mt-20 ${
-        isExpanded ? 'px-2 sm:px-4' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
-      } py-6 sm:py-10`}
+      className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 scroll-mt-20"
     >
       {/* Stokt Section Kicker */}
       <div className="flex items-center gap-2 mb-4">
@@ -151,7 +107,7 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
         {/* Left: Site Identity */}
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#0a0a0a] dark:bg-white/[0.08] text-white flex items-center justify-center shrink-0 shadow-xs border border-[#e2e0da] dark:border-white/20">
-            <Store className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            {getCategoryIcon(activeCategory)}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -229,37 +185,6 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
             )}
           </button>
 
-          {/* Refresh Button */}
-          <button
-            onClick={handleReload}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-            title="페이지 새로고침"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 text-[#787774] ${isLoading ? 'animate-spin text-blue-600' : ''}`}
-            />
-            <span className="hidden sm:inline">새로고침</span>
-          </button>
-
-          {/* Expand Toggle */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-            title={isExpanded ? '표준 너비로 복원' : '화면 넓게 보기'}
-          >
-            {isExpanded ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5 text-[#787774]" />
-                <span className="hidden sm:inline">표준 화면</span>
-              </>
-            ) : (
-              <>
-                <Maximize2 className="w-3.5 h-3.5 text-[#787774]" />
-                <span className="hidden sm:inline">넓게 보기</span>
-              </>
-            )}
-          </button>
-
           {/* Direct Open in New Tab Button (High Visibility) */}
           <a
             href={activeUrl}
@@ -275,7 +200,7 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
         </div>
       </div>
 
-      {/* Multiple Websites Tabs (if more than 1 website registered) */}
+      {/* Multiple Websites Tabs (matching screenshot) */}
       {siteList.length > 1 && (
         <div className="mb-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {siteList.map((site) => {
@@ -311,65 +236,113 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
         </div>
       )}
 
-      {/* Embedded Iframe Container */}
-      <div className="relative w-full rounded-2xl border border-[#e3e2de] dark:border-white/10 bg-white dark:bg-[#121318] shadow-sm overflow-hidden min-h-[520px]">
+      {/* Interactive Click-to-Launch Portal Screen (Replaces broken iframe) */}
+      <a
+        href={activeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group block relative w-full rounded-2xl border border-[#e3e2de] dark:border-white/10 bg-white dark:bg-[#0c1220] shadow-sm hover:shadow-xl hover:border-cyan-500/50 dark:hover:border-cyan-400/50 transition-all duration-300 overflow-hidden cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500"
+        title={`${activeTitle} 웹사이트 바로 열기 (새 창)`}
+      >
+        {/* Browser Top Window Frame */}
+        <div className="px-4 py-3 bg-[#f5f4ef] dark:bg-[#070b14] border-b border-[#e3e2de] dark:border-white/10 flex items-center justify-between gap-3 select-none">
+          {/* Traffic light window controls */}
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f56] inline-block" />
+            <span className="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block" />
+            <span className="w-3 h-3 rounded-full bg-[#27c93f] inline-block" />
+          </div>
 
-        {/* Loading Spinner / Skeleton */}
-        {isLoading && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/95 dark:bg-[#121318]/95 backdrop-blur-xs transition-opacity duration-300">
-            <div className="w-10 h-10 border-3 border-[#e3e2de] border-t-amber-500 rounded-full animate-spin mb-3" />
-            <div className="text-center space-y-1.5 px-4">
-              <p className="text-sm font-semibold text-[#37352f] dark:text-[#f4f2ee]">
-                {activeTitle} 사이트를 불러오는 중입니다...
+          {/* Browser address bar */}
+          <div className="flex-1 max-w-xl mx-auto flex items-center justify-center gap-2 px-3 py-1 rounded-lg bg-white dark:bg-black/40 border border-zinc-200 dark:border-white/10 text-xs font-mono text-zinc-600 dark:text-zinc-300 group-hover:border-cyan-500/40 transition-colors">
+            <Lock className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate max-w-[280px] sm:max-w-md">{activeUrl}</span>
+            <span className="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 font-bold shrink-0">
+              SECURE
+            </span>
+          </div>
+
+          {/* Right link action hint */}
+          <div className="flex items-center gap-1 text-xs font-mono text-zinc-500 dark:text-zinc-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+            <span className="hidden md:inline text-[11px] font-semibold">새 탭에서 사이트 열기</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </div>
+        </div>
+
+        {/* Main Display Canvas (Direct Interactive Card) */}
+        <div className="relative min-h-[420px] sm:min-h-[480px] p-8 sm:p-14 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#faf9f6] via-white to-[#f5f4ef] dark:from-[#080d18] dark:via-[#0c1424] dark:to-[#060a12] overflow-hidden">
+          {/* Subtle Background Circuit Grid Effect */}
+          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-60 pointer-events-none" />
+
+          {/* Interactive Floating Portal Card */}
+          <div className="relative z-10 max-w-xl w-full flex flex-col items-center space-y-5 animate-in fade-in zoom-in-95 duration-300">
+            {/* Category & Verified Status Pill */}
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-50 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 shadow-xs">
+                <Sparkles className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                <span>{activeCategory} PORTAL</span>
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>ONLINE</span>
+              </span>
+            </div>
+
+            {/* Large Brand Icon */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#0a0a0a] dark:bg-[#121c32] text-white flex items-center justify-center shadow-xl border border-zinc-200 dark:border-cyan-500/30 group-hover:scale-105 group-hover:rotate-1 transition-all duration-300">
+              {activeCategory.includes('COMMUNITY') || activeCategory.includes('CLUB') ? (
+                <Users className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-400" />
+              ) : activeCategory.includes('STORE') || activeCategory.includes('SHOP') ? (
+                <Store className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400" />
+              ) : (
+                <Globe className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-400" />
+              )}
+            </div>
+
+            {/* Site Title & Tagline */}
+            <div className="space-y-2">
+              <h3 className="text-2xl sm:text-4xl font-sans font-black tracking-tight text-[#0a0a0a] dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                {activeTitle}
+              </h3>
+              <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 font-sans max-w-md mx-auto leading-relaxed">
+                {activeDescription}
               </p>
-              <p className="text-xs text-[#787774] dark:text-[#a3a29e] font-mono truncate max-w-md">
-                {activeUrl}
-              </p>
-              <div className="pt-2">
-                <a
-                  href={activeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-cyan-400 hover:underline"
-                >
-                  <span>화면이 늦게 뜨면 새 탭에서 바로 열기</span>
-                  <ArrowUpRight className="w-3 h-3" />
-                </a>
+            </div>
+
+            {/* Big Action Button */}
+            <div className="pt-2 w-full max-w-sm">
+              <div className="w-full py-3.5 px-6 rounded-2xl bg-black text-white dark:bg-cyan-500 dark:text-black font-sans font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg group-hover:bg-zinc-800 dark:group-hover:bg-cyan-400 group-hover:scale-[1.02] group-hover:shadow-cyan-500/20 transition-all duration-300">
+                <span>공식 웹사이트 바로가기</span>
+                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Live Iframe */}
-        <iframe
-          ref={iframeRef}
-          key={`${activeUrl}-${shouldUseProxy}`}
-          src={effectiveIframeUrl}
-          title={activeTitle}
-          onLoad={() => setIsLoading(false)}
-          className={`w-full transition-all duration-300 border-0 bg-white ${
-            isExpanded ? 'h-[88vh] min-h-[700px]' : 'h-[80vh] min-h-[640px]'
-          }`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-        />
-      </div>
+            {/* Subtle user instruction */}
+            <p className="text-xs font-mono text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5 pt-1">
+              <span>🖱️</span>
+              <span>화면 어디든 클릭하시면 공식 웹사이트가 새 창에서 열립니다.</span>
+            </p>
+          </div>
+        </div>
+      </a>
 
       {/* Safe Bottom Notice & Direct Access Card */}
       <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#787774] px-1">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>안전한 연결을 통해 공식 외부 사이트가 실시간으로 임베드되어 작동합니다.</span>
+          <span>안전한 공식 외부 사이트 연동 허브입니다.</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-mono">URL: {activeUrl}</span>
+          <span className="font-mono text-[11px] truncate max-w-[200px] sm:max-w-none">
+            {activeUrl}
+          </span>
           <a
             href={activeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline font-semibold inline-flex items-center gap-1"
+            className="text-cyan-600 dark:text-cyan-400 hover:underline font-semibold inline-flex items-center gap-1 shrink-0"
           >
-            <span>전체 화면 새 탭 열기</span>
+            <span>새 탭에서 열기</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -377,4 +350,3 @@ export const ExternalSiteSection: React.FC<ExternalSiteSectionProps> = ({
     </section>
   );
 };
-

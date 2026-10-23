@@ -325,7 +325,7 @@ export const ProjectResearchLogView: React.FC<ProjectResearchLogViewProps> = ({
         </div>
 
         {/* Dynamic Project Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-zinc-200 dark:border-white/10 font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-zinc-200 dark:border-white/10 font-mono text-xs">
           <div className="p-2.5 rounded-xl bg-white/60 dark:bg-black/30 border border-zinc-200/80 dark:border-white/10">
             <span className="text-[10px] text-zinc-500 block uppercase">총 기록된 일지</span>
             <span className="text-base sm:text-lg font-black text-zinc-900 dark:text-white">
@@ -342,13 +342,6 @@ export const ProjectResearchLogView: React.FC<ProjectResearchLogViewProps> = ({
             <span className="text-[10px] text-zinc-500 block uppercase">프로젝트 상태</span>
             <span className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">
               {project.status || 'COMPLETED'}
-            </span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-white/60 dark:bg-black/30 border border-zinc-200/80 dark:border-white/10">
-            <span className="text-[10px] text-zinc-500 block uppercase">일지 편집 권한</span>
-            <span className="text-sm sm:text-base font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-400'}`} />
-              {isAdmin ? 'ADMIN (작성/수정 가능)' : 'VIEW ONLY'}
             </span>
           </div>
         </div>

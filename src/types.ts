@@ -269,6 +269,7 @@ export interface ExternalSiteItem {
   url: string;
   description?: string;
   category?: string;
+  previewImage?: string;
   isDefault?: boolean;
   order?: number;
   updatedAt?: string;

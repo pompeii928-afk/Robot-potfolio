@@ -438,6 +438,118 @@ app.get('/api/notion/sync-review', async (req: Request, res: Response) => {
 });
 
 // ==========================================
+// EXTERNAL SITE EMBED PROXY & EMBED CHECKER
+// ==========================================
+app.get('/api/check-site-embed', async (req: Request, res: Response) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).json({ error: 'Missing url parameter' });
+  }
+
+  try {
+    const parsed = new URL(targetUrl);
+    const headRes = await fetch(parsed.origin + parsed.pathname, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    });
+
+    const xFrame = headRes.headers.get('x-frame-options');
+    const csp = headRes.headers.get('content-security-policy') || '';
+    const hasXFrame = !!(xFrame && (xFrame.toLowerCase().includes('deny') || xFrame.toLowerCase().includes('sameorigin')));
+    const hasCsp = csp.toLowerCase().includes('frame-ancestors');
+    const canEmbedDirectly = !hasXFrame && !hasCsp;
+
+    return res.json({
+      canEmbedDirectly,
+      hasXFrame,
+      xFrameOptions: xFrame || null,
+      hasCsp,
+      csp: csp || null,
+      status: headRes.status,
+    });
+  } catch (err: any) {
+    return res.json({
+      canEmbedDirectly: false,
+      error: err?.message || 'Check failed',
+    });
+  }
+});
+
+app.get('/api/proxy-site', async (req: Request, res: Response) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).send('Missing url parameter');
+  }
+
+  try {
+    const parsed = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return res.status(400).send('Invalid URL protocol');
+    }
+
+    // Strip hash fragment for server fetch if present
+    const fetchUrl = `${parsed.origin}${parsed.pathname}${parsed.search}`;
+
+    const upstreamRes = await fetch(fetchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+      },
+    });
+
+    const contentType = upstreamRes.headers.get('content-type') || 'text/html';
+
+    // Strip framing restrictions so iframe works cleanly
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('Content-Security-Policy');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Content-Type', contentType);
+
+    if (contentType.includes('text/html')) {
+      let html = await upstreamRes.text();
+      const origin = parsed.origin;
+      const baseTag = `<base href="${origin}/">`;
+
+      // Inject base tag for relative stylesheets, scripts, images
+      if (/<head[^>]*>/i.test(html)) {
+        html = html.replace(/<head[^>]*>/i, (m) => `${m}\n  ${baseTag}`);
+      } else {
+        html = `${baseTag}\n${html}`;
+      }
+
+      // Remove meta http-equiv restrictions
+      html = html.replace(/<meta[^>]*http-equiv=["']?Content-Security-Policy["']?[^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*http-equiv=["']?X-Frame-Options["']?[^>]*>/gi, '');
+
+      return res.send(html);
+    } else {
+      const buffer = Buffer.from(await upstreamRes.arrayBuffer());
+      return res.send(buffer);
+    }
+  } catch (err: any) {
+    console.error('[Proxy] Failed to proxy site:', err?.message || err);
+    return res.status(502).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><meta charset="utf-8"><title>사이트 로드 안내</title></head>
+        <body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f9f9f8;color:#333;">
+          <div style="text-align:center;padding:24px;background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.06);max-width:440px;">
+            <h3 style="margin-top:0;">외부 사이트 연결 안내</h3>
+            <p style="font-size:14px;color:#666;">외부 사이트의 자체 보안 정책으로 인해 직접 임베드가 제한될 수 있습니다.</p>
+            <a href="${targetUrl}" target="_blank" style="display:inline-block;margin-top:12px;padding:10px 20px;background:#000;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">새 탭에서 열기 ↗</a>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+});
+
+
+// ==========================================
 // VITE SPA MIDDLEWARE / PRODUCTION STATIC
 // ==========================================
 async function startServer() {

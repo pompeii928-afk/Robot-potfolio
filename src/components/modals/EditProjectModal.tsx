@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Trash2, Layers, Plus } from 'lucide-react';
+import { X, Save, Trash2, Layers, Plus, FlaskConical } from 'lucide-react';
 import { ProjectItem } from '../../types';
 import { ImageUploader } from '../ImageUploader';
 import { CodeFileUploader } from '../CodeFileUploader';
@@ -22,6 +22,8 @@ const getDefaultProject = (): ProjectItem => ({
   image: '',
   tags: ['Robotics', 'Embedded', 'Control'],
   status: 'COMPLETED',
+  projectType: 'standard',
+  researchLogs: [],
   specs: {
     microcontroller: '',
     sensors: [],
@@ -211,6 +213,46 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
 
           {/* Form Body */}
           <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 max-h-[calc(90vh-140px)]">
+            {/* Project Type: Standard vs Research Log Format */}
+            <div className="p-3.5 rounded-xl bg-[#050c1a] border border-cyan-500/20 space-y-2">
+              <label className="block text-xs font-mono text-cyan-400 font-bold">
+                프로젝트 형식 및 디스플레이 방식 (Project Type)
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, projectType: 'standard' })}
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
+                    (formData.projectType || 'standard') === 'standard'
+                      ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-xs'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="font-bold block text-white">일반 하드웨어 / CAD 프로젝트</span>
+                    <span className="text-[11px] text-zinc-400">시스템 제원, CAD 조립도 중심</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, projectType: 'research-log' })}
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all text-left cursor-pointer ${
+                    formData.projectType === 'research-log'
+                      ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-xs ring-1 ring-cyan-500/30'
+                      : 'bg-black/30 border-white/10 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <FlaskConical className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="font-bold block text-white">🔬 연구 일지 형식 (ODOM Lab Journal)</span>
+                    <span className="text-[11px] text-zinc-400">날짜별 실험 과정, 측정 수치, 연구 일지 중심</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Title & Project ID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

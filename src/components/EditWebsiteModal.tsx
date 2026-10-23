@@ -148,6 +148,9 @@ export const EditWebsiteModal: React.FC<EditWebsiteModalProps> = ({
               placeholder="https://wro-2026-selling-site.vercel.app/"
               className="w-full px-3.5 py-2.5 bg-white border border-[#d3d2ce] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/20 rounded-xl text-sm font-mono outline-none transition-all text-[#37352f]"
             />
+            <p className="text-[11px] text-[#787774] flex items-center gap-1">
+              <span>💡 Vercel이나 외부 사이트의 보안 정책(X-Frame-Options)이 있을 경우 자동으로 프록시 우회 모드가 적용됩니다.</span>
+            </p>
           </div>
 
           {/* Description */}

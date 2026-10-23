@@ -90,6 +90,8 @@
         "image": { "type": "string", "maxLength": 2000000 },
         "tags": { "type": "array" },
         "status": { "type": "string", "enum": ["COMPLETED", "IN_PROGRESS", "AWAITING"] },
+        "projectType": { "type": "string" },
+        "researchLogs": { "type": "array" },
         "specs": { "type": "object" },
         "highlights": { "type": "array" },
         "blueprintAnnotations": { "type": "array" },

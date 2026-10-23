@@ -919,6 +919,7 @@ function PortfolioApp() {
                   onAddProject={() => setProjectModalData({ isOpen: true, item: null })}
                   onEditProject={(project) => setProjectModalData({ isOpen: true, item: project })}
                   onDeleteProject={handleDeleteProject}
+                  onSaveProject={handleSaveProject}
                 />
               )}
 

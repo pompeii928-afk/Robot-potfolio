@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronUp,
   Terminal,
+  FlaskConical,
 } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { useTheme, useLanguage } from '../context/ThemeContext';
@@ -25,19 +26,28 @@ import {
   getLanguageStyle,
 } from '../utils/codeFileHelper';
 import { useToast } from './Toast';
+import { ProjectResearchLogView } from './ProjectResearchLogView';
 
 interface ProjectModalProps {
   project: ProjectItem | null;
   onClose: () => void;
+  isAdmin?: boolean;
+  onSaveProject?: (project: ProjectItem) => Promise<void>;
 }
 
-export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject, onClose }) => {
+export const ProjectModal: React.FC<ProjectModalProps> = ({
+  project: rawProject,
+  onClose,
+  isAdmin = false,
+  onSaveProject,
+}) => {
   const { theme } = useTheme();
   const { lang, t } = useLanguage();
   const { showToast } = useToast();
 
   const [expandedCodeId, setExpandedCodeId] = useState<string | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'research-logs' | 'overview' | 'code'>('overview');
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
   const modalBodyRef = useRef<HTMLDivElement>(null);
@@ -109,14 +119,41 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
     }
   }, [project, onClose]);
 
-  if (!project || project.status === 'AWAITING') return null;
-
   // Resolve code files: check item's own codeFiles, fallback to default if not yet populated
-  const defaultProj = PROJECTS_DATA.find((p) => p.id === project.id);
+  const defaultProj = project ? PROJECTS_DATA.find((p) => p.id === project.id) : null;
   const effectiveCodeFiles =
-    project.codeFiles && project.codeFiles.length > 0
+    project?.codeFiles && project.codeFiles.length > 0
       ? project.codeFiles
       : defaultProj?.codeFiles || [];
+
+  const effectiveResearchLogs =
+    project?.researchLogs && project.researchLogs.length > 0
+      ? project.researchLogs
+      : defaultProj?.researchLogs || [];
+  const researchLogsCount = effectiveResearchLogs.length;
+
+  const isResearchLogProject =
+    project?.projectType === 'research-log' ||
+    project?.title?.toUpperCase().includes('ODOM') ||
+    project?.tags?.some((t) => t.toUpperCase().includes('ODOM'));
+
+  // Switch tab on project change (Hook MUST run before any early return)
+  useEffect(() => {
+    if (project) {
+      if (
+        project.projectType === 'research-log' ||
+        project.title?.toUpperCase().includes('ODOM') ||
+        project.tags?.some((t) => t.toUpperCase().includes('ODOM')) ||
+        researchLogsCount > 0
+      ) {
+        setActiveTab('research-logs');
+      } else {
+        setActiveTab('overview');
+      }
+    }
+  }, [project?.id, project?.projectType, researchLogsCount]);
+
+  if (!project || project.status === 'AWAITING') return null;
 
   const handleCopyCode = async (id: string, codeContent: string) => {
     try {
@@ -152,7 +189,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
       >
         {/* Modal Header */}
         <div
-          className={`px-6 sm:px-8 py-5 border-b flex items-center justify-between ${
+          className={`px-6 sm:px-8 py-5 border-b flex items-center justify-between shrink-0 ${
             theme === 'light'
               ? 'bg-white border-zinc-200 text-zinc-950'
               : 'bg-[#070b14] border-white/10 text-white'
@@ -192,12 +229,121 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
           </button>
         </div>
 
+        {/* Modal Navigation Tabs (Research Logs / Overview & Specs / Code) */}
+        <div
+          className={`px-6 sm:px-8 py-2.5 border-b flex items-center justify-between gap-2 overflow-x-auto no-scrollbar text-xs font-mono shrink-0 ${
+            theme === 'light'
+              ? 'bg-zinc-50 border-zinc-200 text-zinc-600'
+              : 'bg-[#050a14] border-white/10 text-zinc-400'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {(isResearchLogProject || researchLogsCount > 0) && (
+              <button
+                onClick={() => setActiveTab('research-logs')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                  activeTab === 'research-logs'
+                    ? 'bg-black text-white dark:bg-cyan-500 dark:text-black font-bold shadow-xs'
+                    : 'hover:text-black dark:hover:text-white bg-transparent'
+                }`}
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+                <span>연구 일지 (Research Logs)</span>
+                {researchLogsCount > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      activeTab === 'research-logs'
+                        ? 'bg-white/25 text-white dark:bg-black/25 dark:text-black'
+                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
+                    }`}
+                  >
+                    {researchLogsCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-black text-white dark:bg-cyan-500 dark:text-black font-bold shadow-xs'
+                  : 'hover:text-black dark:hover:text-white bg-transparent'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>시스템 스펙 &amp; 개요</span>
+            </button>
+
+            {effectiveCodeFiles.length > 0 && (
+              <button
+                onClick={() => setActiveTab('code')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                  activeTab === 'code'
+                    ? 'bg-black text-white dark:bg-cyan-500 dark:text-black font-bold shadow-xs'
+                    : 'hover:text-black dark:hover:text-white bg-transparent'
+                }`}
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>소스 코드 ({effectiveCodeFiles.length})</span>
+              </button>
+            )}
+          </div>
+
+          {/* Quick badge */}
+          {isResearchLogProject && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+              <FlaskConical className="w-3 h-3" /> RESEARCH LOG FORMAT
+            </span>
+          )}
+        </div>
+
         {/* Modal Body */}
         <div
           ref={modalBodyRef}
           tabIndex={0}
-          className="p-6 sm:p-8 overflow-y-auto space-y-6 max-h-[calc(90vh-130px)] scrollbar-thin outline-none focus:outline-none"
+          className="p-6 sm:p-8 overflow-y-auto space-y-6 max-h-[calc(90vh-175px)] scrollbar-thin outline-none focus:outline-none"
         >
+          {activeTab === 'research-logs' ? (
+            <ProjectResearchLogView
+              project={{
+                ...(rawProject || project),
+                researchLogs: effectiveResearchLogs,
+              }}
+              isAdmin={isAdmin}
+              onUpdateProject={onSaveProject}
+              theme={theme}
+            />
+          ) : activeTab === 'overview' ? (
+            <>
+              {/* Research Log Quick Teaser Banner if project has logs */}
+              {researchLogsCount > 0 && (
+                <div
+                  onClick={() => setActiveTab('research-logs')}
+                  className={`p-4 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all hover:scale-[1.01] ${
+                    theme === 'light'
+                      ? 'bg-cyan-50/70 border-cyan-200 text-cyan-950 hover:bg-cyan-100/70'
+                      : 'bg-cyan-950/40 border-cyan-500/30 text-cyan-200 hover:bg-cyan-900/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-600 dark:text-cyan-400">
+                      <FlaskConical className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold font-sans">
+                        이 프로젝트는 {researchLogsCount}개의 정밀 연구 일지가 등록되어 있습니다.
+                      </h4>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
+                        프로젝트 실험 과정, 측정 수치 및 분석 일지 확인하기
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1 shrink-0">
+                    연구 일지 보기 →
+                  </span>
+                </div>
+              )}
           {/* Main Visual Banner */}
           {project.image && (
             <div
@@ -592,7 +738,186 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project: rawProject,
               ))}
             </div>
           )}
+        </>
+      ) : activeTab === 'code' ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4
+              className={`text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 ${
+                theme === 'light' ? 'text-red-600' : 'text-cyan-400'
+              }`}
+            >
+              <FileCode className="w-4 h-4" />
+              <span>{t('projects.codeFiles', '소스 코드 및 첨부 파일 (Source Code & Files)')}</span>
+            </h4>
+            <span
+              className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${
+                theme === 'light'
+                  ? 'bg-zinc-100 text-zinc-700 border-zinc-200'
+                  : 'bg-cyan-950/60 text-cyan-300 border-cyan-500/30'
+              }`}
+            >
+              {effectiveCodeFiles.length} {lang === 'en' ? 'files attached' : '개 파일 첨부'}
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {effectiveCodeFiles.map((file) => {
+              const style = getLanguageStyle(file.language);
+              const label = getLanguageLabel(file.language);
+              const isExpanded = expandedCodeId === file.id;
+              const isCopied = copiedCodeId === file.id;
+
+              return (
+                <div
+                  key={file.id}
+                  className={`rounded-2xl border transition-all overflow-hidden ${
+                    theme === 'light'
+                      ? 'bg-zinc-50 border-zinc-200 shadow-2xs'
+                      : 'bg-[#060c18] border-white/10'
+                  }`}
+                >
+                  <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0">
+                      <div
+                        className={`p-2.5 rounded-xl border shrink-0 ${
+                          theme === 'light'
+                            ? 'bg-white border-zinc-200 text-zinc-800'
+                            : 'bg-slate-900 border-slate-700 text-cyan-400'
+                        }`}
+                      >
+                        <FileCode className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`font-mono text-sm font-bold truncate ${
+                              theme === 'light' ? 'text-zinc-950' : 'text-white'
+                            }`}
+                          >
+                            {file.name}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${style.badgeBg}`}
+                          >
+                            {label}
+                          </span>
+                          <span className="text-[11px] font-mono text-zinc-500">
+                            {formatFileSize(file.size)}
+                          </span>
+                        </div>
+                        {file.description && (
+                          <p
+                            className={`text-xs mt-1 leading-snug line-clamp-2 ${
+                              theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'
+                            }`}
+                          >
+                            {file.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                      {file.content && (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedCodeId(isExpanded ? null : file.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                            isExpanded
+                              ? theme === 'light'
+                                ? 'bg-zinc-200 border-zinc-300 text-zinc-900'
+                                : 'bg-cyan-950 border-cyan-500/50 text-cyan-300'
+                              : theme === 'light'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300'
+                          }`}
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="w-3.5 h-3.5" />
+                              <span>{t('projects.collapseCode', '접기')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Code2 className="w-3.5 h-3.5" />
+                              <span>{t('projects.viewCode', '코드 보기')}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => downloadCodeFile(file)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                          theme === 'light'
+                            ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                            : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300'
+                        }`}
+                        title="파일 다운로드"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>{t('projects.downloadFile', '다운로드')}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {isExpanded && file.content && (
+                    <div className="border-t border-zinc-200 dark:border-white/10 bg-[#070d19] text-slate-200 animate-in fade-in duration-150">
+                      <div className="px-4 py-2.5 bg-[#040813] border-b border-white/5 flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-cyan-400 flex items-center gap-1.5">
+                          <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="font-semibold">{file.name}</span>
+                          <span className="text-slate-500">
+                            ({file.content.split('\n').length} lines)
+                          </span>
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCode(file.id, file.content!)}
+                          className="px-2.5 py-1 rounded text-xs font-mono bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 text-cyan-300 flex items-center gap-1 cursor-pointer transition-colors"
+                        >
+                          {isCopied ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-emerald-400 font-semibold">{t('projects.copied', '복사됨!')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{t('projects.copyCode', '코드 복사')}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="p-4 overflow-x-auto max-h-96 font-mono text-xs leading-relaxed scrollbar-thin">
+                        <table className="w-full border-collapse">
+                          <tbody>
+                            {file.content.split('\n').map((line, lIdx) => (
+                              <tr key={lIdx} className="hover:bg-white/[0.04]">
+                                <td className="pr-4 select-none text-right text-slate-600 text-[11px] font-mono w-10">
+                                  {lIdx + 1}
+                                </td>
+                                <td className="text-slate-200 whitespace-pre font-mono selection:bg-cyan-500/30">
+                                  {line || ' '}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+      ) : null}
+    </div>
 
         {/* Modal Footer */}
         <div

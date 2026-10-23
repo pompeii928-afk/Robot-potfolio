@@ -7,6 +7,7 @@ import {
   FileCode,
   LayoutGrid,
   List,
+  FlaskConical,
 } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { ProjectModal } from './ProjectModal';
@@ -21,6 +22,7 @@ interface ProjectsSectionProps {
   onAddProject?: () => void;
   onEditProject?: (project: ProjectItem) => void;
   onDeleteProject?: (id: string) => Promise<void>;
+  onSaveProject?: (project: ProjectItem) => Promise<void>;
 }
 
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
@@ -29,6 +31,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   onAddProject,
   onEditProject,
   onDeleteProject,
+  onSaveProject,
 }) => {
   const { lang, t } = useLanguage();
 
@@ -54,6 +57,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   // Filter categories
   const categories = [
     { id: 'all', label: lang === 'ko' ? '전체 (All)' : 'All Work' },
+    { id: 'research-log', label: lang === 'ko' ? '🔬 연구 일지 (ODOM)' : '🔬 Research Logs (ODOM)' },
     { id: 'autonomous', label: lang === 'ko' ? '자율주행 (Autonomous)' : 'Autonomous' },
     { id: 'manipulator', label: lang === 'ko' ? '매니퓰레이터 (Manipulator)' : 'Manipulator' },
     { id: 'embedded', label: lang === 'ko' ? '제어 & 임베디드 (Embedded)' : 'Embedded & Hardware' },
@@ -61,7 +65,19 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
   const filteredProjects = localizedProjects.filter((project) => {
     if (activeFilter === 'all') return true;
+    const defaultProj = PROJECTS_DATA.find((p) => p.id === project.id);
     const textToMatch = `${project.title} ${project.summary} ${project.tags.join(' ')}`.toLowerCase();
+
+    if (activeFilter === 'research-log') {
+      return (
+        project.projectType === 'research-log' ||
+        (project.researchLogs && project.researchLogs.length > 0) ||
+        (defaultProj?.researchLogs && defaultProj.researchLogs.length > 0) ||
+        textToMatch.includes('odom') ||
+        textToMatch.includes('연구 일지') ||
+        textToMatch.includes('오도메트리')
+      );
+    }
     if (activeFilter === 'autonomous') {
       return textToMatch.includes('라인') || textToMatch.includes('자율') || textToMatch.includes('navigation') || textToMatch.includes('autonomous') || textToMatch.includes('pid');
     }
@@ -171,6 +187,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 project.codeFiles && project.codeFiles.length > 0
                   ? project.codeFiles
                   : defaultProj?.codeFiles || [];
+              const researchLogs =
+                project.researchLogs && project.researchLogs.length > 0
+                  ? project.researchLogs
+                  : defaultProj?.researchLogs || [];
 
               if (project.status === 'AWAITING') {
                 if (!isAdmin) return null;
@@ -204,7 +224,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   data-cursor="view"
                   data-cursor-label="VIEW ↗"
                   className="group relative rounded-2xl border border-[#e2e0da] dark:border-white/10 bg-white dark:bg-[#121318] hover:border-[#0a0a0a]/40 dark:hover:border-white/30 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-2xs hover:shadow-xl cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => setSelectedProject(rawProject)}
                 >
                   {/* Admin Item Controls */}
                   {isAdmin && (
@@ -252,10 +272,21 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     )}
 
                     {/* Corner Technical Monospace Tags */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
                       <div className="font-mono text-[11px] font-bold text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-black/85 backdrop-blur-xs px-2.5 py-0.5 rounded border border-[#e2e0da] dark:border-white/15 shadow-2xs">
                         ( {project.projectId.replace('PROJECT_ID: ', '')} )
                       </div>
+                      {(project.projectType === 'research-log' || project.title?.toUpperCase().includes('ODOM')) ? (
+                        <div className="font-mono text-[11px] font-bold text-cyan-800 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-cyan-200/90 dark:border-cyan-800/50 shadow-2xs flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                          <span>{researchLogs.length > 0 ? `${researchLogs.length} 연구 일지` : '연구 일지 형식'}</span>
+                        </div>
+                      ) : researchLogs.length > 0 ? (
+                        <div className="font-mono text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/95 dark:bg-emerald-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-emerald-200/90 dark:border-emerald-800/50 shadow-2xs flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>{researchLogs.length} 연구 일지</span>
+                        </div>
+                      ) : null}
                       {codeFiles.length > 0 && (
                         <div className="font-mono text-[11px] text-cyan-800 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-cyan-200/90 dark:border-cyan-800/50 shadow-2xs flex items-center gap-1">
                           <FileCode className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
@@ -312,6 +343,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 project.codeFiles && project.codeFiles.length > 0
                   ? project.codeFiles
                   : defaultProj?.codeFiles || [];
+              const researchLogs =
+                project.researchLogs && project.researchLogs.length > 0
+                  ? project.researchLogs
+                  : defaultProj?.researchLogs || [];
 
               return (
                 <div
@@ -339,6 +374,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     <span className="text-[#6e6d6a] dark:text-[#a3a29e]">
                       {project.status}
                     </span>
+                    {(project.projectType === 'research-log' || project.title?.toUpperCase().includes('ODOM')) && (
+                      <span className="flex items-center gap-1 text-cyan-700 dark:text-cyan-300 font-semibold">
+                        <FlaskConical className="w-3.5 h-3.5" />
+                        <span>{researchLogs.length > 0 ? `${researchLogs.length} logs` : '연구 일지'}</span>
+                      </span>
+                    )}
                     {codeFiles.length > 0 && (
                       <span className="flex items-center gap-1 text-cyan-700 dark:text-cyan-300">
                         <FileCode className="w-3.5 h-3.5" />
@@ -361,6 +402,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}
+        isAdmin={isAdmin}
+        onSaveProject={async (updated) => {
+          if (onSaveProject) {
+            await onSaveProject(updated);
+          }
+          setSelectedProject(updated);
+        }}
       />
 
       {/* Delete Confirmation Modal */}

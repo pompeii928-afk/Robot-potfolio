@@ -74,6 +74,23 @@ export interface ProjectCodeFile {
   uploadedAt?: string;
 }
 
+export interface ProjectResearchLog {
+  id: string;
+  date: string; // e.g., '2026-03-15'
+  title: string; // e.g., '엔코더-자이로 EKF 융합 및 슬립 오차 보정 실험'
+  category?: string; // 'CALIBRATION' | 'ALGORITHM' | 'HARDWARE' | 'TEST_RUN' | 'TROUBLESHOOTING'
+  status?: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
+  author?: string;
+  objective: string; // 연구 목적 및 가설 (Objective & Hypothesis)
+  process: string; // 실험 및 구현 과정 (Method & Implementation)
+  results: string; // 실험 결과 및 데이터 분석 (Findings & Results)
+  nextAction?: string; // 후속 조치 및 개선 과제 (Next Steps / Actions)
+  metrics?: { label: string; value: string; unit?: string }[];
+  codeSnippet?: string;
+  codeLanguage?: string;
+  updatedAt?: string;
+}
+
 export interface ProjectItem {
   id: string;
   projectId: string;
@@ -83,6 +100,8 @@ export interface ProjectItem {
   image: string;
   tags: string[];
   status: 'COMPLETED' | 'IN_PROGRESS' | 'AWAITING';
+  projectType?: 'standard' | 'research-log'; // 'standard' for system CAD/specs, 'research-log' for lab journals
+  researchLogs?: ProjectResearchLog[];
   specs?: {
     microcontroller?: string;
     sensors?: string[];

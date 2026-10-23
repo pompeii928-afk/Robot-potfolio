@@ -529,10 +529,26 @@ export function subscribeProjects(
           onUpdate(PROJECTS_DATA);
         }
       } else {
-        const items = snapshot.docs.map((docSnap) => ({
-          ...docSnap.data(),
-          id: docSnap.id,
-        })) as ProjectItem[];
+        const items = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as ProjectItem;
+          const defaultP = PROJECTS_DATA.find((p) => p.id === docSnap.id);
+          return {
+            ...defaultP,
+            ...data,
+            id: docSnap.id,
+            title: data.title !== undefined ? data.title : (defaultP?.title || ''),
+            summary: data.summary !== undefined ? data.summary : (defaultP?.summary || ''),
+            detailedDescription: data.detailedDescription !== undefined ? data.detailedDescription : (defaultP?.detailedDescription || ''),
+            image: data.image !== undefined && data.image !== '' ? data.image : (defaultP?.image || ''),
+            projectType: data.projectType || (data.id === 'proj-1791546891910' || data.title?.toLowerCase().includes('odom') ? 'research-log' : (defaultP?.projectType || 'standard')),
+            researchLogs: Array.isArray(data.researchLogs) ? data.researchLogs : (defaultP?.researchLogs || []),
+            tags: data.tags || defaultP?.tags || [],
+            specs: data.specs || defaultP?.specs,
+            highlights: data.highlights || defaultP?.highlights || [],
+            codeFiles: data.codeFiles || defaultP?.codeFiles || [],
+            blueprintAnnotations: data.blueprintAnnotations || defaultP?.blueprintAnnotations || [],
+          };
+        }) as ProjectItem[];
         items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         setCachedData(CACHE_KEYS.PROJECTS, items);
         onUpdate(items);

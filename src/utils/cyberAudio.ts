@@ -6,7 +6,6 @@ class CyberAudioEngine {
   constructor() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kfc_cyber_sound');
-      // Default to sound enabled (true) or user's preference
       this.isMuted = saved === 'false';
     }
   }

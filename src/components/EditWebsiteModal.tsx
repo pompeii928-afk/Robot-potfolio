@@ -23,6 +23,7 @@ export const EditWebsiteModal: React.FC<EditWebsiteModalProps> = ({
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('STORE');
+  const [previewImage, setPreviewImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,11 +34,13 @@ export const EditWebsiteModal: React.FC<EditWebsiteModalProps> = ({
         setUrl(initialData.url || '');
         setDescription(initialData.description || '');
         setCategory(initialData.category || 'STORE');
+        setPreviewImage(initialData.previewImage || (initialData.url?.includes('kfcclubhouse') ? '/kfc_clubhouse_logo.png' : ''));
       } else {
         setTitle('');
         setUrl('');
         setDescription('');
         setCategory('STORE');
+        setPreviewImage('');
       }
       setError(null);
       setIsSubmitting(false);
@@ -73,6 +76,7 @@ export const EditWebsiteModal: React.FC<EditWebsiteModalProps> = ({
         url: cleanUrl,
         description: description.trim(),
         category: category.trim() || 'STORE',
+        previewImage: previewImage.trim() || undefined,
       });
       onClose();
     } catch (err: any) {
@@ -165,6 +169,23 @@ export const EditWebsiteModal: React.FC<EditWebsiteModalProps> = ({
               placeholder="예: WRO & CoSpace Robotics 공식 스토어 및 리소스"
               className="w-full px-3.5 py-2.5 bg-white border border-[#d3d2ce] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/20 rounded-xl text-sm font-sans outline-none transition-all"
             />
+          </div>
+
+          {/* Optional Preview Image (for sites with embed restrictions) */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#37352f]">
+              미리보기 대표 이미지 경로 / 로고 URL (선택 사항)
+            </label>
+            <input
+              type="text"
+              value={previewImage}
+              onChange={(e) => setPreviewImage(e.target.value)}
+              placeholder="예: /kfc_clubhouse_logo.png"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#d3d2ce] focus:border-[#2383e2] focus:ring-2 focus:ring-[#2383e2]/20 rounded-xl text-sm font-mono outline-none transition-all text-[#37352f]"
+            />
+            <p className="text-[11px] text-[#787774]">
+              외부 임베드가 차단된 사이트는 입력된 이미지가 화면에 표시되며, 클릭 시 새 창으로 연결됩니다.
+            </p>
           </div>
 
           {/* Category Tag */}

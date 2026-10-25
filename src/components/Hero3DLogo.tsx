@@ -43,68 +43,68 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
 
-    // 2. Lighting Setup (Cinematic Studio Lighting with Electric Blue Rim Accents)
-    const ambientLight = new THREE.AmbientLight(0xffffff, isWhiteBg ? 1.5 : 0.9);
+    // 2. Lighting Setup (Cinematic Architectural Studio Lighting with Pure Neutral Highlights)
+    const ambientLight = new THREE.AmbientLight(0xffffff, isWhiteBg ? 1.4 : 0.9);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xffffff, 3.2);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.8);
     mainLight.position.set(5, 8, 7);
     scene.add(mainLight);
 
-    // Vibrant Electric Blue Rim Light for Blue Border Luster
-    const blueRimLight = new THREE.PointLight(0x3b82f6, 4.2, 16);
-    blueRimLight.position.set(-5, -2, 3);
-    scene.add(blueRimLight);
+    // Soft Cybernetic Blue Rim Light
+    const softRimLight = new THREE.PointLight(0x3b82f6, 2.2, 16);
+    softRimLight.position.set(-5, -2, 3);
+    scene.add(softRimLight);
 
-    // Vivid Blue Counter Accent Light
-    const blueBackLight = new THREE.PointLight(0x2563eb, 3.8, 16);
-    blueBackLight.position.set(5, 3, -3);
-    scene.add(blueBackLight);
+    // Deep Blue Counter Accent Light
+    const fillLight = new THREE.PointLight(0x2563eb, 1.8, 16);
+    fillLight.position.set(5, 3, -3);
+    scene.add(fillLight);
 
     // Dynamic mouse tracking specular light
-    const mouseLight = new THREE.PointLight(0xffffff, 2.0, 10);
+    const mouseLight = new THREE.PointLight(0x60a5fa, 1.8, 10);
     mouseLight.position.set(0, 0, 4);
     scene.add(mouseLight);
 
-    // 3. Central 3D Medallion Emblem Logo Group (Sleek Compact Size & Electric Blue Border)
+    // 3. Central 3D Medallion Emblem Logo Group
     const logoGroup = new THREE.Group();
     scene.add(logoGroup);
 
-    // 3.1 Compact Circular 3D Disc (Reduced size as requested)
-    const discRadius = 1.52;
-    const discDepth = 0.25;
+    // 3.1 Compact Circular 3D Disc
+    const discRadius = 1.48;
+    const discDepth = 0.22;
     const discGeometry = new THREE.CylinderGeometry(discRadius, discRadius, discDepth, 64);
 
     // Premium Dark Obsidian Chrome Material
     const chromeMaterial = new THREE.MeshStandardMaterial({
-      color: 0x18181b,
-      metalness: 0.9,
-      roughness: 0.16,
+      color: 0x0f172a,
+      metalness: 0.95,
+      roughness: 0.12,
     });
     const discMesh = new THREE.Mesh(discGeometry, chromeMaterial);
     discMesh.rotation.x = Math.PI / 2; // Circular face faces camera
     logoGroup.add(discMesh);
 
-    // 3.2 Outer Beveled Cybernetic Rim Ring in Electric Cyber Blue
-    const outerRingGeometry = new THREE.TorusGeometry(discRadius + 0.02, 0.065, 16, 96);
+    // 3.2 Outer Beveled Rim Ring in Vibrant Cyber Blue
+    const outerRingGeometry = new THREE.TorusGeometry(discRadius + 0.015, 0.05, 16, 96);
     const blueRimMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1d4ed8, // Vibrant electric blue (Tailwind blue-700)
-      emissive: 0x2563eb, // Glowing vivid blue (Tailwind blue-600)
+      color: 0x1d4ed8,
+      metalness: 0.9,
+      roughness: 0.2,
+      emissive: 0x2563eb,
       emissiveIntensity: 0.75,
-      metalness: 0.85,
-      roughness: 0.15,
     });
     const outerRing = new THREE.Mesh(outerRingGeometry, blueRimMaterial);
     logoGroup.add(outerRing);
 
-    // 3.2.1 Front & Back Bevel Rings (Electric Blue Accent Perimeter Border)
-    const bevelRingGeo = new THREE.TorusGeometry(discRadius - 0.015, 0.028, 16, 96);
+    // 3.2.1 Front & Back Bevel Rings (Luminous Cyan-Blue Perimeter)
+    const bevelRingGeo = new THREE.TorusGeometry(discRadius - 0.015, 0.02, 16, 96);
     const bevelBlueMat = new THREE.MeshStandardMaterial({
       color: 0x2563eb,
-      emissive: 0x3b82f6,
-      emissiveIntensity: 0.65,
       metalness: 0.9,
-      roughness: 0.12,
+      roughness: 0.15,
+      emissive: 0x3b82f6,
+      emissiveIntensity: 0.6,
     });
     const frontBevelRing = new THREE.Mesh(bevelRingGeo, bevelBlueMat);
     frontBevelRing.position.z = discDepth / 2;
@@ -127,8 +127,8 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     const plaqueGeometry = new THREE.PlaneGeometry(planeW, planeH);
     const plaqueMaterial = new THREE.MeshStandardMaterial({
       map: logoTexture,
-      metalness: 0.1,
-      roughness: 0.2,
+      metalness: 0.05,
+      roughness: 0.22,
       transparent: true,
       alphaTest: 0.05,
     });
@@ -142,14 +142,14 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     backPlaque.rotateY(Math.PI);
     logoGroup.add(backPlaque);
 
-    // 3.4 Orbiting Gyroscope Cybernetic Ring 1 (Electric Blue Orbit)
-    const gyroRing1Geo = new THREE.TorusGeometry(1.75, 0.028, 16, 80);
+    // 3.4 Orbiting Gyroscope Cybernetic Ring 1 (Luminous Royal Blue)
+    const gyroRing1Geo = new THREE.TorusGeometry(1.85, 0.018, 16, 96);
     const gyroMat1 = new THREE.MeshStandardMaterial({
       color: 0x2563eb,
+      metalness: 0.85,
+      roughness: 0.25,
       emissive: 0x1d4ed8,
       emissiveIntensity: 0.5,
-      metalness: 0.92,
-      roughness: 0.12,
       transparent: true,
       opacity: 0.85,
     });
@@ -158,12 +158,14 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     gyroRing1.rotation.y = Math.PI / 6;
     scene.add(gyroRing1);
 
-    // 3.5 Orbiting Gyroscope Cybernetic Ring 2 (Sleek Deep Blue-Grey Chrome)
-    const gyroRing2Geo = new THREE.TorusGeometry(2.05, 0.024, 16, 80);
+    // 3.5 Orbiting Gyroscope Cybernetic Ring 2 (Deep Cyber Slate)
+    const gyroRing2Geo = new THREE.TorusGeometry(2.1, 0.012, 16, 96);
     const gyroMat2 = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
-      metalness: 0.95,
-      roughness: 0.15,
+      metalness: 0.9,
+      roughness: 0.2,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.4,
       transparent: true,
       opacity: 0.75,
     });
@@ -172,8 +174,8 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     gyroRing2.rotation.z = Math.PI / 4;
     scene.add(gyroRing2);
 
-    // 3.6 Ambient Spatial Depth Particle Field (Warm Amber & White Tech Atmosphere)
-    const particleCount = 200;
+    // 3.6 Ambient Spatial Depth Particle Field (Vibrant Cyan-Blue Sparkle)
+    const particleCount = 220;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
 
@@ -185,10 +187,10 @@ export const Hero3DLogo: React.FC<Hero3DLogoProps> = ({
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMat = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.035,
+      color: 0x38bdf8,
+      size: 0.04,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending,
     });
     const particlePoints = new THREE.Points(particleGeo, particleMat);

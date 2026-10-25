@@ -125,22 +125,22 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
         {/* Stokt Section Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+            <span className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold tracking-wider uppercase">
               ( 04 / DISCIPLINES &amp; CAPABILITIES )
             </span>
-            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
+            <span className="h-px flex-1 bg-zinc-300 dark:bg-white/10 max-w-[80px]" />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-orange-500/15 border border-amber-500/25 text-amber-500 shadow-2xs shrink-0 select-none transition-all duration-300 hover:scale-105 hover:border-amber-500/40">
-                <Zap className="w-5 h-5 text-amber-500 fill-amber-500/20 stroke-[2.2]" />
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-orange-500/15 border border-amber-500/25 text-amber-500 shadow-2xs shrink-0 select-none">
+                <Zap className="w-5 h-5 stroke-[2]" />
               </span>
               <div>
-                <h2 className="text-2xl sm:text-4xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-sans font-black text-zinc-950 dark:text-zinc-100 tracking-tight">
                   {t('skills.title', '기술 스택 및 핵심 역량')}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-sans">
+                <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 font-medium mt-0.5 font-sans">
                   {t('skills.subtitle', '하드웨어 설계, 펌웨어 제어, 알고리즘 구현 역량입니다.')}
                 </p>
               </div>
@@ -151,7 +151,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
               <button
                 onClick={onAddSkill}
                 id="add-skill-btn"
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-zinc-200 transition-colors cursor-pointer shadow-2xs border border-zinc-900 dark:border-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Add Capability</span>
@@ -168,10 +168,10 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
-                    : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-zinc-950 text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-bold shadow-2xs'
+                    : 'text-zinc-800 dark:text-zinc-200 font-bold hover:text-black dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 dark:border-zinc-700'
                 }`}
               >
                 {getCategoryLabel(cat)}
@@ -221,11 +221,11 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
                   <div>
                     {/* Category & Proficiency (Clean unboxed Stokt metadata) */}
                     <div className="flex items-center justify-between gap-2 mb-3 pr-12 text-xs font-mono">
-                      <span className="text-[#6e6d6a] dark:text-[#a3a29e] uppercase tracking-wider text-[11px]">
+                      <span className="text-zinc-800 dark:text-zinc-200 uppercase tracking-wider text-[11px] font-bold">
                         ( {skill.category} )
                       </span>
                       {skill.proficiency !== undefined && (
-                        <span className="font-semibold text-[#0a0a0a] dark:text-[#f4f2ee]">
+                        <span className="font-bold text-zinc-950 dark:text-zinc-100">
                           {skill.proficiency}%
                         </span>
                       )}
@@ -233,26 +233,26 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({
 
                     {/* Skill Name */}
                     <div className="flex items-center gap-2.5 mb-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-[#f5f0e9] dark:bg-white/[0.06] border border-[#e2e0da] dark:border-white/10 flex items-center justify-center text-[#0a0a0a] dark:text-[#f4f2ee] shrink-0 group-hover:scale-105 transition-transform">
+                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-900 dark:text-[#f4f2ee] shrink-0 group-hover:scale-105 transition-transform">
                         {renderIcon(skill.iconName || 'Cpu')}
                       </div>
-                      <h4 className="text-base font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                      <h4 className="text-base font-sans font-bold text-zinc-950 dark:text-zinc-100 tracking-tight">
                         {skill.name}
                       </h4>
                     </div>
 
                     {/* Description */}
-                    <p className="text-xs sm:text-sm font-sans text-[#4a4946] dark:text-[#b4b3ae] leading-relaxed mb-4 whitespace-pre-line">
+                    <p className="text-xs sm:text-sm font-sans text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed mb-4 whitespace-pre-line">
                       {skill.description}
                     </p>
                   </div>
 
-                  {/* Proficiency Bar (Minimalist Stokt Track) */}
+                  {/* Proficiency Bar */}
                   {skill.proficiency !== undefined && (
-                    <div className="space-y-1.5 pt-3 border-t border-[#e2e0da] dark:border-white/10">
-                      <div className="h-1 w-full rounded-full bg-[#eae8e2] dark:bg-white/10 overflow-hidden">
+                    <div className="space-y-1.5 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                      <div className="h-1.5 w-full rounded-full bg-zinc-300 dark:bg-zinc-800 overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-[#0a0a0a] dark:bg-[#f4f2ee] group-hover:bg-[#ff6a37] transition-all duration-300"
+                          className="h-full rounded-full bg-zinc-950 dark:bg-zinc-100 group-hover:bg-[#ff6a37] transition-all duration-300"
                           style={{ width: `${Math.min(Math.max(skill.proficiency, 5), 100)}%` }}
                         />
                       </div>

@@ -174,13 +174,13 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
   return (
     <section id="reviews" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-[#e2e0da] dark:border-white/10 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-zinc-200 dark:border-white/10 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+            <span className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold tracking-wider uppercase">
               ( FIELD REVIEWS &amp; RETROSPECTIVES )
             </span>
-            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[60px]" />
+            <span className="h-px flex-1 bg-zinc-300 dark:bg-white/10 max-w-[60px]" />
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shadow-2xs">
@@ -188,14 +188,14 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl sm:text-3xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-sans font-black text-zinc-950 dark:text-[#f4f2ee] tracking-tight">
                   {t('nav.reviews', '대회 후기 & 실전 회고')}
                 </h2>
-                <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
+                <span className="text-[11px] font-mono text-emerald-800 dark:text-emerald-400 font-bold">
                   / WRO 2026 INDIA
                 </span>
               </div>
-              <p className="text-xs text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-mono">
+              <p className="text-xs text-zinc-800 dark:text-[#a3a29e] mt-0.5 font-mono font-medium">
                 실전 라운드별 점수, 미션 분석 및 엔지니어링 회고 아카이브
               </p>
             </div>
@@ -206,18 +206,18 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
         <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap font-mono">
           <button
             onClick={expandAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-white/[0.04] hover:bg-[#eae8e2] dark:hover:bg-white/10 border border-[#e2e0da] dark:border-white/10 rounded-md transition-colors cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-950 font-bold dark:text-[#f4f2ee] bg-zinc-100 dark:bg-white/[0.04] hover:bg-zinc-200 dark:hover:bg-white/10 border border-zinc-300 dark:border-white/10 rounded-full transition-colors cursor-pointer shadow-2xs"
             title="모든 토글 펼치기"
           >
-            <Maximize2 className="w-3 h-3 text-[#6e6d6a] dark:text-[#a3a29e]" />
+            <Maximize2 className="w-3 h-3 text-zinc-700 dark:text-[#a3a29e]" />
             <span>모두 펼치기</span>
           </button>
           <button
             onClick={collapseAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-white/[0.04] hover:bg-[#eae8e2] dark:hover:bg-white/10 border border-[#e2e0da] dark:border-white/10 rounded-md transition-colors cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-950 font-bold dark:text-[#f4f2ee] bg-zinc-100 dark:bg-white/[0.04] hover:bg-zinc-200 dark:hover:bg-white/10 border border-zinc-300 dark:border-white/10 rounded-full transition-colors cursor-pointer shadow-2xs"
             title="모든 토글 접기"
           >
-            <Minimize2 className="w-3 h-3 text-[#6e6d6a] dark:text-[#a3a29e]" />
+            <Minimize2 className="w-3 h-3 text-zinc-700 dark:text-[#a3a29e]" />
             <span>모두 접기</span>
           </button>
 
@@ -433,7 +433,7 @@ export const CompetitionReviewsSection: React.FC<CompetitionReviewsSectionProps>
                         href={rev.officialUrl || 'https://oc26.wroindia.org/schedule/'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[#2383e2] hover:underline font-medium"
+                        className="inline-flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100 hover:underline font-medium"
                       >
                         <span>WRO Open Championship 2026 India (공식 일정 및 경기 안내)</span>
                         <ExternalLink className="w-3.5 h-3.5" />

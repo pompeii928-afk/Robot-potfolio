@@ -204,20 +204,33 @@ html.light ::-webkit-scrollbar-thumb {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #00f0ff;
+  box-shadow: 0 0 10px #00f0ff;
 }
 
 html.light ::-webkit-scrollbar-thumb:hover {
   background: #0284c7;
 }
 
-/* Engineering HUD & Radar Scan Animations */
+/* Blueprint dot pattern - Clean subtle neutrals */
+.bg-blueprint-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+html.light .bg-blueprint-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Box glow gold */
+.box-glow-gold {
+  box-shadow: 0 0 20px -3px rgba(245, 158, 11, 0.35);
+}
+
+/* Cyber animations */
 @keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(1000%);
-  }
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
 }
 
 .animate-scanline {
@@ -225,48 +238,15 @@ html.light ::-webkit-scrollbar-thumb:hover {
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.03);
-  }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 4s ease-in-out infinite;
+  animation: pulseGlow 3s ease-in-out infinite;
 }
 
-/* Blueprint dot pattern */
-.bg-blueprint-dots {
-  background-image: radial-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-html.light .bg-blueprint-dots {
-  background-image: radial-gradient(rgba(2, 132, 199, 0.18) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-/* Metallic Gold Glow for Top Awards */
-.box-glow-gold {
-  box-shadow: 0 0 25px -2px rgba(245, 158, 11, 0.35), 0 0 10px 0px rgba(245, 158, 11, 0.5);
-}
-
-html.light .box-glow-gold {
-  box-shadow: 0 10px 30px -4px rgba(217, 119, 6, 0.25), 0 4px 10px -2px rgba(217, 119, 6, 0.15);
-}
-
-/* Stokt Custom Cursor Support */
-body.has-custom-cursor,
+/* Custom cursor hide default cursor */
 body.has-custom-cursor * {
   cursor: none !important;
-}
-
-body.has-custom-cursor input,
-body.has-custom-cursor textarea,
-body.has-custom-cursor [contenteditable="true"] {
-  cursor: text !important;
 }

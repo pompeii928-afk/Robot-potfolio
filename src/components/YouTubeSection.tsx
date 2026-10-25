@@ -98,22 +98,22 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
         {/* Stokt Section Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+            <span className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold tracking-wider uppercase">
               ( 05 / MOTION INDEX &amp; RUN FOOTAGE )
             </span>
-            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
+            <span className="h-px flex-1 bg-zinc-300 dark:bg-white/10 max-w-[80px]" />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/15 via-rose-500/10 to-pink-500/15 border border-red-500/25 text-red-600 shadow-2xs shrink-0 select-none transition-all duration-300 hover:scale-105 hover:border-red-500/40">
-                <Play className="w-5 h-5 text-red-600 fill-red-500/25 stroke-[2.2] ml-0.5" />
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/15 via-rose-500/10 to-pink-500/15 border border-red-500/25 text-red-500 shadow-2xs shrink-0 select-none">
+                <Play className="w-5 h-5 ml-0.5 stroke-[2]" />
               </span>
               <div>
-                <h2 className="text-2xl sm:text-4xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-sans font-black text-zinc-950 dark:text-zinc-100 tracking-tight">
                   {t('youtube.title', '공식 유튜브 채널 및 실전 주행')}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-sans">
+                <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 font-medium mt-0.5 font-sans">
                   {t('youtube.subtitle', 'World Robot Olympiad (WRO) 및 자율주행 주행 테스트, PID 제어 튜닝, 하드웨어 빌드 메이킹 영상 아카이브입니다.')}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                 <button
                   onClick={onAddVideo}
                   id="add-youtube-btn"
-                  className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
+                  className="px-4 py-2 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-zinc-200 transition-colors cursor-pointer shadow-2xs border border-zinc-900 dark:border-white"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>+ Add Video</span>
@@ -137,18 +137,18 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               href={channelInfo.channelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-md text-xs font-sans font-medium flex items-center gap-1.5 bg-[#f1f1ef] hover:bg-[#e3e2de] text-[#37352f] border border-[#e3e2de] transition-colors"
+              className="px-3 py-1.5 rounded-md text-xs font-sans font-bold flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 border border-zinc-300 transition-colors"
             >
               <Youtube className="w-3.5 h-3.5 text-red-600" />
               <span>{t('youtube.visitChannel', '채널 방문')}</span>
-              <ExternalLink className="w-3 h-3 text-[#787774]" />
+              <ExternalLink className="w-3 h-3 text-zinc-700" />
             </a>
           </div>
         </div>
       </div>
 
         {/* Notion Channel Callout Card */}
-        <div className="mb-6 p-4 sm:p-5 rounded-xl bg-[#f7f6f3] border border-[#e3e2de] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mb-6 p-4 sm:p-5 rounded-xl bg-zinc-50 border border-zinc-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center shrink-0 shadow-xs">
               <img
@@ -159,11 +159,11 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
               />
             </div>
             <div>
-              <div className="text-sm font-sans font-bold text-[#37352f] flex items-center gap-2">
+              <div className="text-sm font-sans font-black text-zinc-950 flex items-center gap-2">
                 <span>{channelInfo.channelName}</span>
-                <span className="text-xs font-mono text-[#787774] font-normal">{channelInfo.handle}</span>
+                <span className="text-xs font-mono text-zinc-700 font-bold">{channelInfo.handle}</span>
               </div>
-              <p className="text-xs text-[#787774] line-clamp-1 mt-0.5">
+              <p className="text-xs text-zinc-800 font-medium line-clamp-1 mt-0.5">
                 {channelBio}
               </p>
             </div>
@@ -172,9 +172,9 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <button
               onClick={handleShareChannel}
-              className="px-2.5 py-1 rounded text-xs font-sans bg-white hover:bg-[#efefed] border border-[#e3e2de] text-[#37352f] flex items-center gap-1 cursor-pointer"
+              className="px-2.5 py-1 rounded text-xs font-sans bg-white hover:bg-zinc-100 border border-zinc-300 text-zinc-950 font-bold flex items-center gap-1 cursor-pointer"
             >
-              {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-[#787774]" />}
+              {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-zinc-700" />}
               <span>{copiedLink ? t('youtube.copied', '복사됨!') : t('youtube.share', '공유')}</span>
             </button>
           </div>
@@ -190,8 +190,8 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                 onClick={() => setActiveFilter(catKey)}
                 className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-semibold shadow-2xs'
-                    : 'text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-zinc-950 text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] font-bold shadow-2xs'
+                    : 'text-zinc-800 dark:text-zinc-200 font-bold hover:text-black dark:hover:text-white bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 dark:border-zinc-700'
                 }`}
               >
                 {getCategoryLabel(catKey)}
@@ -280,22 +280,22 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                     <div>
                       <h4
                         onClick={() => setActivePlayingVideo(video)}
-                        className="text-base font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] group-hover:text-[#ff4d1d] transition-colors line-clamp-2 cursor-pointer leading-snug tracking-tight"
+                        className="text-base font-sans font-bold text-zinc-950 dark:text-[#f4f2ee] group-hover:text-[#ff4d1d] transition-colors line-clamp-2 cursor-pointer leading-snug tracking-tight"
                       >
                         {video.title}
                       </h4>
                       {video.description && (
-                        <p className="text-xs font-sans text-[#6e6d6a] dark:text-[#a3a29e] line-clamp-2 mt-1.5 leading-relaxed">
+                        <p className="text-xs font-sans text-zinc-800 dark:text-[#a3a29e] font-medium line-clamp-2 mt-1.5 leading-relaxed">
                           {video.description}
                         </p>
                       )}
                     </div>
 
                     {/* Bottom Link */}
-                    <div className="pt-3 border-t border-[#e2e0da] dark:border-white/10 flex items-center justify-between text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e]">
+                    <div className="pt-3 border-t border-[#e2e0da] dark:border-white/10 flex items-center justify-between text-xs font-mono text-zinc-800 dark:text-[#a3a29e]">
                       <button
                         onClick={() => setActivePlayingVideo(video)}
-                        className="text-[#0a0a0a] dark:text-[#f4f2ee] font-semibold hover:text-[#ff4d1d] cursor-pointer flex items-center gap-1 transition-colors"
+                        className="text-zinc-950 dark:text-[#f4f2ee] font-bold hover:text-[#ff4d1d] cursor-pointer flex items-center gap-1 transition-colors"
                       >
                         <span>{t('youtube.watchVideo', '영상 재생')}</span>
                         <span>↗</span>
@@ -306,11 +306,11 @@ export const YouTubeSection: React.FC<YouTubeSectionProps> = ({
                           href={video.youtubeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-[#6e6d6a] dark:text-[#a3a29e] hover:text-[#0a0a0a] dark:hover:text-white transition-colors"
+                          className="flex items-center gap-1 text-zinc-800 dark:text-[#a3a29e] hover:text-black dark:hover:text-white font-bold transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <span>YouTube</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-3 h-3 text-zinc-700" />
                         </a>
                       )}
                     </div>

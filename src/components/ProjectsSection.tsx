@@ -93,24 +93,25 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   return (
     <section id="experience" className="relative py-12 sm:py-20 border-t border-[#e2e0da] dark:border-white/10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Alche Studio Signature Section Header */}
+        {/* Section Header */}
         <div className="mb-8 sm:mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="font-mono text-xs text-cyan-700 tracking-widest uppercase font-semibold">
+            <span className="font-mono text-xs text-cyan-700 dark:text-cyan-400 uppercase font-bold tracking-wider">
               02 // SYSTEMS &amp; PHYSICAL BUILDS
             </span>
-            <span className="h-px flex-1 bg-zinc-200 max-w-[120px]" />
-            <span className="font-mono text-[11px] text-zinc-500 tracking-widest hidden sm:inline">
-              [ EMBEDDED COMPUTING &amp; ROBOTICS ]
+            <span className="h-px flex-1 bg-zinc-300 dark:bg-zinc-800 max-w-[120px]" />
+            <span className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 font-bold tracking-wider hidden sm:inline flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
+              // EMBEDDED ARCHITECTURE
             </span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-zinc-900 leading-[1.05]">
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-zinc-950 dark:text-zinc-100 leading-[1.05]">
                 {lang === 'ko' ? '자율주행 & 정밀 로보틱스 시스템 아카이브' : 'Autonomous Systems & Precision Robotics'}
               </h2>
-              <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-2xl font-sans leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-zinc-800 dark:text-zinc-200 font-medium max-w-2xl font-sans leading-relaxed">
                 {t('projects.subtitle', '직접 설계하고 제작한 자율주행 알고리즘, 임베디드 제어기 및 정밀 로보틱스 하드웨어 실전 아카이브입니다.')}
               </p>
             </div>
@@ -120,7 +121,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               <button
                 onClick={onAddProject}
                 id="add-project-btn"
-                className="px-4 py-2 rounded-full text-xs font-mono font-bold flex items-center gap-2 bg-black text-white hover:bg-zinc-800 transition-all cursor-pointer shrink-0 self-start lg:self-auto shadow-xs"
+                className="px-4 py-2 rounded-full text-xs font-mono font-medium flex items-center gap-2 bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer shrink-0 self-start lg:self-auto shadow-2xs border border-zinc-900 dark:border-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Register Project</span>
@@ -136,10 +137,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 <button
                   key={cat.id}
                   onClick={() => setActiveFilter(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
                     activeFilter === cat.id
                       ? 'bg-black text-white font-bold shadow-xs'
-                      : 'text-zinc-600 hover:text-black bg-zinc-100 hover:bg-zinc-200'
+                      : 'text-zinc-800 font-bold hover:text-black bg-zinc-100 hover:bg-zinc-200 border border-zinc-300'
                   }`}
                 >
                   {cat.label}
@@ -148,13 +149,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             </div>
 
             {/* View Mode Toggle: Grid vs Archive Table */}
-            <div className="flex items-center gap-1 border border-zinc-200 rounded-xl p-1 bg-zinc-50 backdrop-blur-md">
+            <div className="flex items-center gap-1 border border-zinc-300 rounded-full p-1 bg-zinc-50 backdrop-blur-md">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`px-3 py-1 rounded-full text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
                   viewMode === 'grid'
                     ? 'bg-black text-white font-bold shadow-xs'
-                    : 'text-zinc-600 hover:text-black'
+                    : 'text-zinc-800 font-bold hover:text-black'
                 }`}
                 title="Grid View"
               >
@@ -163,10 +164,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                className={`px-3 py-1 rounded-full text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-black text-white font-bold shadow-xs'
-                    : 'text-zinc-600 hover:text-black'
+                    : 'text-zinc-800 font-bold hover:text-black'
                 }`}
                 title="Archive Index List"
               >
@@ -266,30 +267,30 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                         referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs font-mono text-[#9b9a97]">
+                      <div className="w-full h-full flex items-center justify-center text-xs font-mono text-zinc-700 font-bold bg-zinc-200">
                         NO MEDIA ATTACHED
                       </div>
                     )}
 
                     {/* Corner Technical Monospace Tags */}
                     <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                      <div className="font-mono text-[11px] font-bold text-[#0a0a0a] dark:text-[#f4f2ee] bg-white/90 dark:bg-black/85 backdrop-blur-xs px-2.5 py-0.5 rounded border border-[#e2e0da] dark:border-white/15 shadow-2xs">
+                      <div className="font-mono text-[11px] font-bold text-zinc-900 dark:text-zinc-100 bg-white/95 dark:bg-black/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-zinc-200 dark:border-white/20 shadow-2xs">
                         ( {project.projectId.replace('PROJECT_ID: ', '')} )
                       </div>
                       {(project.projectType === 'research-log' || project.title?.toUpperCase().includes('ODOM')) ? (
-                        <div className="font-mono text-[11px] font-bold text-cyan-800 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-cyan-200/90 dark:border-cyan-800/50 shadow-2xs flex items-center gap-1">
-                          <FlaskConical className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                        <div className="font-mono text-[11px] font-bold text-cyan-900 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-cyan-200/90 dark:border-cyan-500/40 shadow-2xs flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-cyan-700 dark:text-cyan-400" />
                           <span>{researchLogs.length > 0 ? `${researchLogs.length} 연구 일지` : '연구 일지 형식'}</span>
                         </div>
                       ) : researchLogs.length > 0 ? (
-                        <div className="font-mono text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50/95 dark:bg-emerald-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-emerald-200/90 dark:border-emerald-800/50 shadow-2xs flex items-center gap-1">
-                          <FlaskConical className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <div className="font-mono text-[11px] font-bold text-cyan-900 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-cyan-200/90 dark:border-cyan-500/40 shadow-2xs flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-cyan-700 dark:text-cyan-400" />
                           <span>{researchLogs.length} 연구 일지</span>
                         </div>
                       ) : null}
                       {codeFiles.length > 0 && (
-                        <div className="font-mono text-[11px] text-cyan-800 dark:text-cyan-300 bg-white/95 dark:bg-cyan-950/80 backdrop-blur-xs px-2 py-0.5 rounded border border-cyan-200/90 dark:border-cyan-800/50 shadow-2xs flex items-center gap-1">
-                          <FileCode className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                        <div className="font-mono text-[11px] text-zinc-800 dark:text-zinc-200 font-semibold bg-white/95 dark:bg-zinc-900/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-2xs flex items-center gap-1">
+                          <FileCode className="w-3 h-3 text-zinc-700" />
                           <span>{codeFiles.length} files</span>
                         </div>
                       )}
@@ -300,30 +301,30 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                     <div>
                       <div className="flex items-start justify-between gap-3 mb-2">
-                        <h3 className="text-xl sm:text-2xl font-sans font-bold tracking-tight text-[#0a0a0a] dark:text-[#f4f2ee] group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
+                        <h3 className="text-xl sm:text-2xl font-sans font-bold tracking-tight text-zinc-950 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
                           {project.title}
                         </h3>
-                        <div className="p-1 text-[#6e6d6a] dark:text-[#a3a29e] group-hover:text-[#0a0a0a] dark:group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0">
+                        <div className="p-1 text-zinc-600 group-hover:text-blue-600 dark:group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0">
                           <ArrowUpRight className="w-5 h-5" />
                         </div>
                       </div>
 
                       {/* Stokt Slash Metadata Line */}
-                      <p className="text-xs sm:text-sm font-mono text-[#6e6d6a] dark:text-[#a3a29e] mb-3">
+                      <p className="text-xs sm:text-sm font-mono text-zinc-800 dark:text-zinc-200 font-semibold mb-3">
                         {project.tags.join(' / ')} {codeFiles.length > 0 && ` / ${codeFiles.length} Code Files`}
                       </p>
 
-                      <p className="text-xs sm:text-sm font-sans text-[#4a4946] dark:text-[#b4b3ae] leading-relaxed line-clamp-3">
+                      <p className="text-xs sm:text-sm font-sans text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed line-clamp-3">
                         {project.summary}
                       </p>
                     </div>
 
                     {/* Bottom Action Line */}
                     <div className="pt-4 border-t border-[#e2e0da] dark:border-white/10 flex items-center justify-between text-xs font-mono">
-                      <span className="text-[#6e6d6a] dark:text-[#a3a29e]">
+                      <span className="text-zinc-800 dark:text-zinc-200 font-bold">
                         STATUS / {project.status}
                       </span>
-                      <span className="font-semibold text-[#0a0a0a] dark:text-[#f4f2ee] flex items-center gap-1 group-hover:underline underline-offset-4">
+                      <span className="font-bold text-zinc-950 dark:text-zinc-100 flex items-center gap-1 group-hover:underline underline-offset-4">
                         {t('projects.details', '상세 보기')} ↗
                       </span>
                     </div>
@@ -357,36 +358,36 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   className="group p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#faf9f6] dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
                 >
                   <div className="flex items-baseline gap-4 sm:gap-6 min-w-0">
-                    <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#8e8d89] shrink-0">
+                    <span className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold shrink-0">
                       ( {String(idx + 1).padStart(2, '0')} )
                     </span>
                     <div className="min-w-0">
-                      <h4 className="text-lg sm:text-xl font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+                      <h4 className="text-lg sm:text-xl font-sans font-bold text-zinc-950 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors truncate">
                         {project.title}
                       </h4>
-                      <p className="text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e] mt-1">
+                      <p className="text-xs font-mono text-zinc-800 dark:text-zinc-200 font-medium mt-1">
                         {project.projectId.replace('PROJECT_ID: ', '')} / {project.tags.join(' / ')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-6 sm:gap-8 self-end md:self-auto shrink-0 font-mono text-xs">
-                    <span className="text-[#6e6d6a] dark:text-[#a3a29e]">
+                    <span className="text-zinc-800 dark:text-zinc-200 font-semibold">
                       {project.status}
                     </span>
                     {(project.projectType === 'research-log' || project.title?.toUpperCase().includes('ODOM')) && (
-                      <span className="flex items-center gap-1 text-cyan-700 dark:text-cyan-300 font-semibold">
+                      <span className="flex items-center gap-1 text-cyan-800 dark:text-cyan-300 font-bold">
                         <FlaskConical className="w-3.5 h-3.5" />
                         <span>{researchLogs.length > 0 ? `${researchLogs.length} logs` : '연구 일지'}</span>
                       </span>
                     )}
                     {codeFiles.length > 0 && (
-                      <span className="flex items-center gap-1 text-cyan-700 dark:text-cyan-300">
+                      <span className="flex items-center gap-1 text-cyan-800 dark:text-cyan-300 font-semibold">
                         <FileCode className="w-3.5 h-3.5" />
                         <span>{codeFiles.length} files</span>
                       </span>
                     )}
-                    <div className="flex items-center gap-1 text-[#0a0a0a] dark:text-[#f4f2ee] font-semibold group-hover:translate-x-1 transition-transform">
+                    <div className="flex items-center gap-1 text-zinc-950 dark:text-zinc-100 font-bold group-hover:translate-x-1 transition-transform">
                       <span>{t('projects.details', '상세 보기')}</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </div>

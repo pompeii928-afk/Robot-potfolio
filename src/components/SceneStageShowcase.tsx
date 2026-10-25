@@ -196,60 +196,18 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
 
   return (
     <div className="relative w-full h-full flex-1 flex flex-col justify-between overflow-hidden select-none">
-      {/* =========================================================================
-          TOP RIGHT: ALCHE.STUDIO SIGNATURE QUATERNION HUD WIDGET
-          ========================================================================= */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30 pointer-events-auto flex flex-col items-end gap-1 font-mono text-[11px] text-zinc-500">
+      {/* Top right Quaternion Telemetry HUD */}
+      <div className="absolute top-2 right-4 sm:right-8 z-30 hidden md:flex items-center gap-3 py-1.5 px-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white font-mono text-[11px] pointer-events-none">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider text-zinc-400">MainLogo Quaternion</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-zinc-900 shadow-xs" />
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-zinc-400 uppercase tracking-wider text-[10px]">Quat:</span>
         </div>
-
-        {/* Live Coordinate Readings */}
-        <div className="text-[10px] text-zinc-600 tracking-wider">
-          {quat.x.toFixed(2)} {quat.y.toFixed(2)} {quat.z.toFixed(2)} {quat.w.toFixed(2)}
+        <div className="flex items-center gap-2 text-zinc-300">
+          <span>x:{quat.x}</span>
+          <span>y:{quat.y}</span>
+          <span>z:{quat.z}</span>
+          <span>w:{quat.w}</span>
         </div>
-
-        {/* 3D Gimbal Gyroscope Widget */}
-        <div className="relative w-12 h-12 my-1 flex items-center justify-center">
-          {/* Outer Ring */}
-          <div
-            className="absolute inset-0 rounded-full border border-zinc-400/60"
-            style={{
-              transform: `rotateX(${quat.x * 60}deg) rotateY(${quat.y * 60}deg)`,
-              transition: 'transform 0.4s ease-out',
-            }}
-          />
-          {/* Inner Ring */}
-          <div
-            className="absolute inset-1.5 rounded-full border border-zinc-300"
-            style={{
-              transform: `rotateY(${quat.z * 70}deg) rotateZ(${quat.w * 50}deg)`,
-              transition: 'transform 0.4s ease-out',
-            }}
-          />
-          {/* Axis Labels */}
-          <span className="absolute top-0 w-2 h-2 rounded-full bg-rose-500 text-[8px] text-white flex items-center justify-center font-bold">
-            x
-          </span>
-          <span className="absolute right-0 w-2 h-2 rounded-full bg-emerald-500 text-[8px] text-white flex items-center justify-center font-bold">
-            y
-          </span>
-          <span className="absolute bottom-0 w-2 h-2 rounded-full bg-cyan-600 text-[8px] text-white flex items-center justify-center font-bold">
-            z
-          </span>
-        </div>
-
-        <button
-          onClick={() => {
-            cyberAudio.playKeyTick();
-            setQuat({ x: 0.3, y: -0.86, z: 0.3, w: 0.27 });
-          }}
-          className="text-[9px] uppercase tracking-wider text-zinc-400 hover:text-black transition-colors flex items-center gap-1 cursor-pointer"
-        >
-          <RotateCcw className="w-2.5 h-2.5" />
-          <span>Reset Quaternion</span>
-        </button>
       </div>
 
       {/* =========================================================================
@@ -270,11 +228,11 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
           }`}
         >
           {/* Top minimal subtitle */}
-          <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-xs font-mono text-zinc-500">
-            <span className="tracking-widest uppercase font-semibold text-zinc-400">
+          <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-xs font-mono text-zinc-700 font-bold">
+            <span className="tracking-widest uppercase font-bold text-zinc-700">
               [ 00 // INITIAL ]
             </span>
-            <span className="tracking-widest uppercase font-bold text-zinc-800">
+            <span className="tracking-widest uppercase font-bold text-zinc-900">
               AUTONOMOUS ROBOTICS // ARCHIVE
             </span>
           </div>
@@ -288,7 +246,7 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
               <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight font-sans">
                 K.F.C. CODE CHASER
               </h1>
-              <p className="text-xs font-mono text-zinc-500">
+              <p className="text-xs font-mono text-zinc-800 font-semibold">
                 WRO Robot Engineering &amp; Autonomous Systems Archive
               </p>
             </div>
@@ -298,11 +256,11 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
                 cyberAudio.playScanLaser();
                 onNextScene();
               }}
-              className="px-6 py-3 rounded-full bg-zinc-900 text-white hover:bg-black transition-all flex items-center gap-3 font-mono text-xs font-bold shadow-lg hover:scale-105 active:scale-95 cursor-pointer group"
+              className="px-6 py-3 rounded-full bg-zinc-900 text-white hover:bg-black transition-all flex items-center gap-3 font-mono text-xs font-semibold shadow-lg hover:shadow-cyan-500/20 cursor-pointer group border border-zinc-700/50"
             >
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="tracking-wider uppercase">스크롤하여 3D 카테고리 둘러보기 ↓</span>
-              <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              <span className="tracking-wider uppercase">카테고리 둘러보기 ↓</span>
+              <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform text-cyan-400" />
             </button>
           </div>
         </div>
@@ -420,27 +378,27 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
 
               {/* Top-Left Category Tag */}
               <div className="absolute top-4 left-4 sm:top-5 sm:left-6 flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-white/90 text-black backdrop-blur-md shadow-md">
+                <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-white/95 text-black shadow-xs">
                   {stage.title}
                 </span>
-                <span className="hidden sm:inline-block px-2.5 py-1 rounded-full text-[10px] font-mono text-white/80 bg-black/60 border border-white/20">
+                <span className="hidden sm:inline-block px-3 py-1 rounded-full text-[10px] font-mono text-zinc-300 bg-black/60 border border-white/10">
                   {stage.date}
                 </span>
               </div>
 
-              {/* Top-Right "카테고리 이동 ↗" Floating Pill */}
-              <div className="absolute top-4 right-4 sm:top-5 sm:right-6 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-black/80 text-white backdrop-blur-md border border-white/20 group-hover:bg-cyan-600 transition-colors shadow-lg">
-                <span>카테고리 이동</span>
+              {/* Top-Right Link */}
+              <div className="absolute top-4 right-4 sm:top-5 sm:right-6 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-black/80 text-white border border-white/20 group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-400 transition-colors shadow-xs">
+                <span>자세히 보기</span>
                 <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
 
-              {/* Card Bottom Overlay: Overview, Purpose & Details */}
-              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 bg-gradient-to-t from-black via-black/75 to-transparent text-white space-y-2 pointer-events-none">
+              {/* Card Bottom Overlay */}
+              <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 bg-gradient-to-t from-black via-black/80 to-transparent text-white space-y-2 pointer-events-none">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight font-sans drop-shadow-md text-white">
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight font-sans text-white">
                     {stage.title}
                   </h3>
-                  <span className="text-[11px] font-mono text-cyan-300 font-semibold">
+                  <span className="text-[11px] font-mono text-zinc-300">
                     {stage.detailsPreview}
                   </span>
                 </div>
@@ -450,11 +408,11 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
                 </p>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
                   {stage.tags.map((tag, tIdx) => (
                     <span
                       key={tIdx}
-                      className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white/10 text-white/90 border border-white/15 backdrop-blur-sm"
+                      className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-white/10 text-cyan-300 border border-white/15 backdrop-blur-xs"
                     >
                       #{tag}
                     </span>
@@ -474,19 +432,19 @@ export const SceneStageShowcase: React.FC<SceneStageShowcaseProps> = ({
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 pt-2 pb-4 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
           {/* Bottom-Left Information Metadata */}
           <div className="space-y-1 max-w-2xl">
-            <div className="font-mono text-xs sm:text-sm text-zinc-500 font-semibold tracking-wider">
+            <div className="font-mono text-xs sm:text-sm text-zinc-800 font-bold tracking-wider">
               {currentStage.date}
             </div>
             <h2
               onClick={() => onNavigate(currentStage.categoryId)}
-              className="text-2xl sm:text-4xl font-black text-zinc-900 tracking-tight font-sans hover:text-cyan-700 transition-colors cursor-pointer"
+              className="text-2xl sm:text-4xl font-black text-zinc-950 tracking-tight font-sans hover:text-cyan-700 transition-colors cursor-pointer"
             >
               {currentStage.title}
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 line-clamp-1 font-sans">
+            <p className="text-xs sm:text-sm text-zinc-800 font-medium line-clamp-1 font-sans">
               {currentStage.summary}
             </p>
-            <div className="flex items-center gap-2 pt-1 text-[11px] font-mono text-zinc-500">
+            <div className="flex items-center gap-2 pt-1 text-[11px] font-mono text-zinc-700 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
                 상단 바에서 세부사항을 선택하거나, 카드를 클릭하면 해당 카테고리로 바로 이동합니다.

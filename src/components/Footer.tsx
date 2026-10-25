@@ -28,12 +28,12 @@ export const Footer: React.FC<FooterProps> = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stokt Large Editorial Footer Callout */}
-        <div className="pb-12 border-b border-[#e2e0da] dark:border-white/10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="pb-12 border-b border-zinc-300 dark:border-white/10 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <span className="font-mono text-xs uppercase tracking-wider text-[#6e6d6a] dark:text-[#a3a29e]">
+            <span className="font-mono text-xs uppercase tracking-wider text-zinc-800 dark:text-zinc-200 font-bold">
               ( GET IN TOUCH · COLLABORATION &amp; INQUIRIES )
             </span>
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-[#0a0a0a] dark:text-[#f4f2ee] mt-3 leading-[1.05]">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-[-0.035em] text-zinc-950 dark:text-[#f4f2ee] mt-3 leading-[1.05]">
               Let's engineer something extraordinary.
             </h2>
           </div>
@@ -42,7 +42,7 @@ export const Footer: React.FC<FooterProps> = () => {
             {/* Direct Gmail compose button */}
             <button
               onClick={() => openGmailCompose(lang)}
-              className="px-5 py-2.5 rounded-full text-xs font-mono font-medium flex items-center gap-2 bg-[#0a0a0a] text-white hover:bg-black dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-all cursor-pointer shadow-xs"
+              className="px-5 py-2.5 rounded-full text-xs font-mono font-bold flex items-center gap-2 bg-[#0a0a0a] text-white hover:bg-black dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-all cursor-pointer shadow-xs"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Contact via Gmail ↗</span>
@@ -51,7 +51,7 @@ export const Footer: React.FC<FooterProps> = () => {
             {/* Email Copy Button */}
             <button
               onClick={copyEmail}
-              className="px-4 py-2.5 rounded-full text-xs font-mono border border-[#e2e0da] dark:border-white/15 bg-white dark:bg-[#121318] hover:bg-[#eae8e2] text-[#0a0a0a] dark:text-[#f4f2ee] flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-full text-xs font-mono font-bold border border-zinc-300 dark:border-white/15 bg-white dark:bg-[#121318] hover:bg-zinc-100 text-zinc-950 dark:text-[#f4f2ee] flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               {copied ? (
                 <>
@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = () => {
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-[#6e6d6a]" />
+                  <Copy className="w-3.5 h-3.5 text-zinc-700" />
                   <span>{OWNER_EMAIL}</span>
                 </>
               )}
@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = () => {
         </div>
 
         {/* Bottom Metadata Row */}
-        <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e]">
+        <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold">
           <div className="flex items-center gap-3">
             <RobotLogo size={18} />
             <span>K.F.C. CODE CHASER — JIHOON BAE</span>
@@ -82,9 +82,9 @@ export const Footer: React.FC<FooterProps> = () => {
               href={DEFAULT_CHANNEL_INFO.channelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[#0a0a0a] dark:hover:text-white flex items-center gap-1.5 transition-colors"
+              className="text-zinc-800 dark:text-zinc-200 font-bold hover:text-black dark:hover:text-white flex items-center gap-1.5 transition-colors"
             >
-              <Youtube className="w-3.5 h-3.5 text-red-500" />
+              <Youtube className="w-3.5 h-3.5 text-red-600" />
               <span>YouTube @Wrocospace</span>
             </a>
             <span>© 2026 ARCHIVES</span>

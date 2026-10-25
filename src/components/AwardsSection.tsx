@@ -71,10 +71,10 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
         {/* Stokt Section Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <span className="font-mono text-xs text-[#6e6d6a] dark:text-[#a3a29e] tracking-wider uppercase">
+            <span className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold tracking-wider uppercase">
               ( 03 / RECOGNITION &amp; HONORS )
             </span>
-            <span className="h-px flex-1 bg-[#e2e0da] dark:bg-white/10 max-w-[80px]" />
+            <span className="h-px flex-1 bg-zinc-300 dark:bg-white/10 max-w-[80px]" />
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -83,10 +83,10 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                 <Trophy className="w-5 h-5 text-amber-600 stroke-[2.2]" />
               </span>
               <div>
-                <h2 className="text-2xl sm:text-4xl font-sans font-black text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-sans font-black text-zinc-950 dark:text-zinc-100 tracking-tight">
                   {t('awards.title', '수상 및 성과 내역')}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#6e6d6a] dark:text-[#a3a29e] mt-0.5 font-sans">
+                <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 mt-0.5 font-sans font-medium">
                   {t('awards.subtitle', '국내외 로봇 경진대회 및 자율주행 챌린지 수상 기록입니다.')}
                 </p>
               </div>
@@ -97,7 +97,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
               <button
                 onClick={onAddAward}
                 id="add-award-btn"
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-[#0a0a0a] text-white dark:bg-[#f4f2ee] dark:text-[#0a0a0a] transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-full text-xs font-mono font-medium flex items-center gap-1.5 bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-zinc-200 transition-colors cursor-pointer shadow-2xs border border-zinc-900 dark:border-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Add Award</span>
@@ -107,21 +107,21 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
         </div>
 
         {awards.length === 0 ? (
-          <div className="p-8 text-center rounded-lg border border-dashed border-[#e3e2de] bg-[#f7f6f3] text-sm text-[#787774]">
+          <div className="p-8 text-center rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 font-medium">
             {t('awards.empty', '등록된 수상 내역이 없습니다.')}
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Main Highlight Award (Stokt Showcase) */}
+            {/* Main Highlight Award */}
             {mainAward && (
-              <div className="relative group bg-white dark:bg-[#121318] border border-[#e2e0da] dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xs hover:shadow-lg transition-all duration-300">
+              <div className="relative group bg-white dark:bg-[#121318] border border-zinc-200 dark:border-white/10 rounded-xl p-6 sm:p-8 shadow-2xs hover:shadow-md transition-all duration-200">
                 {/* Admin Quick Action */}
                 {isAdmin && rawMainAward && (
                   <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
                     {onEditAward && (
                       <button
                         onClick={() => onEditAward(rawMainAward)}
-                        className="px-2.5 py-1 rounded text-xs font-mono bg-white/90 dark:bg-black/80 hover:bg-[#eae8e2] border border-[#e2e0da] dark:border-white/20 text-[#0a0a0a] dark:text-white flex items-center gap-1 cursor-pointer shadow-xs"
+                        className="px-2.5 py-1 rounded text-xs font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 cursor-pointer shadow-2xs font-semibold"
                       >
                         <Edit3 className="w-3 h-3" /> {t('journey.edit', '수정')}
                       </button>
@@ -129,7 +129,7 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                     {onDeleteAward && (
                       <button
                         onClick={() => setAwardToDelete(rawMainAward)}
-                        className="p-1.5 rounded text-xs bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 cursor-pointer shadow-xs"
+                        className="p-1.5 rounded text-xs bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 cursor-pointer shadow-2xs"
                         title="Delete"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -138,55 +138,53 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#e2e0da] dark:border-white/10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-2xl shadow-2xs">
+                    <span className="text-2xl p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 shadow-xs">
                       🥇
-                    </div>
+                    </span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                          ( {t('awards.unlocked', 'TOP HONORS')} )
+                        <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                          ( TOP HONORS )
                         </span>
-                        <span className="text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e]">/ {mainAward.date}</span>
+                        <span className="text-xs font-mono text-zinc-700 dark:text-zinc-300 font-bold">· {mainAward.date}</span>
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee] tracking-tight">
+                      <h3 className="text-xl sm:text-2xl font-sans font-bold text-zinc-950 dark:text-zinc-100 tracking-tight">
                         {mainAward.competition}
                       </h3>
                     </div>
                   </div>
 
-                  {/* Confetti Trigger Button */}
                   <button
                     onClick={(e) => handleTriggerCelebration(e, mainAward)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/40 transition-colors cursor-pointer shadow-2xs"
+                    className="px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer font-bold"
                   >
-                    <span>🎉</span>
-                    <span>{t('awards.celebrate', 'Celebrate')}</span>
+                    <span>🎉 Celebrate</span>
                   </button>
                 </div>
 
                 <div className="pt-4 space-y-3">
-                  <div className="inline-flex items-center gap-2 text-sm font-sans font-bold text-[#0a0a0a] dark:text-[#f4f2ee]">
-                    <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <div className="inline-flex items-center gap-2 text-sm font-sans font-bold text-zinc-950 dark:text-zinc-100">
+                    <Trophy className="w-4 h-4 text-zinc-800 dark:text-zinc-300" />
                     <span>{mainAward.title}</span>
                   </div>
 
-                  <p className="text-sm font-sans text-[#4a4946] dark:text-[#b4b3ae] leading-relaxed max-w-3xl whitespace-pre-line">
+                  <p className="text-sm font-sans text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed max-w-3xl whitespace-pre-line">
                     {mainAward.description}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-[#6e6d6a] dark:text-[#a3a29e]">
+                  <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-zinc-800 dark:text-zinc-200 font-semibold">
                     {mainAward.rank && (
                       <span>
-                        RANK / <strong className="text-[#0a0a0a] dark:text-[#f4f2ee]">{mainAward.rank}</strong>
+                        RANK / <strong className="text-zinc-950 dark:text-zinc-100 font-bold">{mainAward.rank}</strong>
                       </span>
                     )}
                     {mainAward.score && (
                       <>
                         <span>·</span>
                         <span>
-                          SCORE / <strong className="text-emerald-600 dark:text-emerald-400">{mainAward.score}</strong>
+                          SCORE / <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{mainAward.score}</strong>
                         </span>
                       </>
                     )}
@@ -237,28 +235,28 @@ export const AwardsSection: React.FC<AwardsSectionProps> = ({
                       )}
 
                       <div>
-                        <div className="flex items-center justify-between text-xs font-mono text-[#787774] mb-2 pr-12">
+                        <div className="flex items-center justify-between text-xs font-mono text-zinc-800 dark:text-zinc-200 font-bold mb-2 pr-12">
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-[#9b9a97]" />
+                            <Calendar className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
                             <span>{award.date}</span>
                           </span>
                           {award.rank && (
-                            <span className="px-2 py-0.5 rounded bg-[#f1f1ef] text-[#37352f] text-[11px] font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-950 dark:bg-zinc-800 dark:text-zinc-100 text-[11px] font-bold border border-zinc-300 dark:border-zinc-700">
                               {award.rank}
                             </span>
                           )}
                         </div>
 
-                        <h4 className="text-base font-sans font-bold text-[#37352f] mb-1 group-hover:text-[#2383e2] transition-colors">
+                        <h4 className="text-base font-sans font-bold text-zinc-950 dark:text-zinc-100 mb-1 group-hover:text-[#2383e2] transition-colors">
                           {award.title}
                         </h4>
 
-                        <div className="text-xs font-sans text-[#787774] mb-3">
+                        <div className="text-xs font-sans text-zinc-800 dark:text-zinc-200 font-semibold mb-3">
                           {award.competition}
                         </div>
                       </div>
 
-                      <p className="text-xs font-sans text-[#5a5854] leading-relaxed line-clamp-3 whitespace-pre-line">
+                      <p className="text-xs font-sans text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed line-clamp-3 whitespace-pre-line">
                         {award.description}
                       </p>
                     </div>
